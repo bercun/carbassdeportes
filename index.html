@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CarbassDeportes — Tienda de Deportes & Coleccionables</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site">
+    <header class="navbar">
+      <div class="brand">
+        <!-- LOGO -->
+        <img class="logo-svg" src="sours/img/logos/logo_carbass.jpg" alt="CarbassDeportes Logo" />
+        <h1>CarbassDeportes</h1>
+      </div>
+
+      <nav>
+        <ul class="navlinks">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#categorias">Categorías</a></li>
+          <li><a href="#coleccionables">Coleccionables</a></li>
+          <li><a href="#ofertas">Ofertas</a></li>
+          <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
+        </ul>
+      </nav>
+
+      <div><a href="#" class="cta">Tienda Online</a></div>
+    </header>
+
+    <main class="layout">
+
+      <!-- ASIDE IZQUIERDO -->
+      <aside class="left">
+        <div class="promo">
+          <img src="sours/img/aside/soccer-755825_1920.jpg" alt="Promo entrenar" />
+          <div class="txt">20% OFF en equipamiento running</div>
+        </div>
+        <div class="promo">
+          <img id="coleccionable-random" src="sours/img/coleccionables/jersey-edicion-limitada.jpg" alt="Coleccionables" />
+          <div class="txt">Figuras limitadas: lanzamiento semanal</div>
+        </div>
+        <div style="margin-top:8px;font-weight:700;color:#222">Síguenos en redes</div>
+      </aside>
+
+      <!-- CONTENIDO -->
+      <section>
+        <!-- CARRUSEL -->
+        <div class="carousel" id="home">
+          <div class="slides" id="slides">
+            <div class="slide"><img src="sours/img/carrousel/ball-488717_1280.jpg" alt="Deportes" /></div>
+            <div class="slide"><img src="sours/img/carrousel/sports-6480830_1280.jpg" alt="Equipamiento deportivo" /></div>
+          </div>
+          <div class="carousel-controls">
+            <button class="btn-ctrl" id="prev" aria-label="Anterior">◀</button>
+            <button class="btn-ctrl" id="next" aria-label="Siguiente">▶</button>
+          </div>
+        </div>
+
+        <!-- PRESENTACIÓN -->
+        <div class="presentacion">
+          <h2>CarbassDeportes</h2>
+          <p>CarbassDeportes es una tienda especializada en artículos deportivos y coleccionables afines. No solo te ofrecemos productos de calidad, sino que te acompañamos en cada paso de tu camino deportivo con asesoramiento personalizado, consejos profesionales y guía experta para que elijas exactamente lo que necesitas.</p>
+          
+          <p class="presentacion-texto">En nuestra página encontrarás consejos deportivos, recomendaciones de equipamiento según tu disciplina y nivel, además de información detallada sobre cada producto. Te ayudamos a tomar decisiones informadas para que cada compra sea una inversión en tu rendimiento y bienestar. ¡Desde equipamiento profesional hasta piezas de colección, con envíos a todo el país!</p>
+          
+          
+
+          <!-- PALETA VISUAL -->
+          <div class="palette" aria-hidden="false">
+            <div class="swatch swatch-verde">Verde<br>#1ecb63</div>
+            <div class="swatch swatch-negro">Negro<br>#000000</div>
+            <div class="swatch swatch-blanco">Blanco<br>#ffffff</div>
+            <div class="swatch swatch-gris">Gris<br>#e0e0e0</div>
+          </div>
+
+        </div>
+
+        <!-- ARTÍCULOS DESTACADOS -->
+        <div class="section-title section-destacados">
+          <h3>Artículos Destacados</h3>
+          <a href="#" class="ver-todo">Ver todo →</a>
+        </div>
+
+        <div class="grid" aria-live="polite">
+          <!-- CARD 1 -->
+          <article class="card">
+            <div class="thumb"><img src="https://placehold.co/600x400?text=Bal%C3%B3n+Pro" alt="Balon Pro"/></div>
+            <h4>Balón Pro Elite</h4>
+            <p class="meta"><span class="price">$59.990</span><span class="badge">Top</span></p>
+            <p>Balón de competición con cosido profesional y tecnología de control.</p>
+            <button class="add-btn">Agregar al carrito</button>
+          </article>
+
+          <!-- CARD 2 -->
+          <article class="card">
+            <div class="thumb"><img src="https://placehold.co/600x400?text=Zapatillas+Running" alt="Zapatillas"/></div>
+            <h4>Zapatillas RunFast</h4>
+            <p class="meta"><span class="price">$79.990</span><span class="badge">Nuevo</span></p>
+            <p>Ultraligeras, para entrenamientos y carreras de distancia.</p>
+            <button class="add-btn">Agregar al carrito</button>
+          </article>
+
+          <!-- CARD 3 -->
+          <article class="card">
+            <div class="thumb"><img src="https://placehold.co/600x400?text=Figura+Coleccionable" alt="Figura"/></div>
+            <h4>Figura Edición Limitada</h4>
+            <p class="meta"><span class="price">$29.990</span><span class="badge">Edición</span></p>
+            <p>Figura coleccionable numerada — ideal para vitrinas.</p>
+            <button class="add-btn">Agregar al carrito</button>
+          </article>
+        </div>
+
+        <!-- ICONOS CATEGORÍAS -->
+        <div class="icons-row" id="categorias">
+          <div class="icon-card"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="black" stroke-width="1.5"/></svg><div>Fútbol</div></div>
+          <div class="icon-card"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="black" stroke-width="1.5"/></svg><div>Basket</div></div>
+          <div class="icon-card"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="12" rx="2" stroke="black" stroke-width="1.5"/></svg><div>Gym</div></div>
+          <div class="icon-card"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16v10H4z" stroke="black" stroke-width="1.5"/></svg><div>Coleccionables</div></div>
+        </div>
+
+        <!-- RECIÉN AGREGADOS Y OFERTAS -->
+        <div class="section-title section-recientes"><h3>Recién Agregados</h3><a href="#" class="ver-todo">Ver todo →</a></div>
+        <div class="small-grid">
+          <div class="card"><div class="thumb"><img src="https://placehold.co/400x260?text=Nuevo+1"/></div><h4>Guantes de Entrenamiento</h4></div>
+          <div class="card"><div class="thumb"><img src="https://placehold.co/400x260?text=Nuevo+2"/></div><h4>Pelota de Pilates</h4></div>
+          <div class="card"><div class="thumb"><img src="https://placehold.co/400x260?text=Nuevo+3"/></div><h4>Bandas Elasticas</h4></div>
+          <div class="card"><div class="thumb"><img src="https://placehold.co/400x260?text=Nuevo+4"/></div><h4>Mochila Deportiva</h4></div>
+        </div>
+
+        <div class="section-title section-ofertas"><h3>Ofertas</h3><a href="#ofertas" class="ver-todo">Ir a Ofertas →</a></div>
+        <div class="small-grid">
+          <div class="card"><div class="thumb"><img src="https://placehold.co/400x260?text=Oferta+1"/></div><h4>Set de Entrenamiento -10%</h4></div>
+          <div class="card"><div class="thumb"><img src="https://placehold.co/400x260?text=Oferta+2"/></div><h4>Casco de Ciclismo -15%</h4></div>
+          <div class="card"><div class="thumb"><img src="https://placehold.co/400x260?text=Oferta+3"/></div><h4>Botines -20%</h4></div>
+          <div class="card"><div class="thumb"><img src="https://placehold.co/400x260?text=Oferta+4"/></div><h4>Figuras Selección -25%</h4></div>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer id="sobre-nosotros">
+      <div class="footer-grid">
+        <div class="map">
+          <h4>Ubicación</h4>
+          <iframe src="https://maps.google.com/maps?q=Montevideo&t=&z=13&ie=UTF8&iwloc=&output=embed" aria-hidden="false"></iframe>
+        </div>
+        <div>
+          <h4>Contacto</h4>
+          <p>Email: contacto@carbassdeportes.com</p>
+          <p>Tel: +598 0000 0000</p>
+
+          <h4 class="footer-redes">Redes</h4>
+          <p>@carbassdeportes</p>
+
+          <p class="footer-copyright">© 2025 CarbassDeportes - Todos los derechos reservados.</p>
+          <p>© designed by brkoon</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
