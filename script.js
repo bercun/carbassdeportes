@@ -15,6 +15,20 @@
   }
 })();
 
+// Video con reproducción al hacer hover
+(function(){
+  const video = document.querySelector('.hover-video');
+  if(video){
+    video.addEventListener('mouseenter', function(){
+      this.play();
+    });
+    video.addEventListener('mouseleave', function(){
+      this.pause();
+      this.currentTime = 0;
+    });
+  }
+})();
+
 // Carrusel simple: auto-play + controles
 (function(){
   const slidesEl = document.getElementById('slides');

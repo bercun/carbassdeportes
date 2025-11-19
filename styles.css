@@ -31,6 +31,9 @@ aside.left{background:var(--blanco);padding:12px;border-radius:10px;box-shadow:0
 .promo{border-radius:8px;overflow:hidden;margin-bottom:12px}
 .promo img{width:100%;display:block}
 .promo .txt{padding:10px;font-weight:700;color:#111}
+.video-promo{background:#000;position:relative}
+.hover-video{width:100%;height:auto;display:block;cursor:pointer;transition:opacity 300ms ease}
+.hover-video:hover{opacity:0.9}
 
 /* CARRUSEL */
 .carousel{position:relative;background:var(--blanco);padding:14px;border-radius:10px;overflow:hidden;box-shadow:0 8px 20px rgba(2,6,23,0.06)}
