@@ -128,7 +128,7 @@ El diseño utiliza una paleta de colores definida en variables CSS:
 <div class="presentacion">
   <h2>CarbassDeportes</h2>
   <p>CarbassDeportes es una tienda especializada en artículos deportivos y coleccionables afines...</p>
-  <div class="palette" aria-hidden="false">
+  <div class="palette" >
     <div class="swatch swatch-verde">Verde<br>#1ecb63</div>
     <div class="swatch swatch-negro">Negro<br>#000000</div>
     <div class="swatch swatch-blanco">Blanco<br>#ffffff</div>
