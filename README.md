@@ -620,3 +620,34 @@ body{font-family:Inter, Arial, Helvetica, sans-serif;background:var(--gris);colo
 ## 📝 Licencia
 
 © 2025 CarbassDeportes - Todos los derechos reservados.
+
+
+
+## db Base de datos en firebese
+
+** crear un base de datos en firebase 
+para hacer crud de los articulos**
+
+Tipos y caracteristicas
+
+Base de dato de articulos
+Base de datos de el carrito
+Base de datos con informacion de  usuarios
+
+
+## Base de dato de articulos 
+
+nombre: Articulos
+
+Atributos :{
+
+  id
+  nombre
+  imagen
+  descripción
+  precio
+  categoria
+  estatus (nuevo, oferta, destacados)
+  
+}
+
