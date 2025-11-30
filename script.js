@@ -40,7 +40,7 @@
 
   function goTo(i){
     index = (i + slidesCount) % slidesCount;
-    slidesEl.style.transform = `translateX(${ -index * 100 }%)`;
+    slidesEl.style.transform = `translateX(${ -index * 101.6 }%)`;
   }
   function next(){ goTo(index + 1) }
   function prev(){ goTo(index - 1) }
