@@ -1,4 +1,3 @@
-
 // Imagen aleatoria de coleccionables en el aside
 (function(){
   const coleccionables = [
@@ -64,128 +63,12 @@
   slidesEl.addEventListener('mouseleave', ()=>startTimer());
 })();
 
-// Funcionalidad simple para botones "Agregar" (simula añadir al carrito)
+// Funcionalidad para botones "Agregar al carrito"
 function setupAddButtons() {
   document.querySelectorAll('.add-btn').forEach(btn => {
-    btn.addEventListener('click', (e)=>{
-      const card = e.target.closest('.card');
-      const title = card.querySelector('h4').innerText;
-      e.target.innerText = 'Añadido ✓';
-      e.target.disabled = true;
-      setTimeout(()=>{ e.target.innerText = 'Agregar al carrito'; e.target.disabled = false; }, 1400);
-      // Aquí podés integrar la lógica real del carrito o llamadas API
-      console.info('Añadido al carrito:', title);
-    })
-  })
-}
-
-setupAddButtons();
-
-// Inicializar Firebase
-firebase.initializeApp(firebaseConfig);
-import { db } from './firebase-config.js';
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-// Cargar productos desde Firebase y distribuirlos por secciones
-async function cargarProductos() {
-  const destacadosContainer = document.getElementById('destacados-container');
-  const recientesContainer = document.getElementById('recientes-container');
-  const ofertasContainer = document.getElementById('ofertas-container');
-
-  // Limpiar contenedores (o mostrar mensaje de carga si no se hizo en HTML)
-  if(destacadosContainer) destacadosContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Cargando...</p>';
-  if(recientesContainer) recientesContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Cargando...</p>';
-  if(ofertasContainer) ofertasContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Cargando...</p>';
-
-  try {
-    const querySnapshot = await getDocs(collection(db, "productos"));
-    
-    // Limpiar mensajes de carga
-    if(destacadosContainer) destacadosContainer.innerHTML = '';
-    if(recientesContainer) recientesContainer.innerHTML = '';
-    if(ofertasContainer) ofertasContainer.innerHTML = '';
-
-    if (querySnapshot.empty) {
-      console.log("No se encontraron productos.");
-      return;
-    }
-
-    querySnapshot.forEach((doc) => {
-      const producto = doc.data();
-      // Normalizar estatus a minúsculas para comparar
-      const estatus = (producto.estatus || '').toLowerCase();
-      
-      // Crear HTML según el tipo de tarjeta (completa para destacados, simple para otros)
-      
-      // 1. DESTACADOS (Top, Destacado)
-      if (estatus.includes('top') || estatus.includes('destacado')) {
-        if(destacadosContainer) {
-          destacadosContainer.innerHTML += `
-            <article class="card">
-              <div class="thumb">
-                <img src="${producto.imagen || 'https://placehold.co/600x400?text=Sin+Imagen'}" alt="${producto.nombre}"/>
-              </div>
-              <h4>${producto.nombre}</h4>
-              <p class="meta">
-                <span class="price">$${producto.precio}</span>
-                <span class="badge">${producto.etiqueta || 'Top'}</span>
-              </p>
-              <p>${producto.descripcion || ''}</p>
-              <button class="add-btn">Agregar al carrito</button>
-            </article>
-          `;
-        }
-      }
-
-      // 2. RECIÉN AGREGADOS (Nuevo)
-      if (estatus.includes('nuevo') || estatus.includes('reciente')) {
-        if(recientesContainer) {
-          recientesContainer.innerHTML += `
-            <div class="card">
-              <div class="thumb">
-                <img src="${producto.imagen || 'https://placehold.co/400x260?text=Nuevo'}" alt="${producto.nombre}"/>
-              </div>
-              <h4>${producto.nombre}</h4>
-              <p class="meta" style="margin-top:5px;">
-                <span class="price" style="font-size:0.9em">$${producto.precio}</span>
-              </p>
-            </div>
-          `;
-        }
-      }
-
-      // 3. OFERTAS (Oferta)
-      if (estatus.includes('oferta')) {
-        if(ofertasContainer) {
-          ofertasContainer.innerHTML += `
-            <div class="card">
-              <div class="thumb">
-                <img src="${producto.imagen || 'https://placehold.co/400x260?text=Oferta'}" alt="${producto.nombre}"/>
-              </div>
-              <h4>${producto.nombre}</h4>
-              <p class="meta" style="margin-top:5px;">
-                <span class="price" style="font-size:0.9em">$${producto.precio}</span>
-                <span class="badge" style="font-size:0.7em; padding:4px;">Oferta</span>
-              </p>
-            </div>
-          `;
-        }
-      }
-    });
-
-    // Re-inicializar los botones de agregar al carrito
-    inicializarBotonesCarrito();
-
-  } catch (error) {
-    console.error("Error cargando productos:", error);
-  }
-}
-
-// Inicializar botones
-function inicializarBotonesCarrito() {
-  document.querySelectorAll('.add-btn').forEach(btn => {
-    if(btn.dataset.bound) return;
-    btn.dataset.bound = true;
+    // Evita asociar el evento múltiples veces
+    if(btn.dataset.listener === 'true') return;
+    btn.dataset.listener = 'true';
 
     btn.addEventListener('click', (e)=>{
       const card = e.target.closest('.card');
@@ -205,33 +88,90 @@ function inicializarBotonesCarrito() {
   });
 }
 
-// Llamar a la carga de productos al iniciar
-cargarProductos();
+// Inicializar Firebase (Realtime Database)
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-// Imagen aleatoria de coleccionables en el aside
-
-// Cargar artículos desde Firebase
-const articlesGrid = document.querySelector('.grid');
-
-function renderArticles(articles) {
-  articlesGrid.innerHTML = ''; // Limpiar el grid
-  for (const articleId in articles) {
-    const article = articles[articleId];
-    const card = `
-      <article class="card">
-        <div class="thumb"><img src="${article.imagen}" alt="${article.nombre}"/></div>
+// Función auxiliar para crear el HTML de una tarjeta de artículo
+function createArticleCardHtml(article, isSmallGrid = false) {
+  if (isSmallGrid) {
+    return `
+      <div class="card">
+        <div class="thumb">
+          <img src="${article.imagen || 'https://placehold.co/400x260?text=Sin+Imagen'}" alt="${article.nombre}"/>
+        </div>
         <h4>${article.nombre}</h4>
-        <p class="meta"><span class="price">$${article.precio.toFixed(2)}</span><span class="badge">${article.estatus}</span></p>
-        <p>${article.descripción}</p>
+        <p class="meta" style="margin-top:5px;">
+          <span class="price" style="font-size:0.9em">$${article.precio.toFixed(2)}</span>
+          ${article.estatus ? `<span class="badge" style="font-size:0.7em; padding:4px;">${article.estatus}</span>` : ''}
+        </p>
+      </div>
+    `;
+  } else {
+    return `
+      <article class="card">
+        <div class="thumb">
+          <img src="${article.imagen || 'https://placehold.co/600x400?text=Sin+Imagen'}" alt="${article.nombre}"/>
+        </div>
+        <h4>${article.nombre}</h4>
+        <p class="meta">
+          <span class="price">$${article.precio.toFixed(2)}</span>
+          ${article.estatus ? `<span class="badge">${article.estatus}</span>` : ''}
+        </p>
+        <p>${article.descripción || ''}</p>
         <button class="add-btn">Agregar al carrito</button>
       </article>
     `;
-    articlesGrid.innerHTML += card;
   }
+}
+
+// Función para renderizar artículos en un contenedor específico
+function renderArticlesToContainer(containerElement, articlesArray, isSmallGrid = false) {
+  if (!containerElement) return; // Asegurarse de que el contenedor existe
+
+  containerElement.innerHTML = ''; // Limpiar el contenedor
+  if (articlesArray.length === 0) {
+    containerElement.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No hay artículos disponibles en esta sección.</p>';
+    return;
+  }
+
+  articlesArray.forEach(article => {
+    containerElement.innerHTML += createArticleCardHtml(article, isSmallGrid);
+  });
   setupAddButtons(); // Re-asociar eventos a los nuevos botones
 }
 
+// Cargar artículos desde Firebase Realtime Database y distribuirlos por secciones
 db.ref('articulos').on('value', (snapshot) => {
-  const articles = snapshot.val();
-  renderArticles(articles);
+  const articlesData = snapshot.val();
+  const allArticles = Object.values(articlesData || {});
+
+  // Obtener referencias a los contenedores
+  const destacadosContainer = document.getElementById('destacados-container');
+  const recientesContainer = document.getElementById('recientes-container');
+  const ofertasContainer = document.getElementById('ofertas-container');
+  const futbolContainer = document.getElementById('futbol-container');
+  const basketContainer = document.getElementById('basket-container');
+  const gymContainer = document.getElementById('gym-container');
+  const coleccionablesContainer = document.getElementById('coleccionables-container');
+
+  // Filtrar artículos
+  const destacados = allArticles.filter(article => article.estatus && article.estatus.toLowerCase() === 'destacado');
+  const recientes = allArticles.filter(article => article.estatus && article.estatus.toLowerCase() === 'recien agregado');
+  const ofertas = allArticles.filter(article => article.estatus && article.estatus.toLowerCase() === 'oferta');
+  
+  const futbolArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'futbol');
+  const basketArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'basket');
+  const gymArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'gym');
+  const coleccionablesArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'coleccionables');
+
+  // Renderizar en sus respectivos contenedores
+  renderArticlesToContainer(destacadosContainer, destacados, false);
+  renderArticlesToContainer(recientesContainer, recientes, true);
+  renderArticlesToContainer(ofertasContainer, ofertas, true);
+
+  renderArticlesToContainer(futbolContainer, futbolArticles, false);
+  renderArticlesToContainer(basketContainer, basketArticles, false);
+  renderArticlesToContainer(gymContainer, gymArticles, false);
+  renderArticlesToContainer(coleccionablesContainer, coleccionablesArticles, false);
 });
