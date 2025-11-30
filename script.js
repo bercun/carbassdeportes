@@ -64,14 +64,5 @@
 })();
 
 // Funcionalidad simple para botones "Agregar" (simula añadir al carrito)
-document.querySelectorAll('.add-btn').forEach(btn => {
-  btn.addEventListener('click', (e)=>{
-    const card = e.target.closest('.card');
-    const title = card.querySelector('h4').innerText;
-    e.target.innerText = 'Añadido ✓';
-    e.target.disabled = true;
-    setTimeout(()=>{ e.target.innerText = 'Agregar al carrito'; e.target.disabled = false; }, 1400);
-    // Aquí podés integrar la lógica real del carrito o llamadas API
-    console.info('Añadido al carrito:', title);
-  })
-})
+// (Esta lógica ahora se maneja dentro de cargarProductos -> inicializarBotonesCarrito)
+// document.querySelectorAll('.add-btn').forEach(...) se eliminó para evitar conflictos.
