@@ -1,30 +1,31 @@
+
 {
   "articulos": [
     {
       "id": "001",
       "nombre": "Zapatillas Deportivas Premium",
       "imagen": "sours/img/articulos/zapatillas-deportivas-premium.jpg",
-      "descripción": "Zapatillas diseñadas para ofrecer el máximo rendimiento y comodidad durante la actividad física.",
+      "descripción": "Zapatillas diseñadas para ofrecer el máximo rendimiento y comodidad.",
       "precio": 120.00,
-      "categoria": "Calzado",
-      "estatus": "nuevo"
+      "categoria": "gym",
+      "estatus": "destacado"
     },
     {
       "id": "002",
       "nombre": "Botines de Fútbol Profesional",
       "imagen": "sours/img/articulos/botines-futbol-profesional.jpg",
-      "descripción": "Botines de alta gama, ideales para jugadores que buscan precisión y durabilidad en el campo.",
+      "descripción": "Botines de alta gama para jugadores que buscan precisión.",
       "precio": 150.00,
-      "categoria": "Fútbol",
-      "estatus": "destacados"
+      "categoria": "futbol",
+      "estatus": "destacado"
     },
     {
       "id": "003",
       "nombre": "Camiseta Vintage Retro",
       "imagen": "sours/img/articulos/camiseta-vintage-retro.jpg",
-      "descripción": "Una camiseta clásica que evoca la nostalgia de épocas doradas del deporte.",
+      "descripción": "Una camiseta clásica que evoca la nostalgia de épocas doradas.",
       "precio": 75.00,
-      "categoria": "Ropa",
+      "categoria": "coleccionables",
       "estatus": "oferta"
     },
     {
@@ -33,8 +34,8 @@
       "imagen": "sours/img/articulos/calzado-urbano-casual.jpg",
       "descripción": "Calzado cómodo y con estilo para el día a día en la ciudad.",
       "precio": 90.00,
-      "categoria": "Calzado",
-      "estatus": "nuevo"
+      "categoria": "gym",
+      "estatus": "recien agregado"
     },
     {
       "id": "005",
@@ -42,8 +43,142 @@
       "imagen": "sours/img/articulos/zapatillas-running-elite.jpg",
       "descripción": "Zapatillas de alto rendimiento para corredores exigentes.",
       "precio": 180.00,
-      "categoria": "Running",
-      "estatus": "destacados"
+      "categoria": "gym",
+      "estatus": "destacado"
+    },
+    {
+      "id": "006",
+      "nombre": "Balón de Basket Pro",
+      "imagen": "sours/img/articulos/balon-basket-pro.jpg",
+      "descripción": "Balón oficial para ligas profesionales de baloncesto.",
+      "precio": 95.00,
+      "categoria": "basket",
+      "estatus": "destacado"
+    },
+    {
+      "id": "007",
+      "nombre": "Figura Coleccionable Leyenda del Fútbol",
+      "imagen": "sours/img/articulos/figura-coleccionable-leyenda.jpg",
+      "descripción": "Figura detallada de un ícono del fútbol mundial.",
+      "precio": 60.00,
+      "categoria": "coleccionables",
+      "estatus": "recien agregado"
+    },
+    {
+      "id": "008",
+      "nombre": "Set de Mancuernas Ajustables",
+      "imagen": "sours/img/articulos/set-mancuernas-ajustables.jpg",
+      "descripción": "Ahorra espacio con este versátil set de mancuernas.",
+      "precio": 250.00,
+      "categoria": "gym",
+      "estatus": "oferta"
+    },
+    {
+      "id": "009",
+      "nombre": "Camiseta de Entrenamiento sin Mangas",
+      "imagen": "sours/img/articulos/camiseta-sin-mangas.jpg",
+      "descripción": "Ligera y transpirable, ideal para el gimnasio.",
+      "precio": 40.00,
+      "categoria": "gym",
+      "estatus": "recien agregado"
+    },
+    {
+      "id": "010",
+      "nombre": "Rodilleras de Compresión",
+      "imagen": "sours/img/articulos/rodilleras-compresion.jpg",
+      "descripción": "Soporte y estabilidad para tus articulaciones durante el ejercicio.",
+      "precio": 35.00,
+      "categoria": "gym",
+      "estatus": "oferta"
+    },
+    {
+      "id": "011",
+      "nombre": "Shorts de Fútbol Réplica Oficial",
+      "imagen": "sours/img/articulos/shorts-futbol-replica.jpg",
+      "descripción": "Los mismos shorts que usan tus ídolos en el campo.",
+      "precio": 65.00,
+      "categoria": "futbol",
+      "estatus": "recien agregado"
+    },
+    {
+      "id": "012",
+      "nombre": "Muñequera Deportiva",
+      "imagen": "sours/img/articulos/munequera-deportiva.jpg",
+      "descripción": "Absorbe el sudor y proporciona un ajuste cómodo.",
+      "precio": 15.00,
+      "categoria": "basket",
+      "estatus": "oferta"
+    },
+    {
+      "id": "013",
+      "nombre": "Gorra Edición Limitada Campeones",
+      "imagen": "sours/img/articulos/gorra-edicion-limitada.jpg",
+      "descripción": "Celebra la victoria de tu equipo con esta gorra exclusiva.",
+      "precio": 50.00,
+      "categoria": "coleccionables",
+      "estatus": "destacado"
+    },
+    {
+      "id": "014",
+      "nombre": "Espinilleras de Alta Resistencia",
+      "imagen": "sours/img/articulos/espinilleras-alta-resistencia.jpg",
+      "descripción": "Protección máxima sin sacrificar la movilidad.",
+      "precio": 45.00,
+      "categoria": "futbol",
+      "estatus": "oferta"
+    },
+    { póster": "015",
+      "nombre": "Póster Histórico Final del Mundo",
+      "imagen": "sours/img/articulos/poster-final-del-mundo.jpg",
+      "descripción": "Un recuerdo impreso de un partido que hizo historia.",
+      "precio": 25.00,
+      "categoria": "coleccionables",
+      "estatus": "oferta"
+    },
+    {
+      "id": "016",
+      "nombre": "Medias Antideslizantes para Yoga",
+      "imagen": "sours/img/articulos/medias-antideslizantes.jpg",
+      "descripción": "Perfectas para yoga, pilates o cualquier ejercicio descalzo.",
+      "precio": 20.00,
+      "categoria": "gym",
+      "estatus": "recien agregado"
+    },
+    {
+      "id": "017",
+      "nombre": "Zapatillas de Basket de Salto",
+      "imagen": "sours/img/articulos/zapatillas-basket-salto.jpg",
+      "descripción": "Diseñadas para maximizar tu capacidad de salto.",
+      "precio": 200.00,
+      "categoria": "basket",
+      "estatus": "destacado"
+    },
+    {
+      "id": "018",
+      "nombre": "Balón de Fútbol Sala",
+      "imagen": "sours/img/articulos/balon-futbol-sala.jpg",
+      "descripción": "Menos rebote y más control para canchas duras.",
+      "precio": 55.00,
+      "categoria": "futbol",
+      "estatus": "recien agregado"
+    },
+    {
+      "id": "019",
+      "nombre": "Mini Canasta de Basket para Puerta",
+      "imagen": "sours/img/articulos/mini-canasta-basket.jpg",
+      "descripción": "Practica tus tiros libres en cualquier habitación.",
+      "precio": 30.00,
+      "categoria": "basket",
+      "estatus": "recien agregado"
+    },
+    {
+      "id": "020",
+      "nombre": "Bufanda Clásica de Equipo",
+      "imagen": "sours/img/articulos/bufanda-clasica-equipo.jpg",
+      "descripción": "Muestra tus colores con orgullo en el estadio o en la calle.",
+      "precio": 28.00,
+      "categoria": "coleccionables",
+      "estatus": "destacado"
     }
   ]
 }
