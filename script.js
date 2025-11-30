@@ -1,3 +1,4 @@
+
 // Imagen aleatoria de coleccionables en el aside
 (function(){
   const coleccionables = [
@@ -64,5 +65,60 @@
 })();
 
 // Funcionalidad simple para botones "Agregar" (simula añadir al carrito)
-// (Esta lógica ahora se maneja dentro de cargarProductos -> inicializarBotonesCarrito)
-// document.querySelectorAll('.add-btn').forEach(...) se eliminó para evitar conflictos.
+function setupAddButtons() {
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', (e)=>{
+      const card = e.target.closest('.card');
+      const title = card.querySelector('h4').innerText;
+      e.target.innerText = 'Añadido ✓';
+      e.target.disabled = true;
+      setTimeout(()=>{ e.target.innerText = 'Agregar al carrito'; e.target.disabled = false; }, 1400);
+      // Aquí podés integrar la lógica real del carrito o llamadas API
+      console.info('Añadido al carrito:', title);
+    })
+  })
+}
+
+setupAddButtons();
+
+// Configuración de Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyBPF0mwb2kioMb6SCEAhUwRhpq0sCb9N_U",
+  authDomain: "carbassdeportes.firebaseapp.com",
+  databaseURL: "https://carbassdeportes-default-rtdb.firebaseio.com",
+  projectId: "carbassdeportes",
+  storageBucket: "carbassdeportes.appspot.com",
+  messagingSenderId: "348979037154",
+  appId: "1:348979037154:web:66c7dc823cbd8afb38afbb",
+  measurementId: "G-03K2T3BM9Y"
+};
+
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Cargar artículos desde Firebase
+const articlesGrid = document.querySelector('.grid');
+
+function renderArticles(articles) {
+  articlesGrid.innerHTML = ''; // Limpiar el grid
+  for (const articleId in articles) {
+    const article = articles[articleId];
+    const card = `
+      <article class="card">
+        <div class="thumb"><img src="${article.imagen}" alt="${article.nombre}"/></div>
+        <h4>${article.nombre}</h4>
+        <p class="meta"><span class="price">$${article.precio.toFixed(2)}</span><span class="badge">${article.estatus}</span></p>
+        <p>${article.descripción}</p>
+        <button class="add-btn">Agregar al carrito</button>
+      </article>
+    `;
+    articlesGrid.innerHTML += card;
+  }
+  setupAddButtons(); // Re-asociar eventos a los nuevos botones
+}
+
+db.ref('articulos').on('value', (snapshot) => {
+  const articles = snapshot.val();
+  renderArticles(articles);
+});
