@@ -127,7 +127,7 @@
       "categoria": "futbol",
       "estatus": "oferta"
     },
-    { póster": "015",
+    { "id": "015",
       "nombre": "Póster Histórico Final del Mundo",
       "imagen": "sours/img/articulos/poster-final-del-mundo.jpg",
       "descripción": "Un recuerdo impreso de un partido que hizo historia.",

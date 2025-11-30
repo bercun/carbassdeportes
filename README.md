@@ -646,8 +646,8 @@ Atributos :{
   imagen
   descripción
   precio
-  categoria
-  estatus (nuevo, oferta, destacados)
+  categoria (futbol, basket, gym, coleccionables)
+  estatus (recien agregados, oferta, destacados)
   
 }
 
