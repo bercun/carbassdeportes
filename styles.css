@@ -44,6 +44,7 @@ body{
 .brand{
   display:flex;
   align-items:center;
+  background-color: var(--negro);
   gap:12px
 }
 .logo-svg{
@@ -51,7 +52,7 @@ body{
   height:5rem;
 }
 .brand h1{
-  font-size:20px;
+  font-size: 2rem;
   color:var(--blanco);
   letter-spacing:0.4px
 }
