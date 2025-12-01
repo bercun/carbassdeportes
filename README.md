@@ -20,7 +20,7 @@ carbassdeportes/
     │   ├── articulos/      # Imágenes de productos
     │   ├── aside/          # Imágenes del aside
     │   ├── carrousel/      # Imágenes del carrusel
-    │   ├── coleccionables/ # Imágenes de items coleccionables
+        │   ├── coleccionables/ # Imágenes de items coleccionables
     │   └── logos/          # Logo de la marca
     └── videos/             # Videos promocionales
 ```
@@ -646,8 +646,8 @@ Atributos :{
   imagen
   descripción
   precio
-  categoria
-  estatus (nuevo, oferta, destacados)
+  categoria (futbol, basket, gym, coleccionables)
+  estatus (recien agregados, oferta, destacados)
   
 }
 
