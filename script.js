@@ -32,6 +32,8 @@
 // Carrusel simple: auto-play + controles
 (function(){
   const slidesEl = document.getElementById('slides');
+  if (!slidesEl) return; // Salir si no existe el carrusel
+  
   const slidesCount = slidesEl.children.length;
   const nextBtn = document.getElementById('next');
   const prevBtn = document.getElementById('prev');
@@ -45,8 +47,8 @@
   function next(){ goTo(index + 1) }
   function prev(){ goTo(index - 1) }
 
-  nextBtn.addEventListener('click', ()=>{ next(); resetTimer(); });
-  prevBtn.addEventListener('click', ()=>{ prev(); resetTimer(); });
+  if(nextBtn) nextBtn.addEventListener('click', ()=>{ next(); resetTimer(); });
+  if(prevBtn) prevBtn.addEventListener('click', ()=>{ prev(); resetTimer(); });
 
   function startTimer(){ interval = setInterval(next, 4000); }
   function resetTimer(){ clearInterval(interval); startTimer(); }
@@ -128,16 +130,20 @@ function createArticleCardHtml(article, isSmallGrid = false) {
 }
 
 // Función para renderizar artículos en un contenedor específico
-function renderArticlesToContainer(containerElement, articlesArray, isSmallGrid = false) {
+function renderArticlesToContainer(containerElement, articlesArray, isSmallGrid = false, limit = null) {
   if (!containerElement) return; // Asegurarse de que el contenedor existe
 
   containerElement.innerHTML = ''; // Limpiar el contenedor
-  if (articlesArray.length === 0) {
+  
+  // Aplicar límite si se especifica
+  const articlesToShow = limit ? articlesArray.slice(0, limit) : articlesArray;
+  
+  if (articlesToShow.length === 0) {
     containerElement.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No hay artículos disponibles en esta sección.</p>';
     return;
   }
 
-  articlesArray.forEach(article => {
+  articlesToShow.forEach(article => {
     containerElement.innerHTML += createArticleCardHtml(article, isSmallGrid);
   });
   setupAddButtons(); // Re-asociar eventos a los nuevos botones
@@ -147,6 +153,8 @@ function renderArticlesToContainer(containerElement, articlesArray, isSmallGrid 
 db.ref('articulos').on('value', (snapshot) => {
   const articlesData = snapshot.val();
   const allArticles = Object.values(articlesData || {});
+
+  console.log('Artículos cargados:', allArticles.length); // Debug
 
   // Obtener referencias a los contenedores
   const destacadosContainer = document.getElementById('destacados-container');
@@ -166,15 +174,24 @@ db.ref('articulos').on('value', (snapshot) => {
   const basketArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'basket');
   const gymArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'gym');
   const coleccionablesArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'coleccionables');
- 
 
-  // Renderizar en sus respectivos contenedores
-  renderArticlesToContainer(destacadosContainer, destacados, false);
-  renderArticlesToContainer(recientesContainer, recientes, true);
-  renderArticlesToContainer(ofertasContainer, ofertas, true);
-
-  renderArticlesToContainer(futbolContainer, futbolArticles, false);
-  renderArticlesToContainer(basketContainer, basketArticles, false);
-  renderArticlesToContainer(gymContainer, gymArticles, false);
-  renderArticlesToContainer(coleccionablesContainer, coleccionablesArticles, false);
+  // Detectar si estamos en la página principal o en el catálogo
+  const isCatalogPage = window.location.pathname.includes('catalogo.html');
+  
+  if (isCatalogPage) {
+    // Página de catálogo: mostrar todos los artículos por categoría
+    renderArticlesToContainer(futbolContainer, futbolArticles, false);
+    renderArticlesToContainer(basketContainer, basketArticles, false);
+    renderArticlesToContainer(gymContainer, gymArticles, false);
+    renderArticlesToContainer(coleccionablesContainer, coleccionablesArticles, false);
+  } else {
+    // Página principal: mostrar máximo 3 artículos por sección
+    renderArticlesToContainer(destacadosContainer, destacados, false, 3);
+    renderArticlesToContainer(recientesContainer, recientes, true, 3);
+    renderArticlesToContainer(ofertasContainer, ofertas, true, 3);
+    renderArticlesToContainer(futbolContainer, futbolArticles, false, 3);
+    renderArticlesToContainer(basketContainer, basketArticles, false, 3);
+    renderArticlesToContainer(gymContainer, gymArticles, false, 3);
+    renderArticlesToContainer(coleccionablesContainer, coleccionablesArticles, false, 3);
+  }
 });
