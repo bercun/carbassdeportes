@@ -92,6 +92,8 @@ function setupAddButtons() {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+
+
 // Función auxiliar para crear el HTML de una tarjeta de artículo
 function createArticleCardHtml(article, isSmallGrid = false) {
   if (isSmallGrid) {
@@ -164,6 +166,7 @@ db.ref('articulos').on('value', (snapshot) => {
   const basketArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'basket');
   const gymArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'gym');
   const coleccionablesArticles = allArticles.filter(article => article.categoria && article.categoria.toLowerCase() === 'coleccionables');
+ 
 
   // Renderizar en sus respectivos contenedores
   renderArticlesToContainer(destacadosContainer, destacados, false);
