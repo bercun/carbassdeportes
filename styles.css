@@ -1,6 +1,7 @@
 /* Paleta de colores */
 :root{
   --verde: #1ecb63;
+  --verde-oscuro: #17a352;
   --negro: #000000;
   --blanco: #ffffff;
   --gris: #e0e0e0;
@@ -525,4 +526,23 @@ footer{
 .btn-logout:hover {
   background: white;
   color: var(--negro);
+}
+
+.btn-login {
+  padding: 8px 16px;
+  background: var(--verde);
+  border: 1px solid var(--verde);
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-login:hover {
+  background: var(--verde-oscuro);
+  border-color: var(--verde-oscuro);
+  transform: scale(1.05);
 }

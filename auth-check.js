@@ -1,25 +1,32 @@
-// Este script protege las páginas - solo usuarios autenticados pueden acceder
+// Este script maneja la visualización del usuario y protege acciones
 
 firebase.auth().onAuthStateChanged((user) => {
-  const currentPage = window.location.pathname;
-  const isLoginPage = currentPage.includes('login.html');
+  const userNameElement = document.getElementById('user-name');
+  const logoutBtn = document.getElementById('logout-btn');
+  const loginBtn = document.getElementById('login-btn');
   
-  if (!user && !isLoginPage) {
-    // Si no hay usuario y no está en login, redirigir
-    window.location.href = 'login.html';
-  } else if (user) {
-    // Si hay usuario, mostrar su nombre en el navbar
-    const userNameElement = document.getElementById('user-name');
+  if (user) {
+    // Usuario autenticado: mostrar nombre y botón de logout
     if (userNameElement) {
       userNameElement.textContent = user.displayName || user.email;
+      userNameElement.style.display = 'inline';
     }
+    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+    if (loginBtn) loginBtn.style.display = 'none';
+  } else {
+    // Usuario NO autenticado: mostrar botón de login
+    if (userNameElement) {
+      userNameElement.style.display = 'none';
+    }
+    if (logoutBtn) logoutBtn.style.display = 'none';
+    if (loginBtn) loginBtn.style.display = 'inline-block';
   }
 });
 
 // Función de logout
 function logout() {
   firebase.auth().signOut().then(() => {
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
   }).catch((error) => {
     console.error('Error al cerrar sesión:', error);
   });

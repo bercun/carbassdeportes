@@ -73,6 +73,18 @@ function setupAddButtons() {
     btn.dataset.listener = 'true';
 
     btn.addEventListener('click', (e)=>{
+      // Verificar si el usuario está autenticado
+      const user = firebase.auth().currentUser;
+      
+      if (!user) {
+        // Si no está logueado, redirigir al login
+        if (confirm('Debes iniciar sesión para agregar productos al carrito. ¿Ir a iniciar sesión?')) {
+          window.location.href = 'login.html';
+        }
+        return;
+      }
+      
+      // Usuario autenticado: agregar al carrito
       const card = e.target.closest('.card');
       const title = card.querySelector('h4').innerText;
       const originalText = e.target.innerText;
@@ -90,8 +102,7 @@ function setupAddButtons() {
   });
 }
 
-// Inicializar Firebase (Realtime Database)
-firebase.initializeApp(firebaseConfig);
+// Firebase ya está inicializado en firebase-config.js
 const db = firebase.database();
 
 
