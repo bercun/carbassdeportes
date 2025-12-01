@@ -16,13 +16,17 @@
 
       <nav>
         <ul class="navlinks">
-          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html">Inicio</a></li>
           <li><a href="catalogo.html" class="active">Catálogo</a></li>
           <li><a href="index.html#sobre-nosotros">Sobre Nosotros</a></li>
         </ul>
       </nav>
 
-      <div><a href="#" class="carrito">🛒</a></div>
+      <div class="user-section">
+        <span id="user-name" class="user-name"></span>
+        <a href="#" class="carrito">🛒</a>
+        <button onclick="logout()" class="btn-logout">Cerrar sesión</button>
+      </div>
     </header>
 
     <main class="layout" style="grid-template-columns: 1fr;">
@@ -132,8 +136,10 @@
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="auth-check.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
