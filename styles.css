@@ -546,3 +546,32 @@ footer{
   border-color: var(--verde-oscuro);
   transform: scale(1.05);
 }
+/* Estilos para página de catálogo */
+.layout-single-column {
+  grid-template-columns: 1fr;
+}
+
+.section-title {
+  margin-top: 30px;
+}
+
+.section-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.loading-message {
+  grid-column: 1/-1;
+  text-align: center;
+}
+
+.map iframe {
+  border: 0;
+}
+/* Clase helper para ocultar elementos */
+.hidden {
+  display: none !important;
+}
