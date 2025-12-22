@@ -504,12 +504,15 @@ footer{
 .user-section {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
 }
 
 .user-name {
   color: white;
   font-weight: 500;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 .btn-logout {
@@ -521,11 +524,13 @@ footer{
   cursor: pointer;
   transition: all 0.3s;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .btn-logout:hover {
-  background: white;
-  color: var(--negro);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--verde);
+  color: var(--verde);
 }
 
 .btn-login {

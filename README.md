@@ -4,6 +4,56 @@
 
 **CarbassDeportes** es una tienda online especializada en artículos deportivos y coleccionables. Este proyecto web ofrece una experiencia de usuario moderna y responsiva, con funcionalidades interactivas como carruseles, videos hover, gestión de productos y **sistema de autenticación completo con Firebase**.
 
+### ✨ Características Principales
+
+- 🔐 **Autenticación completa** con Firebase Authentication (Login/Registro)
+- 🛒 **Catálogo dinámico** de productos deportivos y coleccionables
+- 🎨 **Diseño responsivo** con CSS moderno y variables personalizadas
+- 🎬 **Videos hover** en elementos promocionales
+- 🎠 **Carrusel automático** con controles manuales
+- 👤 **Gestión de sesión** con persistencia de usuario
+- 📱 **Compatible** con dispositivos móviles y tablets
+- 🗄️ **Base de datos** Firebase Realtime Database para usuarios
+
+---
+
+## 🚀 Inicio Rápido
+
+### Prerrequisitos
+
+- Navegador web moderno (Chrome, Firefox, Edge, Safari)
+- Conexión a internet (para cargar Firebase SDK)
+- Cuenta de Firebase (si deseas configurar tu propia instancia)
+
+### Instalación
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/tu-usuario/carbassdeportes.git
+   cd carbassdeportes
+   ```
+
+2. **Abrir el proyecto**
+   - Opción 1: Abrir `index.html` directamente en el navegador
+   - Opción 2: Usar Live Server en VS Code
+   - Opción 3: Usar un servidor local simple:
+     ```bash
+     # Python 3
+     python -m http.server 8000
+     # Luego visitar http://localhost:8000
+     ```
+
+3. **Configurar Firebase (Opcional)**
+   - Si deseas usar tu propia instancia de Firebase, edita [firebase-config.js](firebase-config.js) con tus credenciales
+
+### Uso
+
+- **Página Principal**: Abre [index.html](index.html) para ver la página principal con productos destacados
+- **Catálogo Completo**: Navega a [catalogo.html](catalogo.html) para ver todos los productos
+- **Iniciar Sesión**: Haz clic en "Iniciar Sesión" en la navbar para acceder a [login.html](login.html)
+- **Registrarse**: En la página de login, haz clic en "Regístrate aquí" para crear una cuenta nueva
+- **Agregar al Carrito**: Debes estar autenticado para poder agregar productos al carrito
+
 ---
 
 ## 🏗️ Estructura del Proyecto
@@ -14,21 +64,108 @@ carbassdeportes/
 ├── catalogo.html           # Catálogo completo de productos
 ├── login.html              # Página de autenticación
 ├── script.js               # Lógica JavaScript principal
-├── auth.js                 # Lógica de autenticación
-├── auth-check.js           # Verificación de sesión
+├── auth.js                 # Lógica de autenticación Firebase
+├── auth-check.js           # Verificación de sesión activa
 ├── firebase-config.js      # Configuración de Firebase
-├── styles.css              # Estilos principales
-├── db.json                 # Datos de productos (para importar)
-├── README.md               # Este archivo
+├── styles.css              # Estilos principales CSS
+├── db.json                 # Datos de productos (para importar a Firebase)
+├── README.md               # Documentación del proyecto
 └── sours/
     ├── img/
-    │   ├── articulos/      # Imágenes de productos
-    │   ├── aside/          # Imágenes del aside
-    │   ├── carrousel/      # Imágenes del carrusel
+    │   ├── articulos/      # Imágenes de productos (futuras)
+    │   ├── aside/          # Imágenes del sidebar promocional
+    │   ├── carrousel/      # Imágenes del carrusel principal
     │   ├── coleccionables/ # Imágenes de items coleccionables
-    │   └── logos/          # Logo de la marca
-    └── videos/             # Videos promocionales
+    │   └── logos/          # Logo de la marca CarbassDeportes
+    ├── promts/             # Prompts y documentación adicional
+    └── videos/             # Videos promocionales para hover
 ```
+
+### Descripción de Archivos Clave
+
+| Archivo | Descripción |
+|---------|-------------|
+| `index.html` | Página principal con productos destacados, carrusel y promociones |
+| `catalogo.html` | Catálogo completo organizado por categorías (Fútbol, Running, Fitness, etc.) |
+| `login.html` | Formulario de login/registro con Firebase Authentication |
+| `script.js` | Lógica principal: carrusel, videos hover, carga de productos, filtros |
+| `auth.js` | Manejo de login/registro, validación y guardado en Firebase Database |
+| `auth-check.js` | Verificación de sesión al cargar páginas, actualiza UI según usuario |
+| `firebase-config.js` | Credenciales y configuración de Firebase |
+| `styles.css` | Estilos completos con variables CSS, Grid y Flexbox |
+| `db.json` | Base de datos de productos en formato JSON para importar |
+
+---
+
+## 🔥 Configuración de Firebase
+
+### Estructura de la Base de Datos
+
+El proyecto utiliza Firebase Realtime Database con la siguiente estructura:
+
+```json
+{
+  "articulos": {
+    "0": {
+      "nombre": "Zapatillas Deportivas Premium",
+      "imagen": "sours/img/articulos/zapatillas-deportivas-premium.jpg",
+      "descripción": "Zapatillas diseñadas para ofrecer el máximo rendimiento y comodidad.",
+      "precio": 120.0,
+      "categoria": "gym",
+      "estatus": "destacado"
+    },
+    "1": { ... }
+  },
+  "usuarios": {
+    "uid-generado-por-firebase": {
+      "nombre": "Juan Pérez",
+      "email": "juan@example.com",
+      "fechaRegistro": "2025-12-22T10:30:00Z"
+    }
+  }
+}
+```
+
+### Categorías de Productos
+
+- `futbol` - Artículos de fútbol
+- `basket` - Artículos de baloncesto
+- `gym` - Equipamiento de gimnasio y running
+- `coleccionables` - Items de colección y ediciones limitadas
+
+### Estados de Productos
+
+- `destacado` - Productos destacados en la página principal
+- `oferta` - Productos con descuento especial
+- `recien agregado` - Productos nuevos en el catálogo
+
+### Reglas de Seguridad Recomendadas
+
+```json
+{
+  "rules": {
+    "articulos": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "usuarios": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    }
+  }
+}
+```
+
+### Importar Datos
+
+Para importar los productos a Firebase:
+
+1. Ve a Firebase Console > Realtime Database
+2. Haz clic en los tres puntos ⋮ > Importar JSON
+3. Selecciona el archivo [db.json](db.json)
+4. Confirma la importación
 
 ---
 
@@ -1307,20 +1444,108 @@ body{font-family:Inter, Arial, Helvetica, sans-serif;background:var(--gris);colo
 
 ### Tecnologías Utilizadas
 
-- **Frontend:** HTML5, CSS3, JavaScript ES6+
-- **Backend:** Firebase (Authentication + Realtime Database)
-- **Librerías:** Firebase Web SDK 8.10.1
-- **Patrones:** IIFE, Async/Await, Event Delegation
-- **Diseño:** CSS Grid, Flexbox, Variables CSS
-- **Control de Versiones:** Git (GitHub)
+| Categoría | Tecnología | Versión | Uso |
+|-----------|-----------|---------|-----|
+| **Frontend** | HTML5 | - | Estructura semántica |
+| | CSS3 | - | Diseño y estilos responsivos |
+| | JavaScript | ES6+ | Lógica de interacción |
+| **Backend/BaaS** | Firebase Authentication | 8.10.1 | Sistema de login/registro |
+| | Firebase Realtime Database | 8.10.1 | Almacenamiento de usuarios y productos |
+| **Diseño** | CSS Grid | - | Layout de productos |
+| | Flexbox | - | Navegación y componentes |
+| | CSS Variables | - | Tema de colores consistente |
+| **Patrones JS** | IIFE | - | Encapsulamiento de lógica |
+| | Event Delegation | - | Optimización de eventos |
+| | Async/Await | - | Operaciones asíncronas |
+| **Multimedia** | HTML5 Video | - | Videos hover promocionales |
+| | SVG | - | Iconos de categorías personalizados |
 
-### Notas Técnicas
+### Dependencias Externas
+
+```html
+<!-- Firebase SDK v8.10.1 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+```
+
+> **Nota**: No se requiere `npm install`. Todas las dependencias se cargan vía CDN.
+
+---
+
+## ⚡ Funcionalidades Principales
+
+### 🔐 Sistema de Autenticación
+
+- **Login y Registro**: Formulario dual que alterna entre login y registro
+- **Validación**: Email válido y contraseña mínimo 6 caracteres
+- **Persistencia**: Sesión mantenida entre páginas
+- **Protección**: Botón "Agregar al carrito" solo para usuarios autenticados
+- **Feedback**: Mensajes de error en español
+- **Perfil**: Nombre de usuario visible en navbar al autenticarse
+
+### 🛍️ Catálogo de Productos
+
+- **Carga Dinámica**: Productos cargados desde Firebase Realtime Database
+- **Filtrado Múltiple**: Por categoría (Fútbol, Basket, Gym, Coleccionables)
+- **Filtrado por Estado**: Destacados, Ofertas, Recién Agregados
+- **Página Principal**: Muestra máximo 3 productos por sección
+- **Catálogo Completo**: [catalogo.html](catalogo.html) muestra todos los productos por categoría
+- **Placeholders**: Imágenes de ejemplo con Placehold.co mientras se agregan reales
+
+### 🎨 Interfaz de Usuario
+
+- **Navbar Sticky**: Navegación siempre visible
+- **Responsive Design**: Adaptable a móviles, tablets y desktop
+- **Carrusel Automático**: Auto-play con controles manuales
+- **Videos Hover**: Reproducción al pasar el mouse
+- **Iconos SVG**: Categorías representadas con iconos personalizados
+- **Paleta Visual**: Muestra de colores corporativos en presentación
+- **Badges**: Etiquetas visuales para productos (Top, Nuevo, Oferta)
+
+### 💡 Interactividad JavaScript
+
+- **IIFE Pattern**: Código modular y encapsulado
+- **Event Delegation**: Optimización de eventos en productos dinámicos
+- **Imagen Aleatoria**: Coleccionable aleatorio en el aside
+- **Temporizador**: Auto-reset del carrusel tras interacción manual
+- **Confirmaciones**: Modales nativas para acciones críticas
+- **Feedback Visual**: Botones cambian a "Añadido ✓" temporalmente
+
+---
+
+## 📝 Notas Técnicas
+
+### Orden de Carga de Scripts
+
+Es crucial mantener este orden en todos los archivos HTML:
+
+```html
+<!-- 1. Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<!-- 2. Configuración de Firebase -->
+<script src="firebase-config.js"></script>
+
+<!-- 3. Verificación de autenticación (excepto en login.html) -->
+<script src="auth-check.js"></script>
+
+<!-- 4. Script principal -->
+<script src="script.js"></script> <!-- Solo en index.html y catalogo.html -->
+<script src="auth.js"></script>    <!-- Solo en login.html -->
+```
+
+### Consideraciones Importantes
 
 - **Firebase SDK v8:** Se usa sintaxis de callbacks (no modular) para mayor compatibilidad
 - **Realtime Database:** Preferido sobre Firestore por simplicidad en este proyecto
 - **Auth Check:** `auth-check.js` debe cargarse después de Firebase pero antes de `script.js`
 - **Reglas de Seguridad:** Lectura pública en artículos, escritura solo autenticados
 - **Toggle Function:** Usa función nombrada para evitar problemas con `arguments.callee`
+- **Event Delegation:** Los eventos de botones se configuran después del renderizado
+- **Placeholders:** Imágenes temporales con Placehold.co mientras se agregan imágenes reales
 
 ---
 
@@ -1350,5 +1575,94 @@ body{font-family:Inter, Arial, Helvetica, sans-serif;background:var(--gris);colo
 
 **Causa:** Múltiples llamadas a `renderArticlesToContainer`  
 **Solución:** Verificar que `setupAddButtons()` use `dataset.listener` para evitar duplicados
+
+### El carrusel no avanza automáticamente
+
+**Causa:** Error en la función de timer o falta el elemento `#slides`  
+**Solución:** Verificar que el elemento existe antes de inicializar el carrusel
+
+### Videos no se reproducen en móviles
+
+**Causa:** Algunos navegadores móviles requieren interacción del usuario  
+**Solución:** Considerar usar imágenes animadas (GIF) como alternativa para móviles
+
+---
+
+## 🚧 Roadmap y Mejoras Futuras
+
+### En Desarrollo
+
+- [ ] Carrito de compras funcional con almacenamiento local
+- [ ] Página de perfil de usuario
+- [ ] Sistema de favoritos
+- [ ] Búsqueda de productos por nombre
+- [ ] Paginación en catálogo completo
+
+### Próximas Versiones
+
+**v1.3 - Carrito Completo** (Planificado)
+- Carrito persistente en localStorage
+- Vista detallada del carrito
+- Cálculo de totales
+- Botón de checkout
+
+**v1.4 - Mejoras de UX** (Planificado)
+- Animaciones CSS en transiciones
+- Skeleton loaders mientras cargan productos
+- Toast notifications personalizadas
+- Modo oscuro
+
+**v1.5 - E-commerce Completo** (Futuro)
+- Integración con pasarela de pago
+- Historial de pedidos
+- Panel de administración
+- Gestión de inventario
+
+### Características Deseables
+
+- 📊 Analytics de productos más vistos
+- ⭐ Sistema de valoraciones y reseñas
+- 🔍 Filtros avanzados (precio, popularidad, etc.)
+- 📧 Notificaciones por email
+- 🌐 Internacionalización (i18n)
+- 📦 Seguimiento de pedidos
+- 💬 Chat de soporte
+
+---
+
+## 👨‍💻 Autor y Contribuciones
+
+**Proyecto:** CarbassDeportes  
+**Desarrollado para:** Prueba Web con ChatGPT  
+**Año:** 2025  
+**Tecnología:** Vanilla JavaScript + Firebase  
+
+### Contribuir
+
+Si deseas contribuir al proyecto:
+
+1. Fork el repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add: amazing feature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+---
+
+## 📄 Licencia
+
+Este proyecto es de código abierto y está disponible para fines educativos.
+
+---
+
+## 🙏 Agradecimientos
+
+- Firebase por proporcionar servicios BaaS gratuitos
+- Placehold.co por imágenes placeholder
+- Comunidad de desarrolladores web
+
+---
+
+**Última actualización:** 22 de diciembre de 2025
 
 ---
