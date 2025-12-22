@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Panel de Administración — CarbassDeportes</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site">
+    <header class="navbar">
+      <div class="brand">
+        <img class="logo-svg" src="sours/img/logos/logo_carbass.png" alt="CarbassDeportes Logo" />
+        <h1>CarbassDeportes</h1>
+      </div>
+
+      <nav>
+        <ul class="navlinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="admin.html" class="active">Admin</a></li>
+        </ul>
+      </nav>
+
+      <div class="user-section">
+        <span id="user-name" class="user-name"></span>
+        <button onclick="logout()" class="btn-logout hidden" id="logout-btn">Cerrar sesión</button>
+        <a href="login.html" class="btn-login hidden" id="login-btn">Iniciar Sesión</a>
+        <a href="#" class="carrito">🛒</a>
+      </div>
+    </header>
+
+    <main class="layout layout-single-column">
+      <div id="access-denied" class="access-denied hidden">
+        <h2>⛔ Acceso Denegado</h2>
+        <p>No tienes permisos de administrador para acceder a esta página.</p>
+        <a href="index.html" class="btn-login">Volver al inicio</a>
+      </div>
+
+      <section id="admin-panel" class="admin-panel hidden">
+        <div class="admin-header">
+          <h2>🛠️ Panel de Administración</h2>
+          <p>Gestiona productos, usuarios y configuraciones de la tienda</p>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="admin-stats">
+          <div class="stat-card">
+            <div class="stat-number" id="total-productos">0</div>
+            <div class="stat-label">Productos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="total-usuarios">0</div>
+            <div class="stat-label">Usuarios</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="total-categorias">4</div>
+            <div class="stat-label">Categorías</div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+          <button class="tab-btn active" onclick="switchTab('productos')">📦 Productos</button>
+          <button class="tab-btn" onclick="switchTab('usuarios')">👥 Usuarios</button>
+        </div>
+
+        <!-- Tab: Productos -->
+        <div id="tab-productos" class="tab-content active">
+          <div class="admin-actions">
+            <button class="btn-add" onclick="showAddProductModal()">➕ Agregar Producto</button>
+          </div>
+
+          <div class="products-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Imagen</th>
+                  <th>Nombre</th>
+                  <th>Categoría</th>
+                  <th>Precio</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="products-table-body">
+                <tr>
+                  <td colspan="6" style="text-align: center;">Cargando productos...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Usuarios -->
+        <div id="tab-usuarios" class="tab-content">
+          <div class="users-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Rol</th>
+                  <th>Fecha Registro</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr>
+                  <td colspan="5" style="text-align: center;">Cargando usuarios...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 CarbassDeportes. Todos los derechos reservados.</p>
+    </footer>
+  </div>
+
+  <!-- Modal: Agregar/Editar Producto -->
+  <div id="product-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Agregar Producto</h3>
+        <button class="modal-close" onclick="closeProductModal()">✕</button>
+      </div>
+      <form id="product-form" class="modal-form">
+        <input type="hidden" id="product-id" />
+        
+        <div class="form-group">
+          <label for="product-nombre">Nombre del Producto *</label>
+          <input type="text" id="product-nombre" required />
+        </div>
+
+        <div class="form-group">
+          <label for="product-imagen">URL de Imagen *</label>
+          <input type="text" id="product-imagen" placeholder="https://placehold.co/600x400?text=Producto" required />
+        </div>
+
+        <div class="form-group">
+          <label for="product-descripcion">Descripción *</label>
+          <textarea id="product-descripcion" rows="3" required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="product-precio">Precio *</label>
+            <input type="number" id="product-precio" step="0.01" min="0" required />
+          </div>
+
+          <div class="form-group">
+            <label for="product-categoria">Categoría *</label>
+            <select id="product-categoria" required>
+              <option value="">Seleccionar...</option>
+              <option value="futbol">Fútbol</option>
+              <option value="basket">Basket</option>
+              <option value="gym">Gym/Running</option>
+              <option value="coleccionables">Coleccionables</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="product-estatus">Estado *</label>
+            <select id="product-estatus" required>
+              <option value="">Seleccionar...</option>
+              <option value="destacado">Destacado</option>
+              <option value="oferta">Oferta</option>
+              <option value="recien agregado">Recién Agregado</option>
+              <option value="normal">Normal</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeProductModal()">Cancelar</button>
+          <button type="submit" class="btn-save" id="btn-save-product">Guardar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  
+  <!-- Scripts -->
+  <script src="firebase-config.js"></script>
+  <script src="auth-check.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

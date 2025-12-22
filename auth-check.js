@@ -35,25 +35,89 @@ firebase.auth().onAuthStateChanged((user) => {
   const userNameElement = document.getElementById('user-name');
   const logoutBtn = document.getElementById('logout-btn');
   const loginBtn = document.getElementById('login-btn');
+  const adminLink = document.getElementById('admin-link');
   
   if (user) {
-    // Usuario autenticado: mostrar nombre y botón de logout
-    if (userNameElement) {
-      userNameElement.textContent = user.displayName || user.email;
-      userNameElement.style.display = 'inline';
-    }
-    if (logoutBtn) {
-      logoutBtn.classList.remove('hidden');
-      logoutBtn.style.display = 'inline-block';
-    }
-    if (loginBtn) {
-      loginBtn.classList.add('hidden');
-      loginBtn.style.display = 'none';
-    }
+    // Cargar datos del usuario desde la base de datos
+    database.ref('usuarios/' + user.uid).once('value')
+      .then((snapshot) => {
+        const userData = snapshot.val();
+        const userRole = userData?.rol || 'comprador';
+        
+        // Guardar el rol en sessionStorage para acceso rápido
+        sessionStorage.setItem('userRole', userRole);
+        
+        // Si no hay datos en la BD, crearlos ahora
+        if (!userData) {
+          database.ref('usuarios/' + user.uid).set({
+            nombre: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            rol: 'comprador',
+            fechaRegistro: new Date().toISOString()
+          }).catch(err => console.error('Error creando usuario en BD:', err));
+        }
+        
+        // Usuario autenticado: mostrar nombre y botón de logout
+        if (userNameElement) {
+          let displayName = user.displayName || user.email;
+          
+          // Agregar badge de ADMIN si corresponde
+          if (userRole === 'administrador') {
+            displayName = `${displayName} <span class="admin-badge">ADMIN</span>`;
+          }
+          
+          userNameElement.innerHTML = displayName;
+          userNameElement.style.display = 'inline';
+        }
+        
+        if (logoutBtn) {
+          logoutBtn.classList.remove('hidden');
+          logoutBtn.style.display = 'inline-block';
+        }
+        if (loginBtn) {
+          loginBtn.classList.add('hidden');
+          loginBtn.style.display = 'none';
+        }
+        
+        // Mostrar enlace al panel de admin solo para administradores
+        if (adminLink) {
+          if (userRole === 'administrador') {
+            adminLink.classList.remove('hidden');
+            adminLink.style.display = 'inline-block';
+          } else {
+            adminLink.classList.add('hidden');
+            adminLink.style.display = 'none';
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('Error al cargar datos del usuario:', error);
+        
+        // Aún así mostrar la interfaz básica
+        if (userNameElement) {
+          userNameElement.textContent = user.displayName || user.email;
+          userNameElement.style.display = 'inline';
+        }
+        if (logoutBtn) {
+          logoutBtn.classList.remove('hidden');
+          logoutBtn.style.display = 'inline-block';
+        }
+        if (loginBtn) {
+          loginBtn.classList.add('hidden');
+          loginBtn.style.display = 'none';
+        }
+        if (adminLink) {
+          adminLink.classList.add('hidden');
+          adminLink.style.display = 'none';
+        }
+      });
     
     // Iniciar el temporizador de sesión
     resetSessionTimer();
   } else {
+    // Limpiar sessionStorage
+    sessionStorage.removeItem('userRole');
+    
     // Usuario NO autenticado: mostrar botón de login
     if (userNameElement) {
       userNameElement.style.display = 'none';
@@ -66,6 +130,10 @@ firebase.auth().onAuthStateChanged((user) => {
     if (loginBtn) {
       loginBtn.classList.remove('hidden');
       loginBtn.style.display = 'inline-block';
+    }
+    if (adminLink) {
+      adminLink.classList.add('hidden');
+      adminLink.style.display = 'none';
     }
     
     // Limpiar el temporizador si existe

@@ -75,6 +75,7 @@ if (authForm) {
         await database.ref('usuarios/' + user.uid).set({
           nombre: name,
           email: email,
+          rol: 'comprador', // Por defecto todos los nuevos usuarios son compradores
           fechaRegistro: new Date().toISOString()
         });
       }
