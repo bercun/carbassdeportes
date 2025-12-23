@@ -1,6 +1,6 @@
 // admin.js - Lógica del panel de administración
 
-const db = firebase.database();
+const db = firebase.firestore();
 let currentEditingProductId = null;
 
 // Verificar permisos de administrador al cargar la página
@@ -11,9 +11,9 @@ firebase.auth().onAuthStateChanged((user) => {
     return;
   }
 
-  // Verificar rol del usuario
-  db.ref('usuarios/' + user.uid).once('value', (snapshot) => {
-    const userData = snapshot.val();
+  // Verificar rol del usuario en Firestore
+  db.collection('usuarios').doc(user.uid).get().then((doc) => {
+    const userData = doc.data();
     const userRole = userData?.rol || 'comprador';
 
     if (userRole !== 'administrador') {
@@ -30,38 +30,43 @@ firebase.auth().onAuthStateChanged((user) => {
       loadUsers();
       loadStats();
     }
+  }).catch((error) => {
+    console.error("Error al verificar rol:", error);
+    window.location.href = 'index.html';
   });
 });
 
 // Cargar estadísticas
 function loadStats() {
   // Contar productos
-  db.ref('articulos').once('value', (snapshot) => {
-    const count = snapshot.numChildren();
+  db.collection('articulos').get().then((snapshot) => {
+    const count = snapshot.size;
     document.getElementById('total-productos').textContent = count;
-  });
+  }).catch(err => console.error("Error al contar productos:", err));
 
   // Contar usuarios
-  db.ref('usuarios').once('value', (snapshot) => {
-    const count = snapshot.numChildren();
+  db.collection('usuarios').get().then((snapshot) => {
+    const count = snapshot.size;
     document.getElementById('total-usuarios').textContent = count;
+  }).catch(err => {
+    console.error("Error al contar usuarios:", err);
+    document.getElementById('total-usuarios').textContent = "Error";
   });
 }
 
 // Cargar productos
 function loadProducts() {
-  db.ref('articulos').on('value', (snapshot) => {
-    const productos = snapshot.val();
+  db.collection('articulos').onSnapshot((snapshot) => {
     const tbody = document.getElementById('products-table-body');
     
-    if (!productos) {
+    if (snapshot.empty) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay productos registrados</td></tr>';
       return;
     }
 
-    const productosArray = Object.entries(productos).map(([id, data]) => ({
-      id,
-      ...data
+    const productosArray = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
     }));
 
     tbody.innerHTML = productosArray.map(product => `
@@ -82,18 +87,17 @@ function loadProducts() {
 
 // Cargar usuarios
 function loadUsers() {
-  db.ref('usuarios').on('value', (snapshot) => {
-    const usuarios = snapshot.val();
+  db.collection('usuarios').onSnapshot((snapshot) => {
     const tbody = document.getElementById('users-table-body');
     
-    if (!usuarios) {
+    if (snapshot.empty) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay usuarios registrados</td></tr>';
       return;
     }
 
-    const usuariosArray = Object.entries(usuarios).map(([uid, data]) => ({
-      uid,
-      ...data
+    const usuariosArray = snapshot.docs.map(doc => ({
+      uid: doc.id,
+      ...doc.data()
     }));
 
     tbody.innerHTML = usuariosArray.map(user => `
@@ -112,6 +116,12 @@ function loadUsers() {
         </td>
       </tr>
     `).join('');
+  }, (error) => {
+    console.error("Error al cargar usuarios:", error);
+    const tbody = document.getElementById('users-table-body');
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Error de permisos: No puedes ver la lista de usuarios.</td></tr>`;
+    }
   });
 }
 
@@ -144,8 +154,8 @@ function closeProductModal() {
 
 // Editar producto
 function editProduct(productId) {
-  db.ref('articulos/' + productId).once('value', (snapshot) => {
-    const product = snapshot.val();
+  db.collection('articulos').doc(productId).get().then((doc) => {
+    const product = doc.data();
     if (!product) return;
 
     currentEditingProductId = productId;
@@ -168,7 +178,7 @@ function deleteProduct(productId, productName) {
     return;
   }
 
-  db.ref('articulos/' + productId).remove()
+  db.collection('articulos').doc(productId).delete()
     .then(() => {
       alert('Producto eliminado exitosamente');
     })
@@ -192,17 +202,18 @@ document.getElementById('product-form')?.addEventListener('submit', async (e) =>
     descripción: document.getElementById('product-descripcion').value,
     precio: parseFloat(document.getElementById('product-precio').value),
     categoria: document.getElementById('product-categoria').value,
-    estatus: document.getElementById('product-estatus').value
+    estatus: document.getElementById('product-estatus').value,
+    ultimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
   };
 
   try {
     if (currentEditingProductId) {
       // Actualizar producto existente
-      await db.ref('articulos/' + currentEditingProductId).update(productData);
+      await db.collection('articulos').doc(currentEditingProductId).update(productData);
       alert('Producto actualizado exitosamente');
     } else {
       // Crear nuevo producto
-      await db.ref('articulos').push(productData);
+      await db.collection('articulos').add(productData);
       alert('Producto agregado exitosamente');
     }
     
@@ -231,7 +242,7 @@ function changeUserRole(uid, newRole) {
     return;
   }
 
-  db.ref('usuarios/' + uid + '/rol').set(newRole)
+  db.collection('usuarios').doc(uid).update({ rol: newRole })
     .then(() => {
       alert('Rol actualizado exitosamente');
     })
@@ -248,7 +259,7 @@ function deleteUser(uid, userName) {
     return;
   }
 
-  db.ref('usuarios/' + uid).remove()
+  db.collection('usuarios').doc(uid).delete()
     .then(() => {
       alert('Datos del usuario eliminados exitosamente');
     })

@@ -71,8 +71,8 @@ if (authForm) {
         // Actualizar perfil con nombre
         await user.updateProfile({ displayName: name });
         
-        // Guardar datos adicionales en la base de datos
-        await database.ref('usuarios/' + user.uid).set({
+        // Guardar datos adicionales en Firestore
+        await firestore.collection('usuarios').doc(user.uid).set({
           nombre: name,
           email: email,
           rol: 'comprador', // Por defecto todos los nuevos usuarios son compradores

@@ -38,10 +38,10 @@ firebase.auth().onAuthStateChanged((user) => {
   const adminLink = document.getElementById('admin-link');
   
   if (user) {
-    // Cargar datos del usuario desde la base de datos
-    database.ref('usuarios/' + user.uid).once('value')
-      .then((snapshot) => {
-        const userData = snapshot.val();
+    // Cargar datos del usuario desde Firestore
+    firestore.collection('usuarios').doc(user.uid).get()
+      .then((doc) => {
+        const userData = doc.data();
         const userRole = userData?.rol || 'comprador';
         
         // Guardar el rol en sessionStorage para acceso rápido
@@ -49,12 +49,12 @@ firebase.auth().onAuthStateChanged((user) => {
         
         // Si no hay datos en la BD, crearlos ahora
         if (!userData) {
-          database.ref('usuarios/' + user.uid).set({
+          firestore.collection('usuarios').doc(user.uid).set({
             nombre: user.displayName || user.email.split('@')[0],
             email: user.email,
             rol: 'comprador',
             fechaRegistro: new Date().toISOString()
-          }).catch(err => console.error('Error creando usuario en BD:', err));
+          }).catch(err => console.error('Error creando usuario en Firestore:', err));
         }
         
         // Usuario autenticado: mostrar nombre y botón de logout

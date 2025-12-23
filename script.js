@@ -103,12 +103,13 @@ function setupAddButtons() {
 }
 
 // Firebase ya está inicializado en firebase-config.js
-const db = firebase.database();
+const db = firebase.firestore();
 
 
 
 // Función auxiliar para crear el HTML de una tarjeta de artículo
 function createArticleCardHtml(article, isSmallGrid = false) {
+  const precio = typeof article.precio === 'number' ? article.precio : parseFloat(article.precio) || 0;
   if (isSmallGrid) {
     return `
       <div class="card">
@@ -117,7 +118,7 @@ function createArticleCardHtml(article, isSmallGrid = false) {
         </div>
         <h4>${article.nombre}</h4>
         <p class="meta" style="margin-top:5px;">
-          <span class="price" style="font-size:0.9em">$${article.precio.toFixed(2)}</span>
+          <span class="price" style="font-size:0.9em">$${precio.toFixed(2)}</span>
           ${article.estatus ? `<span class="badge" style="font-size:0.7em; padding:4px;">${article.estatus}</span>` : ''}
         </p>
       </div>
@@ -130,7 +131,7 @@ function createArticleCardHtml(article, isSmallGrid = false) {
         </div>
         <h4>${article.nombre}</h4>
         <p class="meta">
-          <span class="price">$${article.precio.toFixed(2)}</span>
+          <span class="price">$${precio.toFixed(2)}</span>
           ${article.estatus ? `<span class="badge">${article.estatus}</span>` : ''}
         </p>
         <p>${article.descripción || ''}</p>
@@ -160,12 +161,14 @@ function renderArticlesToContainer(containerElement, articlesArray, isSmallGrid 
   setupAddButtons(); // Re-asociar eventos a los nuevos botones
 }
 
-// Cargar artículos desde Firebase Realtime Database y distribuirlos por secciones
-db.ref('articulos').on('value', (snapshot) => {
-  const articlesData = snapshot.val();
-  const allArticles = Object.values(articlesData || {});
+// Cargar artículos desde Firebase Firestore y distribuirlos por secciones
+db.collection('articulos').onSnapshot((snapshot) => {
+  const allArticles = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
 
-  console.log('Artículos cargados:', allArticles.length); // Debug
+  console.log('Artículos cargados desde Firestore:', allArticles.length); // Debug
 
   // Obtener referencias a los contenedores
   const destacadosContainer = document.getElementById('destacados-container');
