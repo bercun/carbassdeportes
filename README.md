@@ -7,13 +7,17 @@
 ### ✨ Características Principales
 
 - 🔐 **Autenticación completa** con Firebase Authentication (Login/Registro)
+- � **Sistema de roles** - Administradores y Compradores con permisos diferenciados
+- 🛡️ **Panel de administración** - Gestión completa de productos y usuarios
 - 🛒 **Catálogo dinámico** de productos deportivos y coleccionables
 - 🎨 **Diseño responsivo** con CSS moderno y variables personalizadas
 - 🎬 **Videos hover** en elementos promocionales
 - 🎠 **Carrusel automático** con controles manuales
-- 👤 **Gestión de sesión** con persistencia de usuario
+- 👤 **Gestión de sesión** con persistencia de usuario y timeout automático (15 min)
 - 📱 **Compatible** con dispositivos móviles y tablets
-- 🗄️ **Base de datos** Firebase Realtime Database para usuarios
+- 🗄️ **Base de datos** Firebase Realtime Database para usuarios y productos
+- ✅ **Auto-creación de usuarios** en Database al iniciar sesión
+- 🎯 **Badge visual** para identificar administradores
 
 ---
 
@@ -65,8 +69,13 @@ carbassdeportes/
 ├── login.html              # Página de autenticación
 ├── script.js               # Lógica JavaScript principal
 ├── auth.js                 # Lógica de autenticación Firebase
-├── auth-check.js           # Verificación de sesión activa
+├── auth-check.js           # Verificación de sesión activa y roles
 ├── firebase-config.js      # Configuración de Firebase
+├── admin.html              # Panel de administración
+├── admin.js                # Lógica del panel administrativo
+├── test-db.html            # Herramienta de diagnóstico Firebase
+├── CONFIGURACION_ADMIN.md  # Guía de configuración de administradores
+├── firebase-rules.json     # Reglas de seguridad Firebase
 ├── styles.css              # Estilos principales CSS
 ├── db.json                 # Datos de productos (para importar a Firebase)
 ├── README.md               # Documentación del proyecto
@@ -88,12 +97,16 @@ carbassdeportes/
 | `index.html` | Página principal con productos destacados, carrusel y promociones |
 | `catalogo.html` | Catálogo completo organizado por categorías (Fútbol, Running, Fitness, etc.) |
 | `login.html` | Formulario de login/registro con Firebase Authentication |
+| `admin.html` | Panel de administración para gestionar productos y usuarios (solo administradores) |
 | `script.js` | Lógica principal: carrusel, videos hover, carga de productos, filtros |
-| `auth.js` | Manejo de login/registro, validación y guardado en Firebase Database |
-| `auth-check.js` | Verificación de sesión al cargar páginas, actualiza UI según usuario |
-| `firebase-config.js` | Credenciales y configuración de Firebase |
-| `styles.css` | Estilos completos con variables CSS, Grid y Flexbox |
+| `auth.js` | Manejo de login/registro, validación y guardado en Firebase Database con rol 'comprador' |
+| `auth-check.js` | Verificación de sesión, gestión de roles, timeout automático, UI dinámica según rol |
+| `admin.js` | CRUD completo de productos y gestión de roles de usuarios |
+| `firebase-config.js` | Credenciales y configuración de Firebase (Auth y Database) |
+| `test-db.html` | Herramienta de diagnóstico para verificar conexión y migrar usuarios |
+| `styles.css` | Estilos completos con variables CSS, Grid, Flexbox y estilos del panel admin |
 | `db.json` | Base de datos de productos en formato JSON para importar |
+| `CONFIGURACION_ADMIN.md` | Guía paso a paso para crear el primer usuario administrador |
 
 ---
 
@@ -120,11 +133,33 @@ El proyecto utiliza Firebase Realtime Database con la siguiente estructura:
     "uid-generado-por-firebase": {
       "nombre": "Juan Pérez",
       "email": "juan@example.com",
+      "rol": "comprador",
       "fechaRegistro": "2025-12-22T10:30:00Z"
+    },
+    "otro-uid": {
+      "nombre": "Admin User",
+      "email": "admin@example.com",
+      "rol": "administrador",
+      "fechaRegistro": "2025-12-22T11:00:00Z"
     }
   }
 }
 ```
+
+### Roles de Usuario
+
+El sistema implementa dos niveles de acceso:
+
+- **`comprador`** - Usuario estándar que puede navegar y comprar productos
+  - Se asigna automáticamente al registrarse
+  - Acceso limitado a funciones de navegación y compra
+  
+- **`administrador`** - Usuario con privilegios completos
+  - Acceso al panel de administración ([admin.html](admin.html))
+  - Puede gestionar productos (crear, editar, eliminar)
+  - Puede cambiar roles de otros usuarios
+  - Visualiza badge verde "ADMIN" en la barra de navegación
+  - Tiene acceso al enlace verde "🛠️ Admin" en el navbar
 
 ### Categorías de Productos
 
@@ -144,14 +179,25 @@ El proyecto utiliza Firebase Realtime Database con la siguiente estructura:
 ```json
 {
   "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null"
+  }
+}
+```
+
+**Nota**: Las reglas actuales permiten lectura/escritura a cualquier usuario autenticado. Para producción, se recomienda implementar reglas más restrictivas basadas en roles:
+
+```json
+{
+  "rules": {
     "articulos": {
       ".read": true,
-      ".write": "auth != null"
+      ".write": "root.child('usuarios').child(auth.uid).child('rol').val() === 'administrador'"
     },
     "usuarios": {
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".write": "auth != null && (auth.uid == $uid || root.child('usuarios').child(auth.uid).child('rol').val() === 'administrador')"
       }
     }
   }
@@ -166,6 +212,19 @@ Para importar los productos a Firebase:
 2. Haz clic en los tres puntos ⋮ > Importar JSON
 3. Selecciona el archivo [db.json](db.json)
 4. Confirma la importación
+
+### Configuración del Primer Administrador
+
+Para crear el primer usuario administrador, consulta la guía completa en [CONFIGURACION_ADMIN.md](CONFIGURACION_ADMIN.md).
+
+**Pasos rápidos**:
+1. Crea un usuario desde [login.html](login.html)
+2. Copia el UID desde Firebase Console > Authentication
+3. Abre [test-db.html](test-db.html) en el navegador
+4. Inicia sesión con el usuario creado
+5. Haz clic en "Migrar Usuario Actual a Database"
+6. En Firebase Console > Realtime Database, cambia manualmente el campo `rol` de `"comprador"` a `"administrador"`
+7. Recarga la página y verás el badge "ADMIN" y el enlace al panel
 
 ---
 
@@ -1615,8 +1674,7 @@ Es crucial mantener este orden en todos los archivos HTML:
 **v1.5 - E-commerce Completo** (Futuro)
 - Integración con pasarela de pago
 - Historial de pedidos
-- Panel de administración
-- Gestión de inventario
+- Gestión de inventario avanzada
 
 ### Características Deseables
 
@@ -1627,6 +1685,61 @@ Es crucial mantener este orden en todos los archivos HTML:
 - 🌐 Internacionalización (i18n)
 - 📦 Seguimiento de pedidos
 - 💬 Chat de soporte
+
+---
+
+## 🎯 Próximos Pasos Recomendados
+
+Ahora que el sistema de roles está implementado, estos son los pasos sugeridos para continuar el desarrollo:
+
+### 1. **Migrar Usuarios Existentes** (Prioridad Alta)
+Actualmente hay 4 usuarios adicionales en Firebase Authentication que necesitan ser migrados a la base de datos:
+- Abre [test-db.html](test-db.html)
+- Inicia sesión con cada usuario
+- Haz clic en "Migrar Usuario Actual a Database"
+- Asigna roles según corresponda desde el panel de admin
+
+### 2. **Probar Funcionalidad del Panel Admin** (Prioridad Alta)
+- Accede a [admin.html](admin.html) con el usuario administrador
+- Prueba agregar, editar y eliminar productos
+- Verifica que los cambios se reflejen en [catalogo.html](catalogo.html) e [index.html](index.html)
+- Prueba cambiar roles de usuarios
+
+### 3. **Actualizar Reglas de Seguridad Firebase** (Prioridad Media)
+Las reglas actuales permiten lectura/escritura a cualquier usuario autenticado. Para producción:
+- Implementa las reglas basadas en roles sugeridas en este README
+- Protege la escritura en `articulos` solo para administradores
+- Permite a usuarios leer/editar solo sus propios datos
+
+### 4. **Agregar Imágenes Reales** (Prioridad Media)
+Actualmente se usan placeholders de Unsplash:
+- Sube imágenes de productos a `sours/img/articulos/`
+- Actualiza las URLs en Firebase Database
+- Optimiza imágenes para web (WebP, compresión)
+
+### 5. **Implementar Carrito de Compras** (Próximo Feature)
+- Crear estructura de carrito en localStorage
+- Botones "Agregar al Carrito" funcionales
+- Vista de carrito con totales
+- Persistencia entre sesiones
+
+### 6. **Sistema de Pedidos** (Próximo Feature)
+- Crear nodo `pedidos` en Firebase Database
+- Formulario de checkout
+- Guardar historial de compras por usuario
+- Vista de pedidos en perfil de usuario
+
+### 7. **Testing y Optimización** (Continuo)
+- Probar en diferentes navegadores
+- Optimizar tiempos de carga
+- Validar responsive design en móviles
+- Auditoría con Lighthouse
+
+### 8. **Deployment** (Futuro)
+- Configurar Firebase Hosting
+- Configurar dominio personalizado
+- SSL/HTTPS automático
+- CI/CD con GitHub Actions
 
 ---
 

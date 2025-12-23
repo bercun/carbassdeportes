@@ -1036,3 +1036,19 @@ footer{
 .hidden {
   display: none !important;
 }
+
+/* Estilos específicos para el navbar en la página de login */
+.login-container ~ .navbar nav,
+body:has(.login-container) .navbar nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+body:has(.login-container) .navlinks {
+  justify-content: center;
+}
+
+body:has(.login-container) .navlinks a {
+  font-size: 1.1rem;
+}

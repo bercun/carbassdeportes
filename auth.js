@@ -1,5 +1,5 @@
 const auth = firebase.auth();
-const database = firebase.database();
+// database ya está declarado en firebase-config.js
 
 // Variables del formulario
 const authForm = document.getElementById('auth-form');
