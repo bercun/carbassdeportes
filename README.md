@@ -2,7 +2,61 @@
 
 ## 📋 Descripción General
 
-**CarbassDeportes** es una tienda online especializada en artículos deportivos y coleccionables. Este proyecto web ofrece una experiencia de usuario moderna y responsiva, con funcionalidades interactivas como carruseles, videos hover, y gestión de productos.
+**CarbassDeportes** es una tienda online especializada en artículos deportivos y coleccionables. Este proyecto web ofrece una experiencia de usuario moderna y responsiva, con funcionalidades interactivas como carruseles, videos hover, gestión de productos y **sistema de autenticación completo con Firebase**.
+
+### ✨ Características Principales
+
+- 🔐 **Autenticación completa** con Firebase Authentication (Login/Registro)
+- � **Sistema de roles** - Administradores y Compradores con permisos diferenciados
+- 🛡️ **Panel de administración** - Gestión completa de productos y usuarios
+- 🛒 **Catálogo dinámico** de productos deportivos y coleccionables
+- 🎨 **Diseño responsivo** con CSS moderno y variables personalizadas
+- 🎬 **Videos hover** en elementos promocionales
+- 🎠 **Carrusel automático** con controles manuales
+- 👤 **Gestión de sesión** con persistencia de usuario y timeout automático (15 min)
+- 📱 **Compatible** con dispositivos móviles y tablets
+- 🗄️ **Base de datos** Firebase Realtime Database para usuarios y productos
+- ✅ **Auto-creación de usuarios** en Database al iniciar sesión
+- 🎯 **Badge visual** para identificar administradores
+
+---
+
+## 🚀 Inicio Rápido
+
+### Prerrequisitos
+
+- Navegador web moderno (Chrome, Firefox, Edge, Safari)
+- Conexión a internet (para cargar Firebase SDK)
+- Cuenta de Firebase (si deseas configurar tu propia instancia)
+
+### Instalación
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/tu-usuario/carbassdeportes.git
+   cd carbassdeportes
+   ```
+
+2. **Abrir el proyecto**
+   - Opción 1: Abrir `index.html` directamente en el navegador
+   - Opción 2: Usar Live Server en VS Code
+   - Opción 3: Usar un servidor local simple:
+     ```bash
+     # Python 3
+     python -m http.server 8000
+     # Luego visitar http://localhost:8000
+     ```
+
+3. **Configurar Firebase (Opcional)**
+   - Si deseas usar tu propia instancia de Firebase, edita [firebase-config.js](firebase-config.js) con tus credenciales
+
+### Uso
+
+- **Página Principal**: Abre [index.html](index.html) para ver la página principal con productos destacados
+- **Catálogo Completo**: Navega a [catalogo.html](catalogo.html) para ver todos los productos
+- **Iniciar Sesión**: Haz clic en "Iniciar Sesión" en la navbar para acceder a [login.html](login.html)
+- **Registrarse**: En la página de login, haz clic en "Regístrate aquí" para crear una cuenta nueva
+- **Agregar al Carrito**: Debes estar autenticado para poder agregar productos al carrito
 
 ---
 
@@ -10,20 +64,167 @@
 
 ```
 carbassdeportes/
-├── index.html              # Página principal
-├── script.js               # Lógica JavaScript
-├── styles.css              # Estilos principales
-├── carbassdeportes_.css    # Estilos alternativos
-├── README.md               # Este archivo
+├── index.html              # Página principal (vista pública)
+├── catalogo.html           # Catálogo completo de productos
+├── login.html              # Página de autenticación
+├── script.js               # Lógica JavaScript principal
+├── auth.js                 # Lógica de autenticación Firebase
+├── auth-check.js           # Verificación de sesión activa y roles
+├── firebase-config.js      # Configuración de Firebase
+├── admin.html              # Panel de administración
+├── admin.js                # Lógica del panel administrativo
+├── test-db.html            # Herramienta de diagnóstico Firebase
+├── CONFIGURACION_ADMIN.md  # Guía de configuración de administradores
+├── firebase-rules.json     # Reglas de seguridad Firebase
+├── styles.css              # Estilos principales CSS
+├── db.json                 # Datos de productos (para importar a Firebase)
+├── README.md               # Documentación del proyecto
 └── sours/
     ├── img/
-    │   ├── articulos/      # Imágenes de productos
-    │   ├── aside/          # Imágenes del aside
-    │   ├── carrousel/      # Imágenes del carrusel
-        │   ├── coleccionables/ # Imágenes de items coleccionables
-    │   └── logos/          # Logo de la marca
-    └── videos/             # Videos promocionales
+    │   ├── articulos/      # Imágenes de productos (futuras)
+    │   ├── aside/          # Imágenes del sidebar promocional
+    │   ├── carrousel/      # Imágenes del carrusel principal
+    │   ├── coleccionables/ # Imágenes de items coleccionables
+    │   └── logos/          # Logo de la marca CarbassDeportes
+    ├── promts/             # Prompts y documentación adicional
+    └── videos/             # Videos promocionales para hover
 ```
+
+### Descripción de Archivos Clave
+
+| Archivo | Descripción |
+|---------|-------------|
+| `index.html` | Página principal con productos destacados, carrusel y promociones |
+| `catalogo.html` | Catálogo completo organizado por categorías (Fútbol, Running, Fitness, etc.) |
+| `login.html` | Formulario de login/registro con Firebase Authentication |
+| `admin.html` | Panel de administración para gestionar productos y usuarios (solo administradores) |
+| `script.js` | Lógica principal: carrusel, videos hover, carga de productos, filtros |
+| `auth.js` | Manejo de login/registro, validación y guardado en Firebase Database con rol 'comprador' |
+| `auth-check.js` | Verificación de sesión, gestión de roles, timeout automático, UI dinámica según rol |
+| `admin.js` | CRUD completo de productos y gestión de roles de usuarios |
+| `firebase-config.js` | Credenciales y configuración de Firebase (Auth y Database) |
+| `test-db.html` | Herramienta de diagnóstico para verificar conexión y migrar usuarios |
+| `styles.css` | Estilos completos con variables CSS, Grid, Flexbox y estilos del panel admin |
+| `db.json` | Base de datos de productos en formato JSON para importar |
+| `CONFIGURACION_ADMIN.md` | Guía paso a paso para crear el primer usuario administrador |
+
+---
+
+## 🔥 Configuración de Firebase
+
+### Estructura de la Base de Datos
+
+El proyecto utiliza Firebase Realtime Database con la siguiente estructura:
+
+```json
+{
+  "articulos": {
+    "0": {
+      "nombre": "Zapatillas Deportivas Premium",
+      "imagen": "sours/img/articulos/zapatillas-deportivas-premium.jpg",
+      "descripción": "Zapatillas diseñadas para ofrecer el máximo rendimiento y comodidad.",
+      "precio": 120.0,
+      "categoria": "gym",
+      "estatus": "destacado"
+    },
+    "1": { ... }
+  },
+  "usuarios": {
+    "uid-generado-por-firebase": {
+      "nombre": "Juan Pérez",
+      "email": "juan@example.com",
+      "rol": "comprador",
+      "fechaRegistro": "2025-12-22T10:30:00Z"
+    },
+    "otro-uid": {
+      "nombre": "Admin User",
+      "email": "admin@example.com",
+      "rol": "administrador",
+      "fechaRegistro": "2025-12-22T11:00:00Z"
+    }
+  }
+}
+```
+
+### Roles de Usuario
+
+El sistema implementa dos niveles de acceso:
+
+- **`comprador`** - Usuario estándar que puede navegar y comprar productos
+  - Se asigna automáticamente al registrarse
+  - Acceso limitado a funciones de navegación y compra
+  
+- **`administrador`** - Usuario con privilegios completos
+  - Acceso al panel de administración ([admin.html](admin.html))
+  - Puede gestionar productos (crear, editar, eliminar)
+  - Puede cambiar roles de otros usuarios
+  - Visualiza badge verde "ADMIN" en la barra de navegación
+  - Tiene acceso al enlace verde "🛠️ Admin" en el navbar
+
+### Categorías de Productos
+
+- `futbol` - Artículos de fútbol
+- `basket` - Artículos de baloncesto
+- `gym` - Equipamiento de gimnasio y running
+- `coleccionables` - Items de colección y ediciones limitadas
+
+### Estados de Productos
+
+- `destacado` - Productos destacados en la página principal
+- `oferta` - Productos con descuento especial
+- `recien agregado` - Productos nuevos en el catálogo
+
+### Reglas de Seguridad Recomendadas
+
+```json
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null"
+  }
+}
+```
+
+**Nota**: Las reglas actuales permiten lectura/escritura a cualquier usuario autenticado. Para producción, se recomienda implementar reglas más restrictivas basadas en roles:
+
+```json
+{
+  "rules": {
+    "articulos": {
+      ".read": true,
+      ".write": "root.child('usuarios').child(auth.uid).child('rol').val() === 'administrador'"
+    },
+    "usuarios": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && (auth.uid == $uid || root.child('usuarios').child(auth.uid).child('rol').val() === 'administrador')"
+      }
+    }
+  }
+}
+```
+
+### Importar Datos
+
+Para importar los productos a Firebase:
+
+1. Ve a Firebase Console > Realtime Database
+2. Haz clic en los tres puntos ⋮ > Importar JSON
+3. Selecciona el archivo [db.json](db.json)
+4. Confirma la importación
+
+### Configuración del Primer Administrador
+
+Para crear el primer usuario administrador, consulta la guía completa en [CONFIGURACION_ADMIN.md](CONFIGURACION_ADMIN.md).
+
+**Pasos rápidos**:
+1. Crea un usuario desde [login.html](login.html)
+2. Copia el UID desde Firebase Console > Authentication
+3. Abre [test-db.html](test-db.html) en el navegador
+4. Inicia sesión con el usuario creado
+5. Haz clic en "Migrar Usuario Actual a Database"
+6. En Firebase Console > Realtime Database, cambia manualmente el campo `rol` de `"comprador"` a `"administrador"`
+7. Recarga la página y verás el badge "ADMIN" y el enlace al panel
 
 ---
 
@@ -31,16 +232,18 @@ carbassdeportes/
 
 El diseño utiliza una paleta de colores definida en variables CSS:
 
-| Color  | Código   | Uso                          |
-|--------|----------|------------------------------|
-| Verde  | `#1ecb63`| Elementos destacados, CTAs   |
-| Negro  | `#000000`| Navbar, footer, textos       |
-| Blanco | `#ffffff`| Fondos, contenedores         |
-| Gris   | `#e0e0e0`| Fondo general, separadores   |
+| Color         | Código   | Uso                          |
+|---------------|----------|------------------------------|
+| Verde         | `#1ecb63`| Elementos destacados, CTAs   |
+| Verde Oscuro  | `#17a352`| Hover en botones verdes      |
+| Negro         | `#000000`| Navbar, footer, textos       |
+| Blanco        | `#ffffff`| Fondos, contenedores         |
+| Gris          | `#e0e0e0`| Fondo general, separadores   |
 
 ```css
 :root {
   --verde: #1ecb63;
+  --verde-oscuro: #17a352;
   --negro: #000000;
   --blanco: #ffffff;
   --gris: #e0e0e0;
@@ -59,7 +262,7 @@ El diseño utiliza una paleta de colores definida en variables CSS:
 ```html
 <header class="navbar">
   <div class="brand">
-    <img class="logo-svg" src="sours/img/logos/logo_carbass.jpg" alt="CarbassDeportes Logo" />
+    <img class="logo-svg" src="sours/img/logos/logo_carbass.png" alt="CarbassDeportes Logo" />
     <h1>CarbassDeportes</h1>
   </div>
   <nav>
@@ -71,11 +274,21 @@ El diseño utiliza una paleta de colores definida en variables CSS:
       <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
     </ul>
   </nav>
-  <div><a href="#" class="cta">Tienda Online</a></div>
+  <div class="user-section">
+    <span id="user-name" class="user-name"></span>
+    <a href="#" class="carrito">🛒</a>
+    <button onclick="logout()" class="btn-logout" id="logout-btn" style="display: none;">Cerrar sesión</button>
+    <a href="login.html" class="btn-login" id="login-btn" style="display: none;">Iniciar Sesión</a>
+  </div>
 </header>
 ```
 
-**Función:** Navegación principal sticky con logo, menú de navegación y botón CTA para acceso a la tienda online.
+**Función:** Navegación principal sticky con logo, menú de navegación y sección de usuario dinámica.
+
+**Sección de usuario:**
+- **Sin autenticar**: Muestra botón "Iniciar Sesión" (verde)
+- **Autenticado**: Muestra nombre de usuario, carrito y botón "Cerrar sesión"
+- Controlado dinámicamente por `auth-check.js`
 
 ---
 
@@ -232,6 +445,134 @@ El diseño utiliza una paleta de colores definida en variables CSS:
 
 ## 💻 JavaScript - Funcionalidades Interactivas
 
+### Archivos JavaScript
+
+#### `firebase-config.js`
+Configuración e inicialización de Firebase.
+
+```javascript
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "carbassdeportes.firebaseapp.com",
+  databaseURL: "https://carbassdeportes-default-rtdb.firebaseio.com",
+  projectId: "carbassdeportes",
+  storageBucket: "carbassdeportes.appspot.com",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId: "TU_APP_ID",
+  measurementId: "TU_MEASUREMENT_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+```
+
+---
+
+#### `auth-check.js`
+Gestiona la visualización del navbar según el estado de autenticación.
+
+```javascript
+firebase.auth().onAuthStateChanged((user) => {
+  const userNameElement = document.getElementById('user-name');
+  const logoutBtn = document.getElementById('logout-btn');
+  const loginBtn = document.getElementById('login-btn');
+  
+  if (user) {
+    // Usuario autenticado: mostrar nombre y botón de logout
+    if (userNameElement) {
+      userNameElement.textContent = user.displayName || user.email;
+      userNameElement.style.display = 'inline';
+    }
+    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+    if (loginBtn) loginBtn.style.display = 'none';
+  } else {
+    // Usuario NO autenticado: mostrar botón de login
+    if (userNameElement) {
+      userNameElement.style.display = 'none';
+    }
+    if (logoutBtn) logoutBtn.style.display = 'none';
+    if (loginBtn) loginBtn.style.display = 'inline-block';
+  }
+});
+
+function logout() {
+  firebase.auth().signOut().then(() => {
+    window.location.href = 'index.html';
+  });
+}
+```
+
+**Función:** Actualiza la UI del navbar dinámicamente según si el usuario está autenticado o no.
+
+---
+
+#### `auth.js`
+Maneja el sistema de login y registro.
+
+```javascript
+let isLoginMode = true;
+
+function toggleMode(e) {
+  e.preventDefault();
+  isLoginMode = !isLoginMode;
+  
+  if (isLoginMode) {
+    formTitle.textContent = 'Iniciar Sesión';
+    submitBtn.textContent = 'Iniciar Sesión';
+    toggleText.innerHTML = '¿No tienes cuenta? <a href="#" id="toggle-link">Regístrate aquí</a>';
+    nameGroup.style.display = 'none';
+    nameInput.required = false;
+  } else {
+    formTitle.textContent = 'Crear Cuenta';
+    submitBtn.textContent = 'Registrarse';
+    toggleText.innerHTML = '¿Ya tienes cuenta? <a href="#" id="toggle-link">Inicia sesión</a>';
+    nameGroup.style.display = 'block';
+    nameInput.required = true;
+  }
+  
+  const newToggleLink = document.getElementById('toggle-link');
+  if (newToggleLink) {
+    newToggleLink.addEventListener('click', toggleMode);
+  }
+}
+
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  const name = nameInput.value.trim();
+
+  try {
+    if (isLoginMode) {
+      await auth.signInWithEmailAndPassword(email, password);
+    } else {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      await user.updateProfile({ displayName: name });
+      await database.ref('usuarios/' + user.uid).set({
+        nombre: name,
+        email: email,
+        fechaRegistro: new Date().toISOString()
+      });
+    }
+    window.location.href = 'index.html';
+  } catch (error) {
+    // Manejo de errores en español
+    errorMessage.textContent = obtenerMensajeError(error.code);
+  }
+});
+```
+
+**Función:** Gestiona login y registro de usuarios con Firebase Authentication.
+
+**Características:**
+- Toggle entre modo login y registro
+- Validación de campos
+- Mensajes de error en español
+- Almacenamiento de datos de usuario en Realtime Database
+- Redirección automática después de autenticarse
+
+---
+
 ### `script.js`
 
 #### **1. Imagen Aleatoria de Coleccionables**
@@ -349,35 +690,227 @@ El diseño utiliza una paleta de colores definida en variables CSS:
 
 ---
 
-#### **4. Botones Agregar al Carrito**
+#### **4. Botones Agregar al Carrito con Protección**
 
 ```javascript
-document.querySelectorAll('.add-btn').forEach(btn => {
-  btn.addEventListener('click', (e)=>{
-    const card = e.target.closest('.card');
-    const title = card.querySelector('h4').innerText;
-    e.target.innerText = 'Añadido ✓';
-    e.target.disabled = true;
-    setTimeout(()=>{ 
-      e.target.innerText = 'Agregar al carrito'; 
-      e.target.disabled = false; 
-    }, 1400);
-    console.info('Añadido al carrito:', title);
-  })
-})
+function setupAddButtons() {
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    if(btn.dataset.listener === 'true') return;
+    btn.dataset.listener = 'true';
+
+    btn.addEventListener('click', (e)=>{
+      // Verificar si el usuario está autenticado
+      const user = firebase.auth().currentUser;
+      
+      if (!user) {
+        // Si no está logueado, redirigir al login
+        if (confirm('Debes iniciar sesión para agregar productos al carrito. ¿Ir a iniciar sesión?')) {
+          window.location.href = 'login.html';
+        }
+        return;
+      }
+      
+      // Usuario autenticado: agregar al carrito
+      const card = e.target.closest('.card');
+      const title = card.querySelector('h4').innerText;
+      const originalText = e.target.innerText;
+      
+      e.target.innerText = 'Añadido ✓';
+      e.target.disabled = true;
+      
+      setTimeout(()=>{ 
+        e.target.innerText = originalText; 
+        e.target.disabled = false; 
+      }, 1400);
+      
+      console.info('Añadido al carrito:', title);
+    });
+  });
+}
 ```
 
-**Función:** Simula la funcionalidad de agregar productos al carrito con feedback visual.
+**Función:** Protege la funcionalidad de agregar al carrito para usuarios autenticados.
 
 **Proceso:**
-1. Detecta click en cualquier botón `.add-btn`
-2. Obtiene el título del producto desde la tarjeta padre
-3. Cambia el texto del botón a "Añadido ✓"
-4. Deshabilita el botón temporalmente
-5. Después de 1400ms restaura el estado original
-6. Registra el producto en la consola (preparado para integración con API real)
+1. Verifica si hay un usuario autenticado con `firebase.auth().currentUser`
+2. Si NO está autenticado: Muestra confirmación para ir a login
+3. Si está autenticado: Procesa la adición al carrito con feedback visual
+4. Evita múltiples eventos con `dataset.listener`
 
-**Elementos afectados:** Todos los botones con clase `.add-btn`
+---
+
+#### **5. Carga de Artículos desde Firebase**
+
+```javascript
+const db = firebase.database();
+
+db.ref('articulos').on('value', (snapshot) => {
+  const articlesData = snapshot.val();
+  const allArticles = Object.values(articlesData || {});
+
+  // Filtrar artículos por estatus
+  const destacados = allArticles.filter(article => 
+    article.estatus && article.estatus.toLowerCase() === 'destacado');
+  const recientes = allArticles.filter(article => 
+    article.estatus && article.estatus.toLowerCase() === 'recien agregado');
+  const ofertas = allArticles.filter(article => 
+    article.estatus && article.estatus.toLowerCase() === 'oferta');
+  
+  // Filtrar artículos por categoría
+  const futbolArticles = allArticles.filter(article => 
+    article.categoria && article.categoria.toLowerCase() === 'futbol');
+  const basketArticles = allArticles.filter(article => 
+    article.categoria && article.categoria.toLowerCase() === 'basket');
+  const gymArticles = allArticles.filter(article => 
+    article.categoria && article.categoria.toLowerCase() === 'gym');
+  const coleccionablesArticles = allArticles.filter(article => 
+    article.categoria && article.categoria.toLowerCase() === 'coleccionables');
+
+  // Detectar si estamos en la página principal o en el catálogo
+  const isCatalogPage = window.location.pathname.includes('catalogo.html');
+  
+  if (isCatalogPage) {
+    // Catálogo: mostrar todos los artículos
+    renderArticlesToContainer(futbolContainer, futbolArticles, false);
+    renderArticlesToContainer(basketContainer, basketArticles, false);
+    renderArticlesToContainer(gymContainer, gymArticles, false);
+    renderArticlesToContainer(coleccionablesContainer, coleccionablesArticles, false);
+  } else {
+    // Página principal: máximo 3 artículos por sección
+    renderArticlesToContainer(destacadosContainer, destacados, false, 3);
+    renderArticlesToContainer(recientesContainer, recientes, true, 3);
+    renderArticlesToContainer(ofertasContainer, ofertas, true, 3);
+  }
+});
+```
+
+**Función:** Carga productos desde Firebase Realtime Database y los distribuye por secciones.
+
+**Características:**
+- Lectura en tiempo real con `.on('value')`
+- Filtrado por `estatus` (destacado, recien agregado, oferta)
+- Filtrado por `categoria` (futbol, basket, gym, coleccionables)
+- Detección automática de página (index vs catálogo)
+- Límite de 3 productos en página principal
+- Todos los productos en página de catálogo
+
+---
+
+#### **6. Renderizado Dinámico de Productos**
+
+```javascript
+function createArticleCardHtml(article, isSmallGrid = false) {
+  return `
+    <article class="card">
+      <div class="thumb">
+        <img src="${article.imagen}" alt="${article.nombre}"/>
+      </div>
+      <h4>${article.nombre}</h4>
+      <p class="meta">
+        <span class="price">$${article.precio}</span>
+        ${article.estatus ? `<span class="badge">${article.estatus}</span>` : ''}
+      </p>
+      <p>${article.descripcion}</p>
+      <button class="add-btn">Agregar al carrito</button>
+    </article>
+  `;
+}
+
+function renderArticlesToContainer(containerElement, articlesArray, isSmallGrid = false, limit = null) {
+  if (!containerElement) return;
+  
+  if (!articlesArray || articlesArray.length === 0) {
+    containerElement.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No hay artículos disponibles</p>';
+    return;
+  }
+
+  const articlesToRender = limit ? articlesArray.slice(0, limit) : articlesArray;
+  containerElement.innerHTML = articlesToRender.map(article => 
+    createArticleCardHtml(article, isSmallGrid)
+  ).join('');
+  
+  setupAddButtons();
+}
+```
+
+**Función:** Genera HTML de tarjetas de productos dinámicamente.
+
+**Parámetros:**
+- `article`: Objeto con datos del producto
+- `isSmallGrid`: Determina el tamaño de la tarjeta
+- `limit`: Número máximo de productos a mostrar
+
+---
+
+## 🔥 Firebase - Integración y Configuración
+
+### Servicios Utilizados
+
+1. **Firebase Authentication**
+   - Autenticación por email y contraseña
+   - Gestión de sesiones
+   - Actualización de perfiles de usuario
+
+2. **Firebase Realtime Database**
+   - Almacenamiento de artículos
+   - Almacenamiento de datos de usuarios
+   - Lectura en tiempo real
+
+### Estructura de Base de Datos
+
+```json
+{
+  "articulos": {
+    "id1": {
+      "nombre": "Zapatillas Deportivas Premium",
+      "precio": 89990,
+      "imagen": "sours/img/articulos/zapatillas-deportivas-premium.jpg",
+      "descripcion": "Zapatillas de alta gama...",
+      "categoria": "futbol",
+      "estatus": "destacado"
+    }
+  },
+  "usuarios": {
+    "uid123": {
+      "nombre": "Juan Pérez",
+      "email": "juan@example.com",
+      "fechaRegistro": "2025-12-01T10:30:00.000Z"
+    }
+  }
+}
+```
+
+### Reglas de Seguridad
+
+```json
+{
+  "rules": {
+    "articulos": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "usuarios": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    }
+  }
+}
+```
+
+**Explicación:**
+- `articulos` → Lectura pública, escritura solo para autenticados
+- `usuarios` → Cada usuario solo puede leer/escribir sus propios datos
+
+### Configuración Inicial
+
+1. Crear proyecto en [Firebase Console](https://console.firebase.google.com/)
+2. Habilitar **Email/Password** en Authentication
+3. Crear **Realtime Database**
+4. Actualizar reglas de seguridad
+5. Copiar credenciales a `firebase-config.js`
+6. Importar datos desde `db.json` (opcional)
 
 ---
 
@@ -540,7 +1073,132 @@ body{font-family:Inter, Arial, Helvetica, sans-serif;background:var(--gris);colo
 
 ---
 
-#### **7. Diseño Responsive**
+#### **7. Botones de Autenticación**
+
+```css
+.btn-logout {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.btn-logout:hover {
+  background: white;
+  color: var(--negro);
+}
+
+.btn-login {
+  padding: 8px 16px;
+  background: var(--verde);
+  border: 1px solid var(--verde);
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-login:hover {
+  background: var(--verde-oscuro);
+  border-color: var(--verde-oscuro);
+  transform: scale(1.05);
+}
+```
+
+**Función:** Estilos para botones de login y logout en el navbar.
+
+---
+
+#### **8. Página de Login**
+
+```css
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.login-box {
+  background: var(--blanco);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--negro);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--gris);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--verde);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: var(--verde);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary:hover {
+  background: var(--verde-oscuro);
+  transform: translateY(-2px);
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 14px;
+  margin-bottom: 16px;
+  padding: 10px;
+  background: #ffebee;
+  border-radius: 6px;
+  display: none;
+}
+
+.error-message:not(:empty) {
+  display: block;
+}
+```
+
+**Función:** Estilos completos para la página de autenticación.
+
+---
+
+#### **9. Diseño Responsive**
 
 ```css
 @media (max-width:980px){
@@ -569,26 +1227,54 @@ body{font-family:Inter, Arial, Helvetica, sans-serif;background:var(--gris);colo
 
 ### ✅ Implementadas
 
+**Navegación y UI:**
 1. **Navegación Sticky**: Navbar fijo que permanece visible al hacer scroll
-2. **Carrusel Automático**: Rotación automática de imágenes cada 4 segundos
-3. **Controles Manuales**: Botones y teclado para navegar el carrusel
-4. **Imagen Aleatoria**: Muestra coleccionables diferentes en cada carga
-5. **Video Hover**: Reproducción de video al pasar el cursor
-6. **Agregar al Carrito**: Feedback visual al agregar productos
-7. **Diseño Responsive**: Adaptación a móviles, tablets y desktop
-8. **Efectos Hover**: Animaciones en tarjetas e iconos
-9. **Mapa Integrado**: Google Maps embebido en el footer
-10. **Categorías Visuales**: Iconos SVG para navegación por categorías
+2. **UI Dinámica**: Botones que cambian según estado de autenticación
+3. **Diseño Responsive**: Adaptación a móviles, tablets y desktop
+4. **Efectos Hover**: Animaciones en tarjetas, botones e iconos
+
+**Carrusel y Multimedia:**
+5. **Carrusel Automático**: Rotación automática de imágenes cada 4 segundos
+6. **Controles Manuales**: Botones y teclado para navegar el carrusel
+7. **Video Hover**: Reproducción de video al pasar el cursor
+8. **Imagen Aleatoria**: Muestra coleccionables diferentes en cada carga
+
+**Autenticación (Firebase):**
+9. **Sistema de Login**: Email y contraseña con Firebase Auth
+10. **Sistema de Registro**: Creación de cuentas con datos de perfil
+11. **Toggle Login/Registro**: Cambio dinámico entre modos
+12. **Gestión de Sesión**: Verificación automática de estado de autenticación
+13. **Logout**: Cierre de sesión con redirección
+14. **Protección de Acciones**: Solo usuarios autenticados pueden agregar al carrito
+
+**Productos (Firebase Realtime Database):**
+15. **Carga Dinámica**: Productos cargados desde Firebase en tiempo real
+16. **Filtrado por Estatus**: Destacados, Recién Agregados, Ofertas
+17. **Filtrado por Categoría**: Fútbol, Basket, Gym, Coleccionables
+18. **Límite en Página Principal**: Máximo 3 productos por sección
+19. **Catálogo Completo**: Página separada con todos los productos
+20. **Agregar al Carrito**: Feedback visual con protección de autenticación
+
+**Otras Características:**
+21. **Mapa Integrado**: Google Maps embebido en el footer
+22. **Categorías Visuales**: Iconos SVG para navegación por categorías
+23. **Mensajes de Error**: Mensajes en español para errores de autenticación
+24. **Vista Pública**: Páginas visibles sin login, acciones protegidas
 
 ### 🔮 Posibles Mejoras Futuras
 
-- Integración con API de carrito real
-- Sistema de usuarios y autenticación
-- Filtros de productos por categoría/precio
-- Búsqueda de productos
-- Sistema de reviews y calificaciones
-- Checkout y pasarela de pago
-- Panel administrativo
+- ✨ Carrito de compras funcional con persistencia en Firebase
+- ✨ Sistema de favoritos/lista de deseos
+- ✨ Filtros avanzados (precio, disponibilidad, valoración)
+- ✨ Búsqueda de productos con autocompletado
+- ✨ Sistema de reviews y calificaciones
+- ✨ Checkout y pasarela de pago
+- ✨ Panel administrativo para gestión de productos
+- ✨ Historial de pedidos
+- ✨ Notificaciones push
+- ✨ Modo oscuro
+- ✨ Autenticación con Google/Facebook
+- ✨ Recuperación de contraseña
 
 ---
 
@@ -598,6 +1284,168 @@ body{font-family:Inter, Arial, Helvetica, sans-serif;background:var(--gris);colo
 - ✅ Firefox (últimas versiones)
 - ✅ Safari (últimas versiones)
 - ✅ Dispositivos móviles (responsive)
+- ✅ Firebase Web SDK v8.10.1
+
+---
+
+## 🔧 Instalación y Configuración
+
+### Requisitos Previos
+
+- Cuenta de Firebase (gratuita)
+- Navegador web moderno
+- Editor de código (VS Code recomendado)
+
+### Pasos de Instalación
+
+1. **Clonar o descargar el proyecto**
+   ```bash
+   git clone https://github.com/bercun/carbassdeportes.git
+   cd carbassdeportes
+   ```
+
+2. **Configurar Firebase**
+   - Ir a [Firebase Console](https://console.firebase.google.com/)
+   - Crear nuevo proyecto "carbassdeportes"
+   - Habilitar **Authentication** → Email/Password
+   - Crear **Realtime Database**
+   - Copiar credenciales del proyecto
+
+3. **Actualizar `firebase-config.js`**
+   ```javascript
+   const firebaseConfig = {
+     apiKey: "TU_API_KEY_AQUI",
+     authDomain: "tu-proyecto.firebaseapp.com",
+     databaseURL: "https://tu-proyecto.firebaseio.com",
+     projectId: "tu-proyecto-id",
+     storageBucket: "tu-proyecto.appspot.com",
+     messagingSenderId: "123456789",
+     appId: "1:123:web:abc123",
+     measurementId: "G-ABC123"
+   };
+   ```
+
+4. **Configurar Reglas de Firebase**
+   - En Realtime Database → Reglas
+   ```json
+   {
+     "rules": {
+       "articulos": {
+         ".read": true,
+         ".write": "auth != null"
+       },
+       "usuarios": {
+         "$uid": {
+           ".read": "$uid === auth.uid",
+           ".write": "$uid === auth.uid"
+         }
+       }
+     }
+   }
+   ```
+
+5. **Importar datos de productos (opcional)**
+   - En Realtime Database → Datos
+   - Importar archivo `db.json`
+
+6. **Abrir la aplicación**
+   - Abrir `index.html` en el navegador
+   - O usar Live Server en VS Code
+
+---
+
+## 📚 Estructura de Datos Firebase
+
+### Nodo: `articulos`
+
+**Atributos:**
+```javascript
+{
+  id: String,           // Identificador único
+  nombre: String,       // Nombre del producto
+  precio: Number,       // Precio en pesos
+  imagen: String,       // URL de la imagen
+  descripcion: String,  // Descripción del producto
+  categoria: String,    // "futbol" | "basket" | "gym" | "coleccionables"
+  estatus: String       // "destacado" | "recien agregado" | "oferta"
+}
+```
+
+**Ejemplo:**
+```json
+{
+  "articulos": {
+    "art001": {
+      "nombre": "Zapatillas Running Elite",
+      "precio": 89990,
+      "imagen": "sours/img/articulos/zapatillas-running-elite.jpg",
+      "descripcion": "Zapatillas de alto rendimiento con tecnología de amortiguación avanzada.",
+      "categoria": "futbol",
+      "estatus": "destacado"
+    }
+  }
+}
+```
+
+### Nodo: `usuarios`
+
+**Atributos:**
+```javascript
+{
+  nombre: String,       // Nombre completo del usuario
+  email: String,        // Email de registro
+  fechaRegistro: String // Fecha ISO de registro
+}
+```
+
+**Ejemplo:**
+```json
+{
+  "usuarios": {
+    "aBc123XyZ": {
+      "nombre": "María González",
+      "email": "maria@example.com",
+      "fechaRegistro": "2025-12-01T15:30:00.000Z"
+    }
+  }
+}
+```
+
+---
+
+## 🎯 Flujo de Usuario
+
+### Usuario No Autenticado
+
+1. Ingresa a `index.html` o `catalogo.html`
+2. Ve todos los productos disponibles
+3. Ve botón "Iniciar Sesión" en el navbar
+4. Intenta agregar producto → Se le pide autenticarse
+5. Click en "Iniciar Sesión" → Redirige a `login.html`
+
+### Proceso de Registro
+
+1. En `login.html`, click en "Regístrate aquí"
+2. Aparece campo "Nombre completo"
+3. Completa: Nombre, Email, Contraseña (mín. 6 caracteres)
+4. Click en "Registrarse"
+5. Firebase crea cuenta y guarda datos
+6. Redirección automática a `index.html`
+
+### Proceso de Login
+
+1. En `login.html`, modo "Iniciar Sesión" (default)
+2. Ingresa Email y Contraseña
+3. Click en "Iniciar Sesión"
+4. Firebase valida credenciales
+5. Redirección automática a `index.html`
+
+### Usuario Autenticado
+
+1. Ve su nombre en el navbar
+2. Ve botón "Cerrar sesión"
+3. Puede agregar productos al carrito sin restricciones
+4. Click en "Cerrar sesión" → Cierra sesión y vuelve a `index.html`
 
 ---
 
@@ -605,7 +1453,9 @@ body{font-family:Inter, Arial, Helvetica, sans-serif;background:var(--gris);colo
 
 **Diseñado por:** brkoon  
 **Año:** 2025  
-**Proyecto:** CarbassDeportes
+**Proyecto:** CarbassDeportes  
+**Repositorio:** [github.com/bercun/carbassdeportes](https://github.com/bercun/carbassdeportes)  
+**Branch:** test_firebase
 
 ---
 
@@ -614,6 +1464,7 @@ body{font-family:Inter, Arial, Helvetica, sans-serif;background:var(--gris);colo
 - **Email:** contacto@carbassdeportes.com
 - **Teléfono:** +598 0000 0000
 - **Redes Sociales:** @carbassdeportes
+- **Ubicación:** Galería Cristal, Montevideo, Uruguay
 
 ---
 
@@ -621,33 +1472,310 @@ body{font-family:Inter, Arial, Helvetica, sans-serif;background:var(--gris);colo
 
 © 2025 CarbassDeportes - Todos los derechos reservados.
 
+---
 
+## 📖 Notas del Desarrollador
 
-## db Base de datos en firebese
+### Cambios Principales Implementados
 
-** crear un base de datos en firebase 
-para hacer crud de los articulos**
+**v2.0 - Sistema de Autenticación y Firebase (Diciembre 2025)**
 
-Tipos y caracteristicas
+1. ✅ Integración completa con Firebase Authentication y Realtime Database
+2. ✅ Sistema de login/registro con email y contraseña
+3. ✅ Protección de acciones (agregar al carrito) para usuarios autenticados
+4. ✅ Páginas públicas (visualización sin login)
+5. ✅ Navbar dinámico según estado de autenticación
+6. ✅ Carga dinámica de productos desde Firebase
+7. ✅ Filtrado por categorías y estatus
+8. ✅ Página de catálogo completo separada
+9. ✅ Límite de 3 productos por sección en página principal
+10. ✅ Mensajes de error en español
+11. ✅ Iconos SVG personalizados para categorías
+12. ✅ CSS con variables para verde oscuro en hovers
+13. ✅ Botón "Iniciar Sesión" visible para usuarios no autenticados
 
-Base de dato de articulos
-Base de datos de el carrito
-Base de datos con informacion de  usuarios
+**v1.0 - Versión Inicial (Noviembre 2025)**
+- Diseño responsive básico
+- Carrusel automático
+- Grid de productos estático
+- Video hover
+- Mapa integrado
 
+### Tecnologías Utilizadas
 
-## Base de dato de articulos 
+| Categoría | Tecnología | Versión | Uso |
+|-----------|-----------|---------|-----|
+| **Frontend** | HTML5 | - | Estructura semántica |
+| | CSS3 | - | Diseño y estilos responsivos |
+| | JavaScript | ES6+ | Lógica de interacción |
+| **Backend/BaaS** | Firebase Authentication | 8.10.1 | Sistema de login/registro |
+| | Firebase Realtime Database | 8.10.1 | Almacenamiento de usuarios y productos |
+| **Diseño** | CSS Grid | - | Layout de productos |
+| | Flexbox | - | Navegación y componentes |
+| | CSS Variables | - | Tema de colores consistente |
+| **Patrones JS** | IIFE | - | Encapsulamiento de lógica |
+| | Event Delegation | - | Optimización de eventos |
+| | Async/Await | - | Operaciones asíncronas |
+| **Multimedia** | HTML5 Video | - | Videos hover promocionales |
+| | SVG | - | Iconos de categorías personalizados |
 
-nombre: Articulos
+### Dependencias Externas
 
-Atributos :{
+```html
+<!-- Firebase SDK v8.10.1 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+```
 
-  id
-  nombre
-  imagen
-  descripción
-  precio
-  categoria (futbol, basket, gym, coleccionables)
-  estatus (recien agregados, oferta, destacados)
-  
-}
+> **Nota**: No se requiere `npm install`. Todas las dependencias se cargan vía CDN.
 
+---
+
+## ⚡ Funcionalidades Principales
+
+### 🔐 Sistema de Autenticación
+
+- **Login y Registro**: Formulario dual que alterna entre login y registro
+- **Validación**: Email válido y contraseña mínimo 6 caracteres
+- **Persistencia**: Sesión mantenida entre páginas
+- **Protección**: Botón "Agregar al carrito" solo para usuarios autenticados
+- **Feedback**: Mensajes de error en español
+- **Perfil**: Nombre de usuario visible en navbar al autenticarse
+
+### 🛍️ Catálogo de Productos
+
+- **Carga Dinámica**: Productos cargados desde Firebase Realtime Database
+- **Filtrado Múltiple**: Por categoría (Fútbol, Basket, Gym, Coleccionables)
+- **Filtrado por Estado**: Destacados, Ofertas, Recién Agregados
+- **Página Principal**: Muestra máximo 3 productos por sección
+- **Catálogo Completo**: [catalogo.html](catalogo.html) muestra todos los productos por categoría
+- **Placeholders**: Imágenes de ejemplo con Placehold.co mientras se agregan reales
+
+### 🎨 Interfaz de Usuario
+
+- **Navbar Sticky**: Navegación siempre visible
+- **Responsive Design**: Adaptable a móviles, tablets y desktop
+- **Carrusel Automático**: Auto-play con controles manuales
+- **Videos Hover**: Reproducción al pasar el mouse
+- **Iconos SVG**: Categorías representadas con iconos personalizados
+- **Paleta Visual**: Muestra de colores corporativos en presentación
+- **Badges**: Etiquetas visuales para productos (Top, Nuevo, Oferta)
+
+### 💡 Interactividad JavaScript
+
+- **IIFE Pattern**: Código modular y encapsulado
+- **Event Delegation**: Optimización de eventos en productos dinámicos
+- **Imagen Aleatoria**: Coleccionable aleatorio en el aside
+- **Temporizador**: Auto-reset del carrusel tras interacción manual
+- **Confirmaciones**: Modales nativas para acciones críticas
+- **Feedback Visual**: Botones cambian a "Añadido ✓" temporalmente
+
+---
+
+## 📝 Notas Técnicas
+
+### Orden de Carga de Scripts
+
+Es crucial mantener este orden en todos los archivos HTML:
+
+```html
+<!-- 1. Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<!-- 2. Configuración de Firebase -->
+<script src="firebase-config.js"></script>
+
+<!-- 3. Verificación de autenticación (excepto en login.html) -->
+<script src="auth-check.js"></script>
+
+<!-- 4. Script principal -->
+<script src="script.js"></script> <!-- Solo en index.html y catalogo.html -->
+<script src="auth.js"></script>    <!-- Solo en login.html -->
+```
+
+### Consideraciones Importantes
+
+- **Firebase SDK v8:** Se usa sintaxis de callbacks (no modular) para mayor compatibilidad
+- **Realtime Database:** Preferido sobre Firestore por simplicidad en este proyecto
+- **Auth Check:** `auth-check.js` debe cargarse después de Firebase pero antes de `script.js`
+- **Reglas de Seguridad:** Lectura pública en artículos, escritura solo autenticados
+- **Toggle Function:** Usa función nombrada para evitar problemas con `arguments.callee`
+- **Event Delegation:** Los eventos de botones se configuran después del renderizado
+- **Placeholders:** Imágenes temporales con Placehold.co mientras se agregan imágenes reales
+
+---
+
+## 🐛 Solución de Problemas Comunes
+
+### Los productos no cargan
+
+**Causa:** Reglas de Firebase muy restrictivas  
+**Solución:** Verificar que las reglas permitan `.read: true` en nodo `articulos`
+
+### El botón de login/registro no funciona
+
+**Causa:** Firebase no inicializado correctamente  
+**Solución:** Verificar que `firebase-config.js` tenga `firebase.initializeApp(firebaseConfig)`
+
+### "Debes iniciar sesión" aparece siempre
+
+**Causa:** Firebase Auth no reconoce la sesión  
+**Solución:** Revisar que la configuración de Firebase sea correcta y que el dominio esté autorizado en Firebase Console
+
+### Los botones de toggle no funcionan
+
+**Causa:** Event listener no reasignado después de cambiar el DOM  
+**Solución:** Usar función nombrada (`toggleMode`) en lugar de anónima
+
+### Productos duplicados en el catálogo
+
+**Causa:** Múltiples llamadas a `renderArticlesToContainer`  
+**Solución:** Verificar que `setupAddButtons()` use `dataset.listener` para evitar duplicados
+
+### El carrusel no avanza automáticamente
+
+**Causa:** Error en la función de timer o falta el elemento `#slides`  
+**Solución:** Verificar que el elemento existe antes de inicializar el carrusel
+
+### Videos no se reproducen en móviles
+
+**Causa:** Algunos navegadores móviles requieren interacción del usuario  
+**Solución:** Considerar usar imágenes animadas (GIF) como alternativa para móviles
+
+---
+
+## 🚧 Roadmap y Mejoras Futuras
+
+### En Desarrollo
+
+- [ ] Carrito de compras funcional con almacenamiento local
+- [ ] Página de perfil de usuario
+- [ ] Sistema de favoritos
+- [ ] Búsqueda de productos por nombre
+- [ ] Paginación en catálogo completo
+
+### Próximas Versiones
+
+**v1.3 - Carrito Completo** (Planificado)
+- Carrito persistente en localStorage
+- Vista detallada del carrito
+- Cálculo de totales
+- Botón de checkout
+
+**v1.4 - Mejoras de UX** (Planificado)
+- Animaciones CSS en transiciones
+- Skeleton loaders mientras cargan productos
+- Toast notifications personalizadas
+- Modo oscuro
+
+**v1.5 - E-commerce Completo** (Futuro)
+- Integración con pasarela de pago
+- Historial de pedidos
+- Gestión de inventario avanzada
+
+### Características Deseables
+
+- 📊 Analytics de productos más vistos
+- ⭐ Sistema de valoraciones y reseñas
+- 🔍 Filtros avanzados (precio, popularidad, etc.)
+- 📧 Notificaciones por email
+- 🌐 Internacionalización (i18n)
+- 📦 Seguimiento de pedidos
+- 💬 Chat de soporte
+
+---
+
+## 🎯 Próximos Pasos Recomendados
+
+Ahora que el sistema de roles está implementado, estos son los pasos sugeridos para continuar el desarrollo:
+
+### 1. **Migrar Usuarios Existentes** (Prioridad Alta)
+Actualmente hay 4 usuarios adicionales en Firebase Authentication que necesitan ser migrados a la base de datos:
+- Abre [test-db.html](test-db.html)
+- Inicia sesión con cada usuario
+- Haz clic en "Migrar Usuario Actual a Database"
+- Asigna roles según corresponda desde el panel de admin
+
+### 2. **Probar Funcionalidad del Panel Admin** (Prioridad Alta)
+- Accede a [admin.html](admin.html) con el usuario administrador
+- Prueba agregar, editar y eliminar productos
+- Verifica que los cambios se reflejen en [catalogo.html](catalogo.html) e [index.html](index.html)
+- Prueba cambiar roles de usuarios
+
+### 3. **Actualizar Reglas de Seguridad Firebase** (Prioridad Media)
+Las reglas actuales permiten lectura/escritura a cualquier usuario autenticado. Para producción:
+- Implementa las reglas basadas en roles sugeridas en este README
+- Protege la escritura en `articulos` solo para administradores
+- Permite a usuarios leer/editar solo sus propios datos
+
+### 4. **Agregar Imágenes Reales** (Prioridad Media)
+Actualmente se usan placeholders de Unsplash:
+- Sube imágenes de productos a `sours/img/articulos/`
+- Actualiza las URLs en Firebase Database
+- Optimiza imágenes para web (WebP, compresión)
+
+### 5. **Implementar Carrito de Compras** (Próximo Feature)
+- Crear estructura de carrito en localStorage
+- Botones "Agregar al Carrito" funcionales
+- Vista de carrito con totales
+- Persistencia entre sesiones
+
+### 6. **Sistema de Pedidos** (Próximo Feature)
+- Crear nodo `pedidos` en Firebase Database
+- Formulario de checkout
+- Guardar historial de compras por usuario
+- Vista de pedidos en perfil de usuario
+
+### 7. **Testing y Optimización** (Continuo)
+- Probar en diferentes navegadores
+- Optimizar tiempos de carga
+- Validar responsive design en móviles
+- Auditoría con Lighthouse
+
+### 8. **Deployment** (Futuro)
+- Configurar Firebase Hosting
+- Configurar dominio personalizado
+- SSL/HTTPS automático
+- CI/CD con GitHub Actions
+
+---
+
+## 👨‍💻 Autor y Contribuciones
+
+**Proyecto:** CarbassDeportes  
+**Desarrollado para:** Prueba Web con ChatGPT  
+**Año:** 2025  
+**Tecnología:** Vanilla JavaScript + Firebase  
+
+### Contribuir
+
+Si deseas contribuir al proyecto:
+
+1. Fork el repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add: amazing feature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+---
+
+## 📄 Licencia
+
+Este proyecto es de código abierto y está disponible para fines educativos.
+
+---
+
+## 🙏 Agradecimientos
+
+- Firebase por proporcionar servicios BaaS gratuitos
+- Placehold.co por imágenes placeholder
+- Comunidad de desarrolladores web
+
+---
+
+**Última actualización:** 22 de diciembre de 2025
+
+---

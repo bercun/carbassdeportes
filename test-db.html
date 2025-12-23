@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Test de Conexión Firebase - CarbassDeportes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 { color: #1ecb63; }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f9f9f9;
+      border-left: 4px solid #1ecb63;
+      border-radius: 4px;
+    }
+    .test-section h3 {
+      margin-top: 0;
+    }
+    button {
+      background: #1ecb63;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #17a352;
+    }
+    .log {
+      background: #000;
+      color: #0f0;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+    .success { color: #0f0; }
+    .error { color: #f00; }
+    .info { color: #0ff; }
+    .warning { color: #ff0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔬 Test de Conexión Firebase Database</h1>
+    <p>Esta página te ayudará a diagnosticar problemas con Realtime Database</p>
+
+    <div class="test-section">
+      <h3>1️⃣ Estado de Autenticación</h3>
+      <p id="auth-status">Verificando...</p>
+      <button onclick="loginTest()">Iniciar Sesión de Prueba</button>
+      <button onclick="logoutTest()">Cerrar Sesión</button>
+    </div>
+
+    <div class="test-section">
+      <h3>2️⃣ Conexión a Realtime Database</h3>
+      <button onclick="testRead()">Test Lectura</button>
+      <button onclick="testWrite()">Test Escritura</button>
+      <button onclick="testRules()">Test Reglas de Seguridad</button>
+    </div>
+
+    <div class="test-section">
+      <h3>3️⃣ Migrar Usuarios a Database</h3>
+      <p>Si los usuarios están en Authentication pero NO en Database:</p>
+      <button onclick="migrateCurrentUser()">Migrar Usuario Actual</button>
+      <button onclick="showMigrationGuide()">Ver Guía Manual</button>
+    </div>
+
+    <div class="test-section">
+      <h3>4️⃣ Verificar Datos Existentes</h3>
+      <button onclick="listUsers()">Listar Usuarios en Database</button>
+      <button onclick="listArticles()">Listar Artículos</button>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    const auth = firebase.auth();
+    const db = firebase.database();
+    let currentUser = null;
+
+    // Función para escribir en el log
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      const className = type;
+      logDiv.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+      logDiv.scrollTop = logDiv.scrollHeight;
+      console.log(`[${type.toUpperCase()}]`, message);
+    }
+
+    // Monitorear estado de autenticación
+    auth.onAuthStateChanged((user) => {
+      currentUser = user;
+      const statusEl = document.getElementById('auth-status');
+      
+      if (user) {
+        statusEl.innerHTML = `
+          <strong class="success">✅ Usuario Autenticado</strong><br>
+          UID: ${user.uid}<br>
+          Email: ${user.email}<br>
+          Nombre: ${user.displayName || 'Sin nombre'}
+        `;
+        log(`Usuario autenticado: ${user.email}`, 'success');
+      } else {
+        statusEl.innerHTML = '<strong class="warning">⚠️ No hay usuario autenticado</strong>';
+        log('No hay usuario autenticado', 'warning');
+      }
+    });
+
+    // Test de lectura
+    async function testRead() {
+      log('=== INICIANDO TEST DE LECTURA ===', 'info');
+      log('URL de la base de datos: ' + db.ref().toString(), 'info');
+      log('Usuario autenticado: ' + (currentUser ? currentUser.email : 'NO'), 'info');
+      
+      // Test 1: Lectura de raíz
+      try {
+        log('Test 1: Intentando leer la raíz "/"...', 'info');
+        const snapshot = await db.ref('/').once('value');
+        const data = snapshot.val();
+        
+        if (data) {
+          const nodes = Object.keys(data);
+          log(`✅ Raíz leída correctamente. Nodos: ${nodes.join(', ')}`, 'success');
+        } else {
+          log('⚠️ La base de datos está completamente vacía', 'warning');
+        }
+      } catch (error) {
+        log(`❌ ERROR leyendo raíz: ${error.message}`, 'error');
+        log(`Detalles: ${JSON.stringify(error)}`, 'error');
+        
+        if (error.code === 'PERMISSION_DENIED') {
+          log('🔒 Las reglas de Firebase están bloqueando la lectura', 'warning');
+          log('SOLUCIÓN: Actualiza las reglas (ver botón "Test Reglas")', 'warning');
+        }
+      }
+      
+      // Test 2: Lectura de artículos
+      try {
+        log('Test 2: Intentando leer nodo "articulos"...', 'info');
+        const snapshot = await db.ref('articulos').once('value');
+        const data = snapshot.val();
+        
+        if (data) {
+          const count = Object.keys(data).length;
+          log(`✅ LECTURA EXITOSA: ${count} artículos encontrados`, 'success');
+        } else {
+          log('⚠️ LECTURA EXITOSA pero no hay datos en "articulos"', 'warning');
+          log('Esto es normal si aún no has importado los productos', 'info');
+        }
+      } catch (error) {
+        log(`❌ ERROR DE LECTURA articulos: ${error.message}`, 'error');
+        log(`Código de error: ${error.code}`, 'error');
+      }
+
+      // Test 3: Lectura de usuarios
+      try {
+        log('Test 3: Intentando leer nodo "usuarios"...', 'info');
+        const snapshot = await db.ref('usuarios').once('value');
+        const data = snapshot.val();
+        
+        if (data) {
+          const count = Object.keys(data).length;
+          log(`✅ LECTURA EXITOSA: ${count} usuarios encontrados`, 'success');
+        } else {
+          log('⚠️ LECTURA EXITOSA pero no hay datos en "usuarios"', 'warning');
+          log('👉 ESTE ES EL PROBLEMA: Los usuarios no están en Database', 'error');
+          log('Solución: Usa el botón "Migrar Usuario Actual"', 'warning');
+        }
+      } catch (error) {
+        log(`❌ ERROR DE LECTURA usuarios: ${error.message}`, 'error');
+        log(`Código de error: ${error.code}`, 'error');
+        
+        if (error.code === 'PERMISSION_DENIED') {
+          log('🔒 Las reglas requieren autenticación para leer usuarios', 'warning');
+          log('Esto es correcto por seguridad, pero debes estar logueado', 'info');
+        }
+      }
+    }
+
+    // Test de escritura
+    async function testWrite() {
+      log('=== INICIANDO TEST DE ESCRITURA ===', 'info');
+      
+      if (!currentUser) {
+        log('❌ Debes estar autenticado para hacer test de escritura', 'error');
+        alert('Por favor, inicia sesión primero');
+        return;
+      }
+
+      try {
+        log(`Intentando escribir en usuarios/${currentUser.uid}...`, 'info');
+        
+        const userData = {
+          nombre: currentUser.displayName || currentUser.email.split('@')[0],
+          email: currentUser.email,
+          rol: 'comprador',
+          fechaRegistro: new Date().toISOString(),
+          testTimestamp: Date.now()
+        };
+
+        await db.ref('usuarios/' + currentUser.uid).set(userData);
+        log('✅ ESCRITURA EXITOSA: Usuario guardado en Database', 'success');
+        log(`Datos guardados: ${JSON.stringify(userData, null, 2)}`, 'info');
+        
+      } catch (error) {
+        log(`❌ ERROR DE ESCRITURA: ${error.message}`, 'error');
+        log(`Código de error: ${error.code}`, 'error');
+        
+        if (error.code === 'PERMISSION_DENIED') {
+          log('⚠️ PROBLEMA: Las reglas de Firebase están bloqueando la escritura', 'warning');
+          log('SOLUCIÓN: Actualiza las reglas en Firebase Console', 'warning');
+        }
+      }
+    }
+
+    // Test de reglas
+    async function testRules() {
+      log('=== VERIFICANDO REGLAS DE SEGURIDAD ===', 'info');
+      
+      log('Reglas recomendadas para tu proyecto:', 'info');
+      log(`{
+  "rules": {
+    "articulos": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "usuarios": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}`, 'warning');
+      
+      log('Copia estas reglas y pégalas en Firebase Console > Realtime Database > Reglas', 'warning');
+    }
+
+    // Migrar usuario actual
+    async function migrateCurrentUser() {
+      log('=== MIGRANDO USUARIO ACTUAL ===', 'info');
+      
+      if (!currentUser) {
+        log('❌ Debes estar autenticado para migrar', 'error');
+        alert('Por favor, inicia sesión primero');
+        return;
+      }
+
+      try {
+        const userData = {
+          nombre: currentUser.displayName || currentUser.email.split('@')[0],
+          email: currentUser.email,
+          rol: 'comprador',
+          fechaRegistro: new Date().toISOString()
+        };
+
+        log(`Guardando usuario ${currentUser.email}...`, 'info');
+        await db.ref('usuarios/' + currentUser.uid).set(userData);
+        
+        log('✅ MIGRACIÓN EXITOSA', 'success');
+        log(`Usuario guardado con UID: ${currentUser.uid}`, 'success');
+        
+        alert('✅ Usuario migrado exitosamente a Realtime Database!');
+        
+      } catch (error) {
+        log(`❌ ERROR EN MIGRACIÓN: ${error.message}`, 'error');
+        
+        if (error.code === 'PERMISSION_DENIED') {
+          alert('❌ Error: Las reglas de Firebase están bloqueando la escritura.\n\nNecesitas actualizar las reglas en Firebase Console.');
+        }
+      }
+    }
+
+    // Listar usuarios
+    async function listUsers() {
+      log('=== LISTANDO USUARIOS EN DATABASE ===', 'info');
+      
+      try {
+        const snapshot = await db.ref('usuarios').once('value');
+        const usuarios = snapshot.val();
+        
+        if (!usuarios) {
+          log('⚠️ No hay usuarios en la base de datos', 'warning');
+          return;
+        }
+
+        const count = Object.keys(usuarios).length;
+        log(`✅ Encontrados ${count} usuarios:`, 'success');
+        
+        Object.entries(usuarios).forEach(([uid, data]) => {
+          log(`  • ${data.nombre || 'Sin nombre'} (${data.email}) - Rol: ${data.rol}`, 'info');
+          log(`    UID: ${uid}`, 'info');
+        });
+        
+      } catch (error) {
+        log(`❌ ERROR: ${error.message}`, 'error');
+      }
+    }
+
+    // Listar artículos
+    async function listArticles() {
+      log('=== LISTANDO ARTÍCULOS ===', 'info');
+      
+      try {
+        const snapshot = await db.ref('articulos').once('value');
+        const articulos = snapshot.val();
+        
+        if (!articulos) {
+          log('⚠️ No hay artículos en la base de datos', 'warning');
+          return;
+        }
+
+        const count = Object.keys(articulos).length;
+        log(`✅ Encontrados ${count} artículos`, 'success');
+        
+      } catch (error) {
+        log(`❌ ERROR: ${error.message}`, 'error');
+      }
+    }
+
+    // Login de prueba
+    async function loginTest() {
+      const email = prompt('Email:');
+      const password = prompt('Contraseña:');
+      
+      if (!email || !password) return;
+      
+      try {
+        log(`Intentando login con ${email}...`, 'info');
+        await auth.signInWithEmailAndPassword(email, password);
+        log('✅ Login exitoso', 'success');
+      } catch (error) {
+        log(`❌ ERROR DE LOGIN: ${error.message}`, 'error');
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // Logout de prueba
+    async function logoutTest() {
+      try {
+        await auth.signOut();
+        log('✅ Logout exitoso', 'success');
+      } catch (error) {
+        log(`❌ ERROR: ${error.message}`, 'error');
+      }
+    }
+
+    // Mostrar guía de migración manual
+    function showMigrationGuide() {
+      log('=== GUÍA DE MIGRACIÓN MANUAL ===', 'info');
+      log('1. Ve a Firebase Console > Realtime Database', 'warning');
+      log('2. Haz clic en el + junto al nodo raíz', 'warning');
+      log('3. Crea un nodo llamado "usuarios"', 'warning');
+      log('4. Para cada usuario en Authentication:', 'warning');
+      log('   - Copia el UID', 'warning');
+      log('   - Crea un subnodo con ese UID en usuarios/', 'warning');
+      log('   - Agrega: nombre, email, rol, fechaRegistro', 'warning');
+    }
+
+    // Log inicial
+    log('🚀 Sistema de pruebas iniciado', 'success');
+    log('Esperando autenticación...', 'info');
+  </script>
+</body>
+</html>

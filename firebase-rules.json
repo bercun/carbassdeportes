@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "articulos": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "usuarios": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}
