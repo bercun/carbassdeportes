@@ -15,69 +15,51 @@ El sistema de roles está completamente implementado con dos niveles:
 
 1. Ve a [Firebase Console](https://console.firebase.google.com/)
 2. Selecciona tu proyecto **carbassdeportes**
-3. Ve a **Realtime Database**
-4. Navega a: `usuarios` → `[uid-del-usuario]`
-5. Encuentra el campo `rol` y cámbialo de `"comprador"` a `"administrador"`
-6. Guarda los cambios
-7. Recarga la página web y verás el badge **ADMIN** y el enlace al panel
+3. Ve a **Firestore Database**
+4. Entra en la colección `usuarios`
+5. Busca el documento que coincida con tu `uid`
+6. Cambia el campo `rol` de `"comprador"` a `"administrador"`
+7. Guarda los cambios
+8. Recarga la página web y verás el badge **ADMIN** y el enlace al panel
 
-### Opción 2: Crear Usuario Admin Manualmente
+### Opción 2: Crear Usuario Admin Manualmente en Firestore
 
-1. Regístrate normalmente desde la web
-2. Copia tu UID (lo puedes ver en la consola del navegador o en Firebase Auth)
-3. En Firebase Realtime Database, edita tu usuario:
+Si prefieres crear el documento manualmente:
 
-```json
-{
-  "usuarios": {
-    "TU-UID-AQUI": {
-      "nombre": "Admin",
-      "email": "admin@carbassdeportes.com",
-      "rol": "administrador",  // ← Cambia esto
-      "fechaRegistro": "2025-12-22T..."
-    }
-  }
-}
-```
-
-### Opción 3: Importar Usuario Admin Predefinido
-
-Puedes usar esta estructura en Firebase Database (Importar JSON):
-
-```json
-{
-  "usuarios": {
-    "crear-uid-manualmente": {
-      "nombre": "Administrador",
-      "email": "admin@carbassdeportes.com",
-      "rol": "administrador",
-      "fechaRegistro": "2025-12-22T10:00:00.000Z"
-    }
-  }
-}
-```
-
-**NOTA**: Luego debes crear la cuenta de autenticación en Firebase Authentication con el mismo email.
+1. En Firestore Database, crea una colección llamada `usuarios`
+2. Crea un documento con el ID igual a tu `uid` de Authentication
+3. Agrega los campos:
+   - `nombre`: "Tu Nombre"
+   - `email`: "tu@email.com"
+   - `rol`: "administrador"
+   - `fechaRegistro`: "2025-12-23T..."
 
 ---
 
-## 🔒 Reglas de Seguridad de Firebase
+## 🔒 Reglas de Seguridad de Firestore
 
-Para proteger tu base de datos, actualiza las reglas en Firebase Realtime Database:
+Para proteger tu base de datos, actualiza las reglas en **Firestore Database** -> pestaña **Reglas**:
 
-```json
-{
-  "rules": {
-    "articulos": {
-      ".read": true,
-      ".write": "auth != null && root.child('usuarios').child(auth.uid).child('rol').val() === 'administrador'"
-    },
-    "usuarios": {
-      ".read": "auth != null && root.child('usuarios').child(auth.uid).child('rol').val() === 'administrador'",
-      "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && (auth.uid == $uid || root.child('usuarios').child(auth.uid).child('rol').val() === 'administrador')"
-      }
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Reglas para productos
+    match /articulos/{articuloId} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == 'administrador';
+    }
+    
+    // Reglas para usuarios
+    match /usuarios/{userId} {
+      // El usuario puede leer/escribir su propio perfil
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // El administrador puede listar y gestionar todos los usuarios
+      allow list, delete: if request.auth != null && 
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == 'administrador';
     }
   }
 }
@@ -86,17 +68,29 @@ Para proteger tu base de datos, actualiza las reglas en Firebase Realtime Databa
 ### Explicación de las Reglas:
 
 - **Artículos**:
-  - **Lectura**: Cualquiera puede ver productos
-  - **Escritura**: Solo administradores
+  - **Lectura**: Pública (cualquiera puede ver el catálogo)
+  - **Escritura**: Solo usuarios con rol `administrador` en Firestore.
 
 - **Usuarios**:
-  - **Lectura General**: Solo administradores pueden ver la lista completa
-  - **Lectura Individual**: Cada usuario puede ver sus propios datos
-  - **Escritura**: Usuarios pueden editar sus datos, administradores pueden editar cualquiera
+  - **Lectura Individual**: Cada usuario puede ver sus propios datos.
+  - **Listado General**: Solo administradores pueden ver la lista completa de usuarios en el panel.
+  - **Borrado**: Solo administradores pueden eliminar usuarios.
 
 ---
 
 ## 🎯 Funcionalidades por Rol
+
+### 👨‍💼 Administrador
+- Acceso total al panel de control ([admin.html](admin.html))
+- Gestión de inventario (CRUD de productos)
+- Gestión de usuarios (Cambio de roles y eliminación)
+- Badge visual de identificación
+
+### 👤 Comprador
+- Navegación por el catálogo
+- Gestión de su propio perfil
+- Acceso a funciones de compra (carrito)
+- Sin acceso a herramientas administrativas
 
 ### 👤 Comprador (Rol: "comprador")
 

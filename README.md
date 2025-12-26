@@ -15,9 +15,10 @@
 - 🎠 **Carrusel automático** con controles manuales
 - 👤 **Gestión de sesión** con persistencia de usuario y timeout automático (15 min)
 - 📱 **Compatible** con dispositivos móviles y tablets
-- 🗄️ **Base de datos** Firebase Realtime Database para usuarios y productos
-- ✅ **Auto-creación de usuarios** en Database al iniciar sesión
+- 🗄️ **Base de datos** Cloud Firestore para usuarios y productos
+- ✅ **Auto-creación de usuarios** en Firestore al iniciar sesión
 - 🎯 **Badge visual** para identificar administradores
+- 🔄 **Script de migración** para pasar datos de Realtime Database a Firestore
 
 ---
 
@@ -27,13 +28,13 @@
 
 - Navegador web moderno (Chrome, Firefox, Edge, Safari)
 - Conexión a internet (para cargar Firebase SDK)
-- Cuenta de Firebase (si deseas configurar tu propia instancia)
+- Cuenta de Firebase con **Cloud Firestore** habilitado
 
 ### Instalación
 
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/tu-usuario/carbassdeportes.git
+   git clone https://github.com/bercun/carbassdeportes.git
    cd carbassdeportes
    ```
 
@@ -47,16 +48,23 @@
      # Luego visitar http://localhost:8000
      ```
 
-3. **Configurar Firebase (Opcional)**
-   - Si deseas usar tu propia instancia de Firebase, edita [firebase-config.js](firebase-config.js) con tus credenciales
+3. **Configurar Firebase**
+   - Edita [firebase-config.js](firebase-config.js) con tus credenciales de Firebase.
+   - Asegúrate de habilitar **Authentication** (Email/Password) y **Cloud Firestore** en la consola de Firebase.
 
-### Uso
+### Migración de Datos (Si vienes de Realtime Database)
 
-- **Página Principal**: Abre [index.html](index.html) para ver la página principal con productos destacados
-- **Catálogo Completo**: Navega a [catalogo.html](catalogo.html) para ver todos los productos
-- **Iniciar Sesión**: Haz clic en "Iniciar Sesión" en la navbar para acceder a [login.html](login.html)
-- **Registrarse**: En la página de login, haz clic en "Regístrate aquí" para crear una cuenta nueva
-- **Agregar al Carrito**: Debes estar autenticado para poder agregar productos al carrito
+Si ya tenías datos en Realtime Database y quieres pasarlos a Firestore:
+1. Abre el proyecto en el navegador.
+2. Abre la consola (F12).
+3. Ejecuta:
+   ```javascript
+   const script = document.createElement('script');
+   script.src = 'migrate-to-firestore.js';
+   document.head.appendChild(script);
+   // Luego:
+   migrateToFirestore();
+   ```
 
 ---
 
@@ -66,28 +74,21 @@
 carbassdeportes/
 ├── index.html              # Página principal (vista pública)
 ├── catalogo.html           # Catálogo completo de productos
-├── login.html              # Página de autenticación
-├── script.js               # Lógica JavaScript principal
-├── auth.js                 # Lógica de autenticación Firebase
-├── auth-check.js           # Verificación de sesión activa y roles
-├── firebase-config.js      # Configuración de Firebase
+├── login.html              # Página de autenticación (con navbar de retorno)
+├── script.js               # Lógica JavaScript principal (lectura desde Firestore)
+├── auth.js                 # Lógica de autenticación Firebase (escritura en Firestore)
+├── auth-check.js           # Verificación de sesión activa y roles (Firestore)
+├── firebase-config.js      # Configuración de Firebase (Auth, RTDB y Firestore)
 ├── admin.html              # Panel de administración
-├── admin.js                # Lógica del panel administrativo
+├── admin.js                # Lógica del panel administrativo (CRUD Firestore)
+├── migrate-to-firestore.js # Script de migración RTDB -> Firestore
 ├── test-db.html            # Herramienta de diagnóstico Firebase
 ├── CONFIGURACION_ADMIN.md  # Guía de configuración de administradores
-├── firebase-rules.json     # Reglas de seguridad Firebase
+├── firebase-rules.json     # Reglas de seguridad Firebase (RTDB)
 ├── styles.css              # Estilos principales CSS
-├── db.json                 # Datos de productos (para importar a Firebase)
+├── db.json                 # Datos de productos (formato JSON)
 ├── README.md               # Documentación del proyecto
 └── sours/
-    ├── img/
-    │   ├── articulos/      # Imágenes de productos (futuras)
-    │   ├── aside/          # Imágenes del sidebar promocional
-    │   ├── carrousel/      # Imágenes del carrusel principal
-    │   ├── coleccionables/ # Imágenes de items coleccionables
-    │   └── logos/          # Logo de la marca CarbassDeportes
-    ├── promts/             # Prompts y documentación adicional
-    └── videos/             # Videos promocionales para hover
 ```
 
 ### Descripción de Archivos Clave
@@ -96,53 +97,46 @@ carbassdeportes/
 |---------|-------------|
 | `index.html` | Página principal con productos destacados, carrusel y promociones |
 | `catalogo.html` | Catálogo completo organizado por categorías (Fútbol, Running, Fitness, etc.) |
-| `login.html` | Formulario de login/registro con Firebase Authentication |
+| `login.html` | Formulario de login/registro con Firebase Authentication y botón de volver |
 | `admin.html` | Panel de administración para gestionar productos y usuarios (solo administradores) |
-| `script.js` | Lógica principal: carrusel, videos hover, carga de productos, filtros |
-| `auth.js` | Manejo de login/registro, validación y guardado en Firebase Database con rol 'comprador' |
-| `auth-check.js` | Verificación de sesión, gestión de roles, timeout automático, UI dinámica según rol |
-| `admin.js` | CRUD completo de productos y gestión de roles de usuarios |
-| `firebase-config.js` | Credenciales y configuración de Firebase (Auth y Database) |
-| `test-db.html` | Herramienta de diagnóstico para verificar conexión y migrar usuarios |
-| `styles.css` | Estilos completos con variables CSS, Grid, Flexbox y estilos del panel admin |
-| `db.json` | Base de datos de productos en formato JSON para importar |
-| `CONFIGURACION_ADMIN.md` | Guía paso a paso para crear el primer usuario administrador |
+| `script.js` | Lógica principal: carrusel, videos hover, carga de productos desde Firestore |
+| `auth.js` | Manejo de login/registro, validación y guardado en Firestore con rol 'comprador' |
+| `auth-check.js` | Verificación de sesión, gestión de roles en Firestore, timeout automático |
+| `admin.js` | CRUD completo de productos y gestión de roles de usuarios en Firestore |
+| `firebase-config.js` | Credenciales y configuración de Firebase (Auth, RTDB y Firestore) |
+| `migrate-to-firestore.js` | Script para migrar datos existentes de Realtime Database a Firestore |
+| `styles.css` | Estilos completos, incluyendo centrado de navbar en login y panel admin |
 
 ---
 
 ## 🔥 Configuración de Firebase
 
-### Estructura de la Base de Datos
+### Estructura de la Base de Datos (Firestore)
 
-El proyecto utiliza Firebase Realtime Database con la siguiente estructura:
+El proyecto utiliza Cloud Firestore con las siguientes colecciones:
 
+#### Colección: `articulos`
+Documentos con ID automático o manual:
 ```json
 {
-  "articulos": {
-    "0": {
-      "nombre": "Zapatillas Deportivas Premium",
-      "imagen": "sours/img/articulos/zapatillas-deportivas-premium.jpg",
-      "descripción": "Zapatillas diseñadas para ofrecer el máximo rendimiento y comodidad.",
-      "precio": 120.0,
-      "categoria": "gym",
-      "estatus": "destacado"
-    },
-    "1": { ... }
-  },
-  "usuarios": {
-    "uid-generado-por-firebase": {
-      "nombre": "Juan Pérez",
-      "email": "juan@example.com",
-      "rol": "comprador",
-      "fechaRegistro": "2025-12-22T10:30:00Z"
-    },
-    "otro-uid": {
-      "nombre": "Admin User",
-      "email": "admin@example.com",
-      "rol": "administrador",
-      "fechaRegistro": "2025-12-22T11:00:00Z"
-    }
-  }
+  "nombre": "Zapatillas Deportivas Premium",
+  "imagen": "sours/img/articulos/zapatillas-deportivas-premium.jpg",
+  "descripción": "Zapatillas diseñadas para ofrecer el máximo rendimiento.",
+  "precio": 120.0,
+  "categoria": "gym",
+  "estatus": "destacado",
+  "ultimaActualizacion": "timestamp"
+}
+```
+
+#### Colección: `usuarios`
+Documentos con ID igual al `uid` de Firebase Auth:
+```json
+{
+  "nombre": "Juan Pérez",
+  "email": "juan@example.com",
+  "rol": "comprador",
+  "fechaRegistro": "2025-12-22T10:30:00Z"
 }
 ```
 
@@ -151,80 +145,33 @@ El proyecto utiliza Firebase Realtime Database con la siguiente estructura:
 El sistema implementa dos niveles de acceso:
 
 - **`comprador`** - Usuario estándar que puede navegar y comprar productos
-  - Se asigna automáticamente al registrarse
-  - Acceso limitado a funciones de navegación y compra
-  
-- **`administrador`** - Usuario con privilegios completos
-  - Acceso al panel de administración ([admin.html](admin.html))
-  - Puede gestionar productos (crear, editar, eliminar)
-  - Puede cambiar roles de otros usuarios
-  - Visualiza badge verde "ADMIN" en la barra de navegación
-  - Tiene acceso al enlace verde "🛠️ Admin" en el navbar
+- **`administrador`** - Usuario con privilegios completos (Acceso a [admin.html](admin.html))
 
-### Categorías de Productos
+### Reglas de Seguridad Recomendadas (Firestore)
 
-- `futbol` - Artículos de fútbol
-- `basket` - Artículos de baloncesto
-- `gym` - Equipamiento de gimnasio y running
-- `coleccionables` - Items de colección y ediciones limitadas
-
-### Estados de Productos
-
-- `destacado` - Productos destacados en la página principal
-- `oferta` - Productos con descuento especial
-- `recien agregado` - Productos nuevos en el catálogo
-
-### Reglas de Seguridad Recomendadas
-
-```json
-{
-  "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null"
-  }
-}
-```
-
-**Nota**: Las reglas actuales permiten lectura/escritura a cualquier usuario autenticado. Para producción, se recomienda implementar reglas más restrictivas basadas en roles:
-
-```json
-{
-  "rules": {
-    "articulos": {
-      ".read": true,
-      ".write": "root.child('usuarios').child(auth.uid).child('rol').val() === 'administrador'"
-    },
-    "usuarios": {
-      "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && (auth.uid == $uid || root.child('usuarios').child(auth.uid).child('rol').val() === 'administrador')"
-      }
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /articulos/{articuloId} {
+      allow read: if true;
+      allow write: if request.auth != null; // O restringir a admins
+    }
+    match /usuarios/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow list: if request.auth != null && 
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == 'administrador';
     }
   }
 }
 ```
 
-### Importar Datos
-
-Para importar los productos a Firebase:
-
-1. Ve a Firebase Console > Realtime Database
-2. Haz clic en los tres puntos ⋮ > Importar JSON
-3. Selecciona el archivo [db.json](db.json)
-4. Confirma la importación
-
 ### Configuración del Primer Administrador
 
-Para crear el primer usuario administrador, consulta la guía completa en [CONFIGURACION_ADMIN.md](CONFIGURACION_ADMIN.md).
-
-**Pasos rápidos**:
-1. Crea un usuario desde [login.html](login.html)
-2. Copia el UID desde Firebase Console > Authentication
-3. Abre [test-db.html](test-db.html) en el navegador
-4. Inicia sesión con el usuario creado
-5. Haz clic en "Migrar Usuario Actual a Database"
-6. En Firebase Console > Realtime Database, cambia manualmente el campo `rol` de `"comprador"` a `"administrador"`
-7. Recarga la página y verás el badge "ADMIN" y el enlace al panel
+1. Crea un usuario desde [login.html](login.html).
+2. En Firebase Console > Firestore Database, busca el documento del usuario en la colección `usuarios`.
+3. Cambia el campo `rol` de `"comprador"` a `"administrador"`.
+4. Recarga la página y verás el acceso al panel de administración.
 
 ---
 
