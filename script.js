@@ -110,35 +110,30 @@ const db = firebase.firestore();
 // Función auxiliar para crear el HTML de una tarjeta de artículo
 function createArticleCardHtml(article, isSmallGrid = false) {
   const precio = typeof article.precio === 'number' ? article.precio : parseFloat(article.precio) || 0;
-  if (isSmallGrid) {
-    return `
-      <div class="card">
-        <div class="thumb">
-          <img src="${article.imagen || 'https://placehold.co/400x260?text=Sin+Imagen'}" alt="${article.nombre}"/>
-        </div>
-        <h4>${article.nombre}</h4>
-        <p class="meta" style="margin-top:5px;">
-          <span class="price" style="font-size:0.9em">$${precio.toFixed(2)}</span>
-          ${article.estatus ? `<span class="badge" style="font-size:0.7em; padding:4px;">${article.estatus}</span>` : ''}
-        </p>
+  
+  // Formatear el estatus para que se vea mejor
+  let estatusDisplay = article.estatus || '';
+  if (estatusDisplay.toLowerCase() === 'recien agregado') estatusDisplay = 'Nuevo';
+  else if (estatusDisplay.toLowerCase() === 'oferta') estatusDisplay = 'Oferta';
+  else if (estatusDisplay.toLowerCase() === 'destacado') estatusDisplay = 'Destacado';
+  else if (estatusDisplay) estatusDisplay = estatusDisplay.charAt(0).toUpperCase() + estatusDisplay.slice(1);
+
+  return `
+    <article class="card">
+      <div class="thumb">
+        <img src="${article.imagen || 'https://placehold.co/600x400?text=Sin+Imagen'}" alt="${article.nombre}"/>
+        ${article.estatus ? `<span class="badge">${estatusDisplay}</span>` : ''}
       </div>
-    `;
-  } else {
-    return `
-      <article class="card">
-        <div class="thumb">
-          <img src="${article.imagen || 'https://placehold.co/600x400?text=Sin+Imagen'}" alt="${article.nombre}"/>
-        </div>
+      <div class="card-content">
         <h4>${article.nombre}</h4>
-        <p class="meta">
+        <p class="description">${article.descripción || ''}</p>
+        <div class="meta">
           <span class="price">$${precio.toFixed(2)}</span>
-          ${article.estatus ? `<span class="badge">${article.estatus}</span>` : ''}
-        </p>
-        <p>${article.descripción || ''}</p>
-        <button class="add-btn">Agregar al carrito</button>
-      </article>
-    `;
-  }
+        </div>
+        <button class="add-btn">Agregar al Carrito</button>
+      </div>
+    </article>
+  `;
 }
 
 // Función para renderizar artículos en un contenedor específico
@@ -201,8 +196,8 @@ db.collection('articulos').onSnapshot((snapshot) => {
   } else {
     // Página principal: mostrar máximo 3 artículos por sección
     renderArticlesToContainer(destacadosContainer, destacados, false, 3);
-    renderArticlesToContainer(recientesContainer, recientes, true, 3);
-    renderArticlesToContainer(ofertasContainer, ofertas, true, 3);
+    renderArticlesToContainer(recientesContainer, recientes, false, 3);
+    renderArticlesToContainer(ofertasContainer, ofertas, false, 3);
     renderArticlesToContainer(futbolContainer, futbolArticles, false, 3);
     renderArticlesToContainer(basketContainer, basketArticles, false, 3);
     renderArticlesToContainer(gymContainer, gymArticles, false, 3);
