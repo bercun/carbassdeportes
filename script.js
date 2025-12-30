@@ -217,7 +217,21 @@ function loadProducts() {
     })
     .catch((error) => {
       console.error('❌ Error cargando productos:', error);
-      showErrorMessage('Error cargando productos. Verifica las reglas de Firestore.');
+      
+      // Manejo específico de errores comunes
+      if (error.code === 'permission-denied') {
+        console.error('🚫 Error de permisos - verifica las reglas de Firestore');
+        showErrorMessage('Error de permisos. Verifica las reglas de Firestore.');
+      } else if (error.message && error.message.includes('ERR_BLOCKED_BY_CLIENT')) {
+        console.error('🛡️ Solicitud bloqueada por el cliente (posible bloqueador de anuncios)');
+        showErrorMessage('Conexión bloqueada. Desactiva bloqueadores de anuncios y recarga la página.');
+      } else if (error.message && error.message.includes('Failed to fetch')) {
+        console.error('🌐 Error de red - sin conexión a internet');
+        showErrorMessage('Sin conexión a internet. Verifica tu conexión y recarga la página.');
+      } else {
+        console.error('⚠️ Error desconocido:', error.message || error);
+        showErrorMessage('Error cargando productos. Verifica tu conexión y recarga la página.');
+      }
     });
 }
 
@@ -238,39 +252,87 @@ function renderAllSections(allArticles) {
   const coleccionables = allArticles.filter(p => 
     p.categoria && p.categoria.toLowerCase() === 'coleccionables'
   );
+  const futbol = allArticles.filter(p => 
+    p.categoria && p.categoria.toLowerCase() === 'futbol'
+  );
+  const basket = allArticles.filter(p => 
+    p.categoria && p.categoria.toLowerCase() === 'basket'
+  );
+  const gym = allArticles.filter(p => 
+    p.categoria && p.categoria.toLowerCase() === 'gym'
+  );
   
   console.log('🔍 Productos filtrados:');
   console.log(`- Destacados: ${destacados.length}`);
   console.log(`- Recientes: ${recientes.length}`);
   console.log(`- Ofertas: ${ofertas.length}`);
   console.log(`- Coleccionables: ${coleccionables.length}`);
+  console.log(`- Fútbol: ${futbol.length}`);
+  console.log(`- Basket: ${basket.length}`);
+  console.log(`- Gym: ${gym.length}`);
   
-  // DESTACADOS
+  // RENDERIZADO SOLO SI EL CONTENEDOR EXISTE
+  
+  // DESTACADOS (index.html)
   const destacadosContainer = document.getElementById('destacados-container');
   if (destacadosContainer) {
     console.log('🌟 Renderizando destacados...');
     renderArticlesToContainer(destacadosContainer, destacados, false, 3);
   }
 
-  // RECIENTES
+  // RECIENTES (index.html)
   const recientesContainer = document.getElementById('recientes-container');
   if (recientesContainer) {
     console.log('🆕 Renderizando recientes...');
     renderArticlesToContainer(recientesContainer, recientes, true, 3);
+  } else {
+    console.log('ℹ️ Contenedor recientes no encontrado (normal en catálogo)');
   }
 
-  // OFERTAS  
+  // OFERTAS (index.html)  
   const ofertasContainer = document.getElementById('ofertas-container');
   if (ofertasContainer) {
     console.log('💰 Renderizando ofertas...');
     renderArticlesToContainer(ofertasContainer, ofertas, true, 3);
+  } else {
+    console.log('ℹ️ Contenedor ofertas no encontrado (normal en catálogo)');
   }
 
-  // COLECCIONABLES
+  // COLECCIONABLES (index.html y catalogo.html)
   const coleccionablesContainer = document.getElementById('coleccionables-container');
   if (coleccionablesContainer) {
     console.log('🏆 Renderizando coleccionables...');
-    renderArticlesToContainer(coleccionablesContainer, coleccionables, false, 3);
+    // En index: límite 3, en catálogo: todos
+    const isIndexPage = document.getElementById('destacados-container') !== null;
+    const limit = isIndexPage ? 3 : null;
+    renderArticlesToContainer(coleccionablesContainer, coleccionables, false, limit);
+  }
+
+  // FÚTBOL (catalogo.html)
+  const futbolContainer = document.getElementById('futbol-container');
+  if (futbolContainer) {
+    console.log('⚽ Renderizando fútbol...');
+    renderArticlesToContainer(futbolContainer, futbol, false);
+  } else {
+    console.log('ℹ️ Contenedor fútbol no encontrado (normal en index)');
+  }
+
+  // BASKET (catalogo.html)
+  const basketContainer = document.getElementById('basket-container');
+  if (basketContainer) {
+    console.log('🏀 Renderizando basket...');
+    renderArticlesToContainer(basketContainer, basket, false);
+  } else {
+    console.log('ℹ️ Contenedor basket no encontrado (normal en index)');
+  }
+
+  // GYM (catalogo.html)
+  const gymContainer = document.getElementById('gym-container');
+  if (gymContainer) {
+    console.log('💪 Renderizando gym...');
+    renderArticlesToContainer(gymContainer, gym, false);
+  } else {
+    console.log('ℹ️ Contenedor gym no encontrado (normal en index)');
   }
 
   console.log('✅ Renderizado de todas las secciones completado');
@@ -318,21 +380,28 @@ function initializeApp() {
     return;
   }
   
-  // Verificar que los contenedores existen
-  const containers = [
+  // Verificar que los contenedores existen (para index.html o catalogo.html)
+  const indexContainers = [
     'destacados-container',
     'recientes-container', 
-    'ofertas-container',
+    'ofertas-container'
+  ];
+  
+  const catalogoContainers = [
+    'futbol-container',
+    'basket-container',
+    'gym-container'
+  ];
+  
+  const sharedContainers = [
     'coleccionables-container'
   ];
   
   let containersFound = 0;
-  containers.forEach(id => {
+  [...indexContainers, ...catalogoContainers, ...sharedContainers].forEach(id => {
     if (document.getElementById(id)) {
       containersFound++;
       console.log(`✅ Contenedor encontrado: ${id}`);
-    } else {
-      console.warn(`⚠️ Contenedor NO encontrado: ${id}`);
     }
   });
   
@@ -340,6 +409,12 @@ function initializeApp() {
     console.warn('⚠️ No se encontraron contenedores - posible página incorrecta');
     return;
   }
+  
+  // Determinar el tipo de página
+  const isIndex = indexContainers.some(id => document.getElementById(id));
+  const isCatalogo = catalogoContainers.some(id => document.getElementById(id));
+  
+  console.log(`📄 Página detectada: ${isIndex ? 'Index' : ''} ${isCatalogo ? 'Catálogo' : ''}`);
   
   // Cargar productos directamente
   console.log('⏰ Iniciando carga de productos...');
@@ -412,174 +487,3 @@ if (document.readyState !== 'loading') {
     });
   });
 })();
-
-// === CARGA SIMPLIFICADA QUE FUNCIONA ===
-// Ejecutar inmediatamente después de los destacados
-setTimeout(() => {
-  console.log('🔄 Iniciando carga de secciones adicionales...');
-  
-  if (typeof firebase === 'undefined') {
-    console.error('❌ Firebase no disponible para secciones adicionales');
-    return;
-  }
-  
-  const db = firebase.firestore();
-  console.log('✅ Firestore disponible para secciones adicionales');
-  
-  // Cargar recientes
-  const recientesContainer = document.getElementById('recientes-container');
-  if (recientesContainer) {
-    console.log('🔄 Cargando recientes...');
-    db.collection('articulos').where('estatus', '==', 'recien agregado').limit(3).get()
-      .then(snapshot => {
-        console.log('📦 Recientes encontrados:', snapshot.size);
-        if (snapshot.empty) {
-          recientesContainer.innerHTML = '<p style="text-align: center;">No hay productos recientes</p>';
-          return;
-        }
-        
-        let html = '';
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          console.log('➕ Agregando reciente:', data.nombre);
-          const precio = data.precio || 0;
-          html += `
-            <article class="card">
-              <div class="thumb">
-                <img src="${data.imagen || 'https://placehold.co/600x400'}" alt="${data.nombre}"/>
-                <span class="badge">Nuevo</span>
-              </div>
-              <div class="card-content">
-                <h4>${data.nombre}</h4>
-                <p class="description">${data.descripción || ''}</p>
-                <div class="meta">
-                  <span class="price">$${precio}</span>
-                </div>
-                <button class="add-btn">Agregar al Carrito</button>
-              </div>
-            </article>
-          `;
-        });
-        
-        recientesContainer.innerHTML = html;
-        setupAddButtons();
-        console.log('✅ Recientes cargados exitosamente');
-      })
-      .catch(error => {
-        console.error('❌ Error cargando recientes:', error);
-        recientesContainer.innerHTML = '<p style="color: red;">Error cargando recientes</p>';
-      });
-  } else {
-    console.warn('⚠️ Contenedor recientes no encontrado');
-  }
-  
-}, 2000);
-
-// Cargar ofertas con delay adicional
-setTimeout(() => {
-  console.log('🔄 Cargando ofertas...');
-  
-  const db = firebase.firestore();
-  const ofertasContainer = document.getElementById('ofertas-container');
-  
-  if (ofertasContainer) {
-    db.collection('articulos').where('estatus', '==', 'oferta').limit(3).get()
-      .then(snapshot => {
-        console.log('💰 Ofertas encontradas:', snapshot.size);
-        if (snapshot.empty) {
-          ofertasContainer.innerHTML = '<p style="text-align: center;">No hay ofertas disponibles</p>';
-          return;
-        }
-        
-        let html = '';
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          console.log('➕ Agregando oferta:', data.nombre);
-          const precio = data.precio || 0;
-          html += `
-            <article class="card">
-              <div class="thumb">
-                <img src="${data.imagen || 'https://placehold.co/600x400'}" alt="${data.nombre}"/>
-                <span class="badge">Oferta</span>
-              </div>
-              <div class="card-content">
-                <h4>${data.nombre}</h4>
-                <p class="description">${data.descripción || ''}</p>
-                <div class="meta">
-                  <span class="price">$${precio}</span>
-                </div>
-                <button class="add-btn">Agregar al Carrito</button>
-              </div>
-            </article>
-          `;
-        });
-        
-        ofertasContainer.innerHTML = html;
-        setupAddButtons();
-        console.log('✅ Ofertas cargadas exitosamente');
-      })
-      .catch(error => {
-        console.error('❌ Error cargando ofertas:', error);
-        ofertasContainer.innerHTML = '<p style="color: red;">Error cargando ofertas</p>';
-      });
-  } else {
-    console.warn('⚠️ Contenedor ofertas no encontrado');
-  }
-  
-}, 4000);
-
-// Cargar coleccionables con delay mayor
-setTimeout(() => {
-  console.log('🔄 Cargando coleccionables...');
-  
-  const db = firebase.firestore();
-  const coleccionablesContainer = document.getElementById('coleccionables-container');
-  
-  if (coleccionablesContainer) {
-    db.collection('articulos').where('categoria', '==', 'coleccionables').limit(3).get()
-      .then(snapshot => {
-        console.log('🏆 Coleccionables encontrados:', snapshot.size);
-        if (snapshot.empty) {
-          coleccionablesContainer.innerHTML = '<p style="text-align: center;">No hay coleccionables disponibles</p>';
-          return;
-        }
-        
-        let html = '';
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          console.log('➕ Agregando coleccionable:', data.nombre);
-          const precio = data.precio || 0;
-          let badge = 'Coleccionable';
-          if (data.estatus === 'destacado') badge = 'Destacado';
-          
-          html += `
-            <article class="card">
-              <div class="thumb">
-                <img src="${data.imagen || 'https://placehold.co/600x400'}" alt="${data.nombre}"/>
-                <span class="badge">${badge}</span>
-              </div>
-              <div class="card-content">
-                <h4>${data.nombre}</h4>
-                <p class="description">${data.descripción || ''}</p>
-                <div class="meta">
-                  <span class="price">$${precio}</span>
-                </div>
-                <button class="add-btn">Agregar al Carrito</button>
-              </div>
-            </article>
-          `;
-        });
-        
-        coleccionablesContainer.innerHTML = html;
-        setupAddButtons();
-        console.log('✅ Coleccionables cargados exitosamente');
-      })
-      .catch(error => {
-        console.error('❌ Error cargando coleccionables:', error);
-        coleccionablesContainer.innerHTML = '<p style="color: red;">Error cargando coleccionables</p>';
-      });
-  } else {
-    console.warn('⚠️ Contenedor coleccionables no encontrado');
-  }
-  
-}, 6000);
