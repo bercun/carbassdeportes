@@ -1,5 +1,16 @@
-const auth = firebase.auth();
-// database ya está declarado en firebase-config.js
+let auth;
+
+try {
+  if (typeof firebase === 'undefined') {
+    throw new Error('Firebase no está cargado');
+  }
+  auth = firebase.auth();
+  console.log('✅ Firebase Auth inicializado');
+} catch (error) {
+  console.error('❌ Error inicializando Auth:', error);
+}
+
+// Firestore ya está declarado en firebase-config.js
 
 // Variables del formulario
 const authForm = document.getElementById('auth-form');
@@ -51,6 +62,12 @@ if (toggleLink) {
 if (authForm) {
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    if (!auth) {
+      errorMessage.textContent = 'Error: Sistema de autenticación no disponible';
+      return;
+    }
+    
     errorMessage.textContent = '';
     submitBtn.disabled = true;
     submitBtn.textContent = 'Procesando...';
@@ -115,9 +132,13 @@ if (authForm) {
 }
 
 // Verificar si el usuario ya está autenticado
-auth.onAuthStateChanged((user) => {
-  if (user && window.location.pathname.includes('login.html')) {
-    // Si ya está logueado y está en la página de login, redirigir
-    window.location.href = 'index.html';
-  }
-});
+if (auth) {
+  auth.onAuthStateChanged((user) => {
+    if (user && window.location.pathname.includes('login.html')) {
+      // Si ya está logueado y está en la página de login, redirigir
+      window.location.href = 'index.html';
+    }
+  });
+} else {
+  console.warn('⚠️ Auth no disponible - funcionalidad de login limitada');
+}

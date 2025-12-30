@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Firebase - CarbassDeportes</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+        .log { background: #f8f9fa; padding: 10px; margin: 5px 0; border-left: 3px solid #007bff; }
+        .success { border-color: #28a745; background: #d4edda; }
+        .error { border-color: #dc3545; background: #f8d7da; }
+        .warning { border-color: #ffc107; background: #fff3cd; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Firebase - CarbassDeportes</h1>
+    
+    <button onclick="testFirebaseConnection()">1. Probar Conexión Firebase</button>
+    <button onclick="listCollections()">2. Listar Colecciones</button>
+    <button onclick="checkArticulos()">3. Verificar Artículos</button>
+    <button onclick="addTestArticle()">4. Agregar Artículo de Prueba</button>
+    <button onclick="testRules()">5. Probar Reglas</button>
+    
+    <div id="output"></div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        function log(message, type = 'log') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.innerHTML = new Date().toLocaleTimeString() + ' - ' + message;
+            output.appendChild(div);
+            console.log(message);
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function testFirebaseConnection() {
+            log('🧪 Probando conexión Firebase...', 'log');
+            
+            if (typeof firebase === 'undefined') {
+                log('❌ Firebase no está cargado', 'error');
+                return;
+            }
+            
+            log('✅ Firebase está cargado', 'success');
+            
+            try {
+                const db = firebase.firestore();
+                log('✅ Firestore inicializado', 'success');
+                
+                // Probar conexión básica
+                db.enableNetwork().then(() => {
+                    log('✅ Red habilitada', 'success');
+                }).catch(error => {
+                    log('⚠️ Advertencia red: ' + error.message, 'warning');
+                });
+                
+            } catch (error) {
+                log('❌ Error Firestore: ' + error.message, 'error');
+            }
+        }
+        
+        function listCollections() {
+            log('📋 Intentando listar colecciones...', 'log');
+            
+            try {
+                const db = firebase.firestore();
+                
+                // Intentar leer la colección articulos
+                db.collection('articulos').limit(1).get()
+                    .then(snapshot => {
+                        if (snapshot.empty) {
+                            log('⚠️ Colección "articulos" existe pero está vacía', 'warning');
+                        } else {
+                            log('✅ Colección "articulos" encontrada con datos', 'success');
+                        }
+                    })
+                    .catch(error => {
+                        log('❌ Error accediendo a "articulos": ' + error.code + ' - ' + error.message, 'error');
+                    });
+                    
+            } catch (error) {
+                log('❌ Error general: ' + error.message, 'error');
+            }
+        }
+        
+        function checkArticulos() {
+            log('🔍 Verificando artículos en detalle...', 'log');
+            
+            const db = firebase.firestore();
+            
+            db.collection('articulos').get()
+                .then(snapshot => {
+                    log(`📊 Total documentos: ${snapshot.size}`, 'log');
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        log(`📄 Documento ${doc.id}: ${JSON.stringify(data, null, 2)}`, 'log');
+                    });
+                    
+                    if (snapshot.empty) {
+                        log('⚠️ No hay artículos - esto explica por qué no se cargan', 'warning');
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Error: ${error.code} - ${error.message}`, 'error');
+                    
+                    if (error.code === 'permission-denied') {
+                        log('🔒 Problema de permisos - revisa las reglas de Firestore', 'error');
+                    }
+                });
+        }
+        
+        function addTestArticle() {
+            log('➕ Agregando artículo de prueba...', 'log');
+            
+            const db = firebase.firestore();
+            
+            const testArticle = {
+                nombre: 'Artículo de Prueba',
+                descripción: 'Este es un artículo de prueba',
+                precio: 99.99,
+                categoria: 'futbol',
+                estatus: 'destacado',
+                imagen: 'https://placehold.co/600x400?text=Prueba',
+                fechaCreacion: new Date().toISOString()
+            };
+            
+            db.collection('articulos').add(testArticle)
+                .then(docRef => {
+                    log(`✅ Artículo agregado con ID: ${docRef.id}`, 'success');
+                    log('🔄 Ahora prueba recargar la página principal', 'log');
+                })
+                .catch(error => {
+                    log(`❌ Error agregando artículo: ${error.code} - ${error.message}`, 'error');
+                });
+        }
+        
+        function testRules() {
+            log('🔐 Probando reglas de seguridad...', 'log');
+            
+            const db = firebase.firestore();
+            
+            // Probar lectura sin autenticación
+            db.collection('articulos').limit(1).get()
+                .then(snapshot => {
+                    log('✅ Lectura sin autenticación: PERMITIDA', 'success');
+                })
+                .catch(error => {
+                    if (error.code === 'permission-denied') {
+                        log('❌ Lectura sin autenticación: DENEGADA', 'error');
+                        log('💡 Solución: Cambiar reglas de Firestore para permitir lectura pública', 'warning');
+                        log('📝 Regla sugerida: allow read: if true;', 'log');
+                    } else {
+                        log(`❌ Error inesperado: ${error.message}`, 'error');
+                    }
+                });
+        }
+        
+        // Auto-ejecutar test básico
+        setTimeout(() => {
+            log('🚀 Iniciando diagnóstico automático...', 'log');
+            testFirebaseConnection();
+            setTimeout(checkArticulos, 1000);
+        }, 500);
+    </script>
+</body>
+</html>
