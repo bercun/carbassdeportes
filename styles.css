@@ -75,18 +75,18 @@ body{
   display: inline-block;
   background:var(--negro);
   color:var(--verde);
-  padding:8px 12px;
-  border-radius:8px;
-  border: 0.5px solid var(--verde);
+  padding:4px 6px;
+  border-radius:2px;
+  border: 0.5px solid var(--negro);
   font-weight:700;
-  font-size: 2rem;
+  font-size: 1.5rem;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.3s ease;
 }
 .carrito:hover{
-  transform: scale(1.2);
-  background: var(--gris);
+  transform: scale(1.1);
+  background: var(--verde-oscuro);
   color: var(--negro);
 }
 
@@ -213,7 +213,7 @@ aside.left{
 }
 .card{
   background:var(--blanco);
-  border-radius:12px;
+  border-radius:2px;
   overflow:hidden;
   box-shadow:0 4px 20px rgba(0,0,0,0.08);
   transition:all 0.3s ease;
@@ -247,7 +247,7 @@ aside.left{
   background:var(--verde);
   color:var(--blanco);
   padding:4px 12px;
-  border-radius:20px;
+  border-radius:2px;
   font-size:0.75rem;
   font-weight:600;
   text-transform:uppercase;
@@ -290,7 +290,7 @@ aside.left{
   background:var(--verde);
   color:var(--blanco);
   border:none;
-  border-radius:8px;
+  border-radius:2px;
   font-weight:600;
   cursor:pointer;
   transition:background 0.3s ease;
@@ -312,7 +312,7 @@ aside.left{
   align-items:center;
   gap:12px;
   padding:12px;
-  border-radius:10px;
+  border-radius:2px;
   background:linear-gradient(180deg,var(--blanco),#fafafa);
   box-shadow:0 6px 14px rgba(2,6,23,0.04);
   cursor:pointer;

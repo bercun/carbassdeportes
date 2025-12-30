@@ -204,3 +204,62 @@ db.collection('articulos').onSnapshot((snapshot) => {
     renderArticlesToContainer(coleccionablesContainer, coleccionablesArticles, false, 3);
   }
 });
+
+// Navegación suave entre secciones
+(function(){
+  // Agregar smooth scroll para todos los enlaces internos
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+})();
+
+// Funcionalidad para los iconos de categorías
+(function(){
+  const iconCards = document.querySelectorAll('.icon-card');
+  iconCards.forEach(card => {
+    card.addEventListener('click', function(){
+      const categoryText = this.querySelector('div').textContent.toLowerCase();
+      let targetSection = '';
+      
+      switch(categoryText) {
+        case 'fútbol':
+          targetSection = 'catalogo.html#futbol-section';
+          break;
+        case 'basket':
+          targetSection = 'catalogo.html#basket-section';
+          break;
+        case 'gym':
+          targetSection = 'catalogo.html#gym-section';
+          break;
+        case 'coleccionables':
+          targetSection = '#coleccionables';
+          break;
+        default:
+          targetSection = 'catalogo.html';
+      }
+      
+      if (targetSection.startsWith('#')) {
+        // Scroll interno en la misma página
+        const target = document.querySelector(targetSection);
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      } else {
+        // Navegar a otra página
+        window.location.href = targetSection;
+      }
+    });
+  });
+})();
