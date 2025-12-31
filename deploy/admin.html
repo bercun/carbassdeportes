@@ -7,6 +7,21 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Barra superior sticky para usuario -->
+  <div class="user-bar">
+    <div class="user-bar-content">
+      <div class="user-info">
+        <span id="user-name" class="user-name"></span>
+      </div>
+      <div class="user-actions">
+        <a href="admin.html" class="admin-btn active" title="Panel Admin">🛠️</a>
+        <a href="#" class="carrito" title="Carrito">🛒</a>
+        <button onclick="logout()" class="btn-logout hidden" id="logout-btn">Salir</button>
+        <a href="login.html" class="btn-login hidden" id="login-btn">Iniciar Sesión</a>
+      </div>
+    </div>
+  </div>
+
   <div class="site">
     <header class="navbar">
       <div class="brand">
@@ -21,13 +36,7 @@
           <li><a href="admin.html" class="active">Admin</a></li>
         </ul>
       </nav>
-
-      <div class="user-section">
-        <span id="user-name" class="user-name"></span>
-        <button onclick="logout()" class="btn-logout hidden" id="logout-btn">Cerrar sesión</button>
-        <a href="login.html" class="btn-login hidden" id="login-btn">Iniciar Sesión</a>
-        <a href="#" class="carrito">🛒</a>
-      </div>
+    </header>
     </header>
 
     <main class="layout layout-single-column">

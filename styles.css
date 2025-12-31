@@ -8,6 +8,136 @@
   --max-width: 1200px;
 }
 
+/* ===========================================
+   BARRA SUPERIOR DE USUARIO (STICKY)
+   =========================================== */
+
+.user-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--gris);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 8px 0;
+}
+
+.user-bar-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.user-info .user-name {
+  color: white;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 4px 12px;
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  border-radius: 20px;
+  display: inline-block;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-actions .admin-btn {
+  color: var(--verde);
+  text-decoration: none;
+  font-size: 1.1rem;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background: rgba(76, 175, 80, 0.05);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.user-actions .admin-btn:hover {
+  background: rgba(76, 175, 80, 0.8);
+  color: white;
+  transform: scale(1.05);
+  border: 1px solid var(--verde);
+}
+
+.user-actions .carrito {
+  color: var(--verde);
+  font-size: 1.3rem;
+  text-decoration: none;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background: rgba(76, 175, 80, 0.05);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.user-actions .carrito:hover {
+  background: rgba(76, 175, 80, 0.8);
+  color: white;
+  transform: scale(1.1);
+  border: 1px solid var(--verde);
+}
+
+.user-actions .btn-logout {
+  padding: 6px 12px;
+  background: rgba(255, 68, 68, 0.1);
+  border: 1px solid rgba(255, 68, 68, 0.4);
+  color: #ff4444;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.user-actions .btn-logout:hover {
+  background: rgba(255, 68, 68, 0.8);
+  color: white;
+  border: 1px solid #ff4444;
+}
+
+.user-actions .btn-login {
+  padding: 6px 12px;
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--verde);
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  backdrop-filter: blur(10px);
+}
+
+.user-actions .btn-login:hover {
+  background: rgba(76, 175, 80, 0.8);
+  color: white;
+  border: 1px solid var(--verde);
+}
+
+/* Ajustar el cuerpo para la barra superior */
+body {
+  padding-top: 60px;
+}
+
+/* ===========================================
+   NAVBAR PRINCIPAL (LIMPIO)
+   =========================================== */
+
 /* Reset básico */
 *{
   box-sizing:border-box;
@@ -30,42 +160,50 @@ body{
 
 /* NAVBAR */
 .navbar{
-  position:sticky;
-  top:0;
-  z-index:100;
+  position: sticky;
+  top: 50px;
+  z-index: 999;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:16px;
-  padding:14px 10px;
-  background:var(--negro);
+  gap:8px;
+  padding:10px 8px;
+  background: var(--negro);
+  backdrop-filter: blur(15px);
   color:var(--blanco);
-  border-radius:10px
+  border-radius:10px;
+  margin-top: 10px;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 .brand{
   display:flex;
   align-items:center;
   background-color: var(--negro);
-  gap:12px
+  gap:8px;
+  flex-shrink: 0;
 }
 .logo-svg{
-  width:5rem;
-  height:5rem;
+  width:4rem;
+  height:4rem;
 }
 .brand h1{
-  font-size: 2rem;
+  font-size: 1.6rem;
   color:var(--blanco);
-  letter-spacing:0.4px
+  letter-spacing:0.2px;
+  white-space: nowrap;
 }
 .navlinks{
   display:flex;
-  gap:18px;
-  list-style:none
+  gap:12px;
+  list-style:none;
+  flex-wrap: wrap;
 }
 .navlinks a{
   color:var(--blanco);
   text-decoration:none;
-  font-weight:600
+  font-weight:600;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 .navlinks a.active{
   color:var(--verde);
@@ -84,10 +222,26 @@ body{
   text-decoration: none;
   transition: all 0.3s ease;
 }
-.carrito:hover{
-  transform: scale(1.1);
-  background: var(--verde-oscuro);
-  color: var(--negro);
+/* Responsive para barra de usuario */
+@media (max-width: 768px) {
+  .user-bar-content {
+    padding: 0 10px;
+  }
+  
+  .user-actions {
+    gap: 8px;
+  }
+  
+  .user-info .user-name {
+    max-width: 120px;
+    font-size: 0.8rem;
+  }
+  
+  .user-actions .btn-logout,
+  .user-actions .btn-login {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
 }
 
 
@@ -533,18 +687,22 @@ footer{
 }
 
 /* Sección de usuario en navbar */
+/* Ocultar user-section ya que ahora está en user-bar */
 .user-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: none;
 }
 
 .user-name {
   color: white;
   font-weight: 500;
-  padding: 5px 10px;
+  font-size: 0.85rem;
+  padding: 4px 8px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Badge de ADMIN */
@@ -552,14 +710,14 @@ footer{
   display: inline-block;
   background: var(--verde);
   color: white;
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 3px;
-  margin-left: 8px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  margin-left: 4px;
   vertical-align: middle;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 /* Enlace Admin en navbar */
@@ -573,11 +731,51 @@ footer{
 }
 
 .btn-logout {
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: transparent;
   border: 1px solid white;
   color: white;
-  border-radius: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: white;
+  color: var(--negro);
+}
+
+.btn-login {
+  padding: 6px 12px;
+  background: var(--verde);
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+  background: var(--verde-oscuro);
+}
+
+.carrito{
+  display: inline-block;
+  background:var(--negro);
+  color:var(--verde);
+  padding:3px 5px;
+  border-radius:3px;
+  border: 1px solid var(--verde);
+  font-weight:700;
+  font-size: 1.2rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
   cursor: pointer;
   transition: all 0.3s;
   font-size: 14px;
