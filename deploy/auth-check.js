@@ -38,6 +38,11 @@ firebase.auth().onAuthStateChanged((user) => {
   const adminLink = document.getElementById('admin-link');
   
   if (user) {
+    // Verificar que firestore esté disponible
+    if (typeof firestore === 'undefined') {
+      return;
+    }
+    
     // Cargar datos del usuario desde Firestore
     firestore.collection('usuarios').doc(user.uid).get()
       .then((doc) => {
@@ -144,8 +149,8 @@ firebase.auth().onAuthStateChanged((user) => {
   }
 });
 
-// Función de logout
-function logout() {
+// Función de logout (global)
+window.logout = function() {
   // Limpiar el temporizador de sesión
   if (sessionTimer) {
     clearTimeout(sessionTimer);

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Auth UI - Deploy</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .debug-section { 
+      border: 1px solid #ccc; 
+      padding: 15px; 
+      margin: 10px 0; 
+      border-radius: 5px;
+    }
+    .hidden { display: none !important; }
+    #user-name { color: blue; font-weight: bold; }
+    #logout-btn, #login-btn { 
+      padding: 8px 12px; 
+      margin: 0 5px; 
+      border: none; 
+      border-radius: 4px; 
+      cursor: pointer;
+    }
+    #logout-btn { background-color: #ff4444; color: white; }
+    #login-btn { background-color: #4444ff; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Debug: Autenticación UI (Versión Deploy)</h1>
+  
+  <div class="debug-section">
+    <h3>Estado de Firebase</h3>
+    <div id="firebase-status">Cargando...</div>
+  </div>
+  
+  <div class="debug-section">
+    <h3>Elementos de Autenticación</h3>
+    <span id="user-name" class="user-name"></span>
+    <button onclick="logout()" class="hidden" id="logout-btn">Cerrar sesión</button>
+    <a href="login.html" class="hidden" id="login-btn">Iniciar Sesión</a>
+    <a href="admin.html" id="admin-link" class="hidden admin-link">🛠️ Admin</a>
+  </div>
+  
+  <div class="debug-section">
+    <h3>Pruebas Manuales</h3>
+    <button onclick="testElements()">Verificar Elementos DOM</button>
+    <button onclick="testFirebase()">Verificar Firebase</button>
+    <div id="test-results"></div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="auth-check.js"></script>
+  
+  <script>
+    // Verificaciones adicionales
+    function testElements() {
+      const results = {
+        'user-name': !!document.getElementById('user-name'),
+        'logout-btn': !!document.getElementById('logout-btn'),
+        'login-btn': !!document.getElementById('login-btn'),
+        'admin-link': !!document.getElementById('admin-link')
+      };
+      
+      document.getElementById('test-results').innerHTML = 
+        '<h4>Elementos DOM:</h4>' + 
+        Object.entries(results).map(([key, value]) => 
+          `<div>${key}: ${value ? '✅' : '❌'}</div>`
+        ).join('');
+    }
+    
+    function testFirebase() {
+      const firebaseStatus = document.getElementById('firebase-status');
+      
+      if (typeof firebase === 'undefined') {
+        firebaseStatus.innerHTML = '❌ Firebase no cargado';
+        return;
+      }
+      
+      if (typeof firestore === 'undefined') {
+        firebaseStatus.innerHTML = '⚠️ Firebase cargado, pero Firestore no disponible';
+        return;
+      }
+      
+      const auth = firebase.auth();
+      const user = auth.currentUser;
+      
+      firebaseStatus.innerHTML = `
+        ✅ Firebase: OK<br>
+        ✅ Firestore: OK<br>
+        👤 Usuario actual: ${user ? user.email : 'No autenticado'}
+      `;
+    }
+    
+    // Auto-ejecutar pruebas
+    setTimeout(() => {
+      testFirebase();
+      testElements();
+    }, 1000);
+  </script>
+</body>
+</html>
