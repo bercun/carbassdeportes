@@ -1,4 +1,8 @@
 <?php
+// Evitar cualquier salida antes de los headers
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); // Permitir CORS
 
@@ -24,13 +28,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         
     } else {
         // Obtener todos los productos
-        $sql = 'SELECT p.*, c.nombre as categoria_nombre 
+        $sql = 'SELECT p.*, c.nombre as categoria_nombre, c.id as categoria_id_tabla
                 FROM productos p 
                 LEFT JOIN categorias c ON p.categoria_id = c.id 
-                ORDER BY p.fecha_creacion DESC';
+                ORDER BY p.id DESC';
         
         $stmt = $pdo->query($sql);
         $productos = $stmt->fetchAll();
+        
+        // Log para debugging
+        error_log('Productos encontrados: ' . count($productos));
         
         echo json_encode($productos);
     }
@@ -152,4 +159,3 @@ else {
     http_response_code(405);
     echo json_encode(['error' => 'Método no permitido']);
 }
-?>

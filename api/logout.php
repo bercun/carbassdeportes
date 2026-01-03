@@ -16,4 +16,3 @@ echo json_encode([
     'success' => true,
     'message' => 'Sesión cerrada exitosamente'
 ]);
-?>

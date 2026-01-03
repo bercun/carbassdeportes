@@ -22,4 +22,3 @@ if (isset($_SESSION['user_id'])) {
         'logged_in' => false
     ]);
 }
-?>

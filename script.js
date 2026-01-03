@@ -196,12 +196,15 @@ async function loadProducts() {
       nombre: product.nombre,
       descripción: product.descripcion,
       precio: parseFloat(product.precio),
-      imagen: product.imagen_url,
-      categoria: getCategoriaSlug(product.categoria_id),
-      estatus: product.destacado ? 'destacado' : 'normal'
+      imagen: product.imagen_url || 'https://placehold.co/600x400?text=Sin+Imagen',
+      categoria: product.categoria_nombre || 'general',
+      categoria_id: product.categoria_id,
+      estatus: product.destacado == 1 ? 'destacado' : 'normal',
+      destacado: product.destacado
     }));
     
     console.log('✅ Total productos cargados:', adaptedArticles.length);
+    console.log('📦 Muestra de productos:', adaptedArticles.slice(0, 3));
     
     // Renderizar todas las secciones
     renderAllSections(adaptedArticles);
@@ -212,11 +215,16 @@ async function loadProducts() {
   }
 }
 
-// Función auxiliar para obtener slug de categoría
-function getCategoriaSlug(categoriaId) {
-  // Aquí puedes mapear IDs a slugs si es necesario
-  // Por ahora retornamos un valor por defecto
-  return 'futbol';
+// Función auxiliar para normalizar nombres de categoría
+function normalizarCategoria(categoria) {
+  if (!categoria) return 'general';
+  const cat = categoria.toLowerCase().trim();
+  // Normalizar nombres comunes
+  if (cat.includes('fútbol') || cat.includes('futbol') || cat.includes('soccer')) return 'futbol';
+  if (cat.includes('basket') || cat.includes('baloncesto')) return 'basket';
+  if (cat.includes('gym') || cat.includes('gimnasio') || cat.includes('fitness')) return 'gym';
+  if (cat.includes('coleccionable')) return 'coleccionables';
+  return cat;
 }
 
 // Función para renderizar todas las secciones
@@ -225,26 +233,40 @@ function renderAllSections(allArticles) {
   
   // Filtrar por categorías
   const destacados = allArticles.filter(p => 
-    p.estatus && p.estatus.toLowerCase() === 'destacado'
+    p.destacado == 1 || (p.estatus && p.estatus.toLowerCase() === 'destacado')
   );
-  const recientes = allArticles.filter(p => 
-    p.estatus && p.estatus.toLowerCase() === 'recien agregado'
-  );
+  
+  // Si no hay destacados, usar los primeros 3 productos
+  if (destacados.length === 0) {
+    destacados.push(...allArticles.slice(0, 3));
+  }
+  
+  const recientes = allArticles.slice(0, 3); // Los 3 más recientes
   const ofertas = allArticles.filter(p => 
     p.estatus && p.estatus.toLowerCase() === 'oferta'
   );
-  const coleccionables = allArticles.filter(p => 
-    p.categoria && p.categoria.toLowerCase() === 'coleccionables'
-  );
-  const futbol = allArticles.filter(p => 
-    p.categoria && p.categoria.toLowerCase() === 'futbol'
-  );
-  const basket = allArticles.filter(p => 
-    p.categoria && p.categoria.toLowerCase() === 'basket'
-  );
-  const gym = allArticles.filter(p => 
-    p.categoria && p.categoria.toLowerCase() === 'gym'
-  );
+  
+  // Si no hay ofertas, mostrar productos aleatorios
+  if (ofertas.length === 0) {
+    ofertas.push(...allArticles.slice(3, 6));
+  }
+  
+  const coleccionables = allArticles.filter(p => {
+    const cat = normalizarCategoria(p.categoria);
+    return cat === 'coleccionables';
+  });
+  const futbol = allArticles.filter(p => {
+    const cat = normalizarCategoria(p.categoria);
+    return cat === 'futbol';
+  });
+  const basket = allArticles.filter(p => {
+    const cat = normalizarCategoria(p.categoria);
+    return cat === 'basket';
+  });
+  const gym = allArticles.filter(p => {
+    const cat = normalizarCategoria(p.categoria);
+    return cat === 'gym';
+  });
   
   console.log('🔍 Productos filtrados:');
   console.log(`- Destacados: ${destacados.length}`);
