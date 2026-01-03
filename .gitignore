@@ -1,1 +1,30 @@
-firebase-config.js
+# Archivos de test y debug
+test.html
+test-db.html
+debug-auth.js
+debug-auth-ui.html
+debug-firebase.html
+check-resources.js
+deploy/debug-auth-ui.html
+
+# Archivos temporales
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# Configuración local (si existe)
+firebase-config.local.js
+
+# Node modules (si usas npm)
+node_modules/
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de backup
+*.bak
+*~
