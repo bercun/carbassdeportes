@@ -1,13 +1,3 @@
-let auth;
-
-try {
-  if (typeof firebase !== 'undefined') {
-    auth = firebase.auth();
-  }
-} catch (error) {
-  // Error de inicialización silencioso
-}
-
 // Variables del formulario
 const authForm = document.getElementById('auth-form');
 const emailInput = document.getElementById('email');
@@ -63,16 +53,9 @@ if (authForm) {
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Verificar que Firebase Auth esté disponible
-    if (!auth) {
-      if (errorMessage) {
-        errorMessage.textContent = 'Servicio de autenticación no disponible.';
-      }
-      return;
-    }
-    
     const email = emailInput.value;
     const password = passwordInput.value;
+    const nombre = nameInput ? nameInput.value : '';
     
     // Limpiar mensajes previos
     if (errorMessage) {
@@ -86,51 +69,35 @@ if (authForm) {
     }
     
     try {
-      if (isLoginMode) {
-        // Iniciar sesión
-        await auth.signInWithEmailAndPassword(email, password);
-      } else {
-        // Registrar nuevo usuario
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        
-        // Actualizar el perfil con el nombre si se proporcionó
-        if (nameInput && nameInput.value) {
-          await userCredential.user.updateProfile({
-            displayName: nameInput.value
-          });
-        }
+      const endpoint = isLoginMode ? 'api/login.php' : 'api/register.php';
+      const body = isLoginMode 
+        ? { email, password }
+        : { email, password, nombre };
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Error en la autenticación');
       }
+      
+      // Login/registro exitoso
+      console.log('Usuario autenticado:', data.user);
       
       // Redirigir a la página principal
       window.location.href = 'index.html';
       
     } catch (error) {
-      // Mensajes de error en español
-      let errorMsg = 'Ocurrió un error. Intenta nuevamente.';
-      
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errorMsg = 'Este email ya está registrado.';
-          break;
-        case 'auth/invalid-email':
-          errorMsg = 'Email inválido.';
-          break;
-        case 'auth/weak-password':
-          errorMsg = 'La contraseña debe tener al menos 6 caracteres.';
-          break;
-        case 'auth/user-not-found':
-          errorMsg = 'No existe una cuenta con este email.';
-          break;
-        case 'auth/wrong-password':
-          errorMsg = 'Contraseña incorrecta.';
-          break;
-        case 'auth/too-many-requests':
-          errorMsg = 'Demasiados intentos fallidos. Intenta más tarde.';
-          break;
-      }
-      
+      // Mostrar mensaje de error
       if (errorMessage) {
-        errorMessage.textContent = errorMsg;
+        errorMessage.textContent = error.message || 'Ocurrió un error. Intenta nuevamente.';
       }
       
       // Restaurar botón
@@ -143,11 +110,12 @@ if (authForm) {
 }
 
 // Verificar si el usuario ya está autenticado
-if (auth) {
-  auth.onAuthStateChanged((user) => {
-    if (user && window.location.pathname.includes('login.html')) {
+fetch('api/check_auth.php')
+  .then(res => res.json())
+  .then(data => {
+    if (data.logged_in && window.location.pathname.includes('login.html')) {
       // Si ya está logueado y está en la página de login, redirigir
       window.location.href = 'index.html';
     }
-  });
-}
+  })
+  .catch(err => console.log('No se pudo verificar autenticación'));

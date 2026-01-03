@@ -72,15 +72,21 @@ function setupAddButtons() {
     if(btn.dataset.listener === 'true') return;
     btn.dataset.listener = 'true';
 
-    btn.addEventListener('click', (e)=>{
+    btn.addEventListener('click', async (e)=>{
       // Verificar si el usuario está autenticado
-      const user = firebase.auth().currentUser;
-      
-      if (!user) {
-        // Si no está logueado, redirigir al login
-        if (confirm('Debes iniciar sesión para agregar productos al carrito. ¿Ir a iniciar sesión?')) {
-          window.location.href = 'login.html';
+      try {
+        const response = await fetch('api/check_auth.php');
+        const data = await response.json();
+        
+        if (!data.logged_in) {
+          // Si no está logueado, redirigir al login
+          if (confirm('Debes iniciar sesión para agregar productos al carrito. ¿Ir a iniciar sesión?')) {
+            window.location.href = 'login.html';
+          }
+          return;
         }
+      } catch (error) {
+        console.error('Error verificando autenticación:', error);
         return;
       }
       
@@ -102,24 +108,8 @@ function setupAddButtons() {
   });
 }
 
-// Firebase ya está inicializado en firebase-config.js
-let db;
-
-// Verificar que Firebase esté disponible
-function initializeFirebase() {
-  try {
-    if (typeof firebase === 'undefined') {
-      throw new Error('Firebase no está cargado');
-    }
-    
-    db = firebase.firestore();
-    console.log('✅ Firestore inicializado en script.js');
-    return true;
-  } catch (error) {
-    console.error('❌ Error inicializando Firestore:', error);
-    return false;
-  }
-}
+// API PHP en lugar de Firebase
+const API_BASE_URL = 'api/';
 
 // Función auxiliar para crear el HTML de una tarjeta de artículo
 function createArticleCardHtml(article, isSmallGrid = false) {
@@ -179,60 +169,54 @@ function renderArticlesToContainer(containerElement, articlesArray, isSmallGrid 
   setupAddButtons(); // Re-asociar eventos a los nuevos botones
 }
 // Función simplificada para cargar y renderizar productos
-function loadProducts() {
-  if (!initializeFirebase()) {
-    showErrorMessage('Error: Firebase no disponible');
-    return;
-  }
-  
+async function loadProducts() {
   console.log('🔄 Iniciando carga de productos...');
   
-  db.collection('articulos').get()
-    .then((snapshot) => {
-      console.log('✅ Conexión exitosa con Firestore');
-      console.log('📄 Documentos encontrados:', snapshot.size);
-      
-      if (snapshot.empty) {
-        console.warn('⚠️ No hay productos en la base de datos');
-        showNoProductsMessage();
-        return;
-      }
-      
-      // Convertir a array
-      const allArticles = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        allArticles.push({
-          id: doc.id,
-          ...data
-        });
-        console.log(`📝 Producto cargado: ${data.nombre} (${data.categoria}/${data.estatus})`);
-      });
+  try {
+    const response = await fetch(API_BASE_URL + 'productos.php');
+    
+    if (!response.ok) {
+      throw new Error('Error al cargar productos');
+    }
+    
+    const allArticles = await response.json();
+    
+    console.log('✅ Conexión exitosa con API');
+    console.log('📄 Productos encontrados:', allArticles.length);
+    
+    if (allArticles.length === 0) {
+      console.warn('⚠️ No hay productos en la base de datos');
+      showNoProductsMessage();
+      return;
+    }
+    
+    // Adaptar campos de MySQL a la estructura esperada
+    const adaptedArticles = allArticles.map(product => ({
+      id: product.id,
+      nombre: product.nombre,
+      descripción: product.descripcion,
+      precio: parseFloat(product.precio),
+      imagen: product.imagen_url,
+      categoria: getCategoriaSlug(product.categoria_id),
+      estatus: product.destacado ? 'destacado' : 'normal'
+    }));
+    
+    console.log('✅ Total productos cargados:', adaptedArticles.length);
+    
+    // Renderizar todas las secciones
+    renderAllSections(adaptedArticles);
+    
+  } catch (error) {
+    console.error('❌ Error cargando productos:', error);
+    showErrorMessage('Error cargando productos. Verifica tu conexión y recarga la página.');
+  }
+}
 
-      console.log('✅ Total productos cargados:', allArticles.length);
-      
-      // Renderizar todas las secciones
-      renderAllSections(allArticles);
-      
-    })
-    .catch((error) => {
-      console.error('❌ Error cargando productos:', error);
-      
-      // Manejo específico de errores comunes
-      if (error.code === 'permission-denied') {
-        console.error('🚫 Error de permisos - verifica las reglas de Firestore');
-        showErrorMessage('Error de permisos. Verifica las reglas de Firestore.');
-      } else if (error.message && error.message.includes('ERR_BLOCKED_BY_CLIENT')) {
-        console.error('🛡️ Solicitud bloqueada por el cliente (posible bloqueador de anuncios)');
-        showErrorMessage('Conexión bloqueada. Desactiva bloqueadores de anuncios y recarga la página.');
-      } else if (error.message && error.message.includes('Failed to fetch')) {
-        console.error('🌐 Error de red - sin conexión a internet');
-        showErrorMessage('Sin conexión a internet. Verifica tu conexión y recarga la página.');
-      } else {
-        console.error('⚠️ Error desconocido:', error.message || error);
-        showErrorMessage('Error cargando productos. Verifica tu conexión y recarga la página.');
-      }
-    });
+// Función auxiliar para obtener slug de categoría
+function getCategoriaSlug(categoriaId) {
+  // Aquí puedes mapear IDs a slugs si es necesario
+  // Por ahora retornamos un valor por defecto
+  return 'futbol';
 }
 
 // Función para renderizar todas las secciones

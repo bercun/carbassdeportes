@@ -1,22 +1,23 @@
 // admin.js - Lógica del panel de administración
 
-const db = firebase.firestore();
 let currentEditingProductId = null;
+let userSession = null;
 
 // Verificar permisos de administrador al cargar la página
-firebase.auth().onAuthStateChanged((user) => {
-  if (!user) {
-    // No hay usuario autenticado, redirigir a login
-    window.location.href = 'login.html';
-    return;
-  }
-
-  // Verificar rol del usuario en Firestore
-  db.collection('usuarios').doc(user.uid).get().then((doc) => {
-    const userData = doc.data();
-    const userRole = userData?.rol || 'comprador';
-
-    if (userRole !== 'administrador') {
+async function checkAdminAccess() {
+  try {
+    const response = await fetch('api/check_auth.php');
+    const data = await response.json();
+    
+    if (!data.logged_in) {
+      // No hay usuario autenticado, redirigir a login
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    userSession = data.user;
+    
+    if (userSession.rol !== 'admin') {
       // No es administrador, mostrar mensaje de acceso denegado
       document.getElementById('access-denied').classList.remove('hidden');
       document.getElementById('admin-panel').classList.add('hidden');
@@ -27,102 +28,73 @@ firebase.auth().onAuthStateChanged((user) => {
       
       // Cargar datos
       loadProducts();
-      loadUsers();
       loadStats();
     }
-  }).catch((error) => {
-    console.error("Error al verificar rol:", error);
-    window.location.href = 'index.html';
-  });
-});
+  } catch (error) {
+    console.error("Error al verificar autenticación:", error);
+    window.location.href = 'login.html';
+  }
+}
+
+// Ejecutar verificación al cargar la página
+checkAdminAccess();
 
 // Cargar estadísticas
-function loadStats() {
-  // Contar productos
-  db.collection('articulos').get().then((snapshot) => {
-    const count = snapshot.size;
-    document.getElementById('total-productos').textContent = count;
-  }).catch(err => console.error("Error al contar productos:", err));
-
-  // Contar usuarios
-  db.collection('usuarios').get().then((snapshot) => {
-    const count = snapshot.size;
-    document.getElementById('total-usuarios').textContent = count;
-  }).catch(err => {
-    console.error("Error al contar usuarios:", err);
-    document.getElementById('total-usuarios').textContent = "Error";
-  });
+async function loadStats() {
+  try {
+    const response = await fetch('api/productos.php');
+    const productos = await response.json();
+    document.getElementById('total-productos').textContent = productos.length;
+  } catch (err) {
+    console.error("Error al contar productos:", err);
+    document.getElementById('total-productos').textContent = "Error";
+  }
+  
+  // Total de usuarios (podrías crear un endpoint para esto)
+  document.getElementById('total-usuarios').textContent = "-";
 }
 
 // Cargar productos
-function loadProducts() {
-  db.collection('articulos').onSnapshot((snapshot) => {
+async function loadProducts() {
+  try {
+    const response = await fetch('api/productos.php');
+    const productos = await response.json();
+    
     const tbody = document.getElementById('products-table-body');
     
-    if (snapshot.empty) {
+    if (productos.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay productos registrados</td></tr>';
       return;
     }
 
-    const productosArray = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    tbody.innerHTML = productosArray.map(product => `
+    tbody.innerHTML = productos.map(product => `
       <tr>
-        <td><img src="${product.imagen}" alt="${product.nombre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>
+        <td><img src="${product.imagen_url || 'https://placehold.co/50x50'}" alt="${product.nombre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>
         <td>${product.nombre}</td>
-        <td><span class="categoria-badge categoria-${product.categoria}">${getCategoriaName(product.categoria)}</span></td>
+        <td><span class="categoria-badge">${product.categoria_nombre || 'Sin categoría'}</span></td>
         <td>$${parseFloat(product.precio).toFixed(2)}</td>
-        <td><span class="estatus-badge estatus-${product.estatus?.replace(' ', '-')}">${product.estatus || 'normal'}</span></td>
+        <td><span class="estatus-badge ${product.destacado ? 'estatus-destacado' : ''}">${product.destacado ? 'Destacado' : 'Normal'}</span></td>
         <td>
-          <button class="btn-edit" onclick="editProduct('${product.id}')">✏️</button>
-          <button class="btn-delete" onclick="deleteProduct('${product.id}', '${product.nombre}')">🗑️</button>
+          <button class="btn-edit" onclick="editProduct(${product.id})">✏️</button>
+          <button class="btn-delete" onclick="deleteProduct(${product.id}, '${product.nombre.replace(/'/g, "\\'")}')">🗑️</button>
         </td>
       </tr>
     `).join('');
-  });
+  } catch (error) {
+    console.error("Error al cargar productos:", error);
+    const tbody = document.getElementById('products-table-body');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error al cargar productos</td></tr>';
+    }
+  }
 }
 
-// Cargar usuarios
+// Cargar usuarios (ahora deshabilitado - necesitarías crear api/usuarios.php)
 function loadUsers() {
-  db.collection('usuarios').onSnapshot((snapshot) => {
-    const tbody = document.getElementById('users-table-body');
-    
-    if (snapshot.empty) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay usuarios registrados</td></tr>';
-      return;
-    }
-
-    const usuariosArray = snapshot.docs.map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    }));
-
-    tbody.innerHTML = usuariosArray.map(user => `
-      <tr>
-        <td>${user.nombre}</td>
-        <td>${user.email}</td>
-        <td>
-          <select class="role-select" onchange="changeUserRole('${user.uid}', this.value)">
-            <option value="comprador" ${user.rol === 'comprador' ? 'selected' : ''}>Comprador</option>
-            <option value="administrador" ${user.rol === 'administrador' ? 'selected' : ''}>Administrador</option>
-          </select>
-        </td>
-        <td>${formatDate(user.fechaRegistro)}</td>
-        <td>
-          <button class="btn-delete" onclick="deleteUser('${user.uid}', '${user.nombre}')" ${user.rol === 'administrador' ? 'disabled' : ''}>🗑️</button>
-        </td>
-      </tr>
-    `).join('');
-  }, (error) => {
-    console.error("Error al cargar usuarios:", error);
-    const tbody = document.getElementById('users-table-body');
-    if (tbody) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Error de permisos: No puedes ver la lista de usuarios.</td></tr>`;
-    }
-  });
+  const tbody = document.getElementById('users-table-body');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Función deshabilitada - requiere endpoint de usuarios</td></tr>';
+  }
 }
 
 // Cambiar entre tabs
@@ -153,39 +125,57 @@ function closeProductModal() {
 }
 
 // Editar producto
-function editProduct(productId) {
-  db.collection('articulos').doc(productId).get().then((doc) => {
-    const product = doc.data();
+async function editProduct(productId) {
+  try {
+    const response = await fetch(`api/productos.php?id=${productId}`);
+    const product = await response.json();
+    
     if (!product) return;
 
     currentEditingProductId = productId;
     document.getElementById('modal-title').textContent = 'Editar Producto';
     document.getElementById('product-id').value = productId;
     document.getElementById('product-nombre').value = product.nombre;
-    document.getElementById('product-imagen').value = product.imagen;
-    document.getElementById('product-descripcion').value = product.descripción || product.descripcion || '';
+    document.getElementById('product-imagen').value = product.imagen_url || '';
+    document.getElementById('product-descripcion').value = product.descripcion || '';
     document.getElementById('product-precio').value = product.precio;
-    document.getElementById('product-categoria').value = product.categoria;
-    document.getElementById('product-estatus').value = product.estatus || '';
+    document.getElementById('product-categoria').value = product.categoria_id || '';
+    document.getElementById('product-estatus').value = product.destacado ? 'destacado' : '';
     
     document.getElementById('product-modal').classList.remove('hidden');
-  });
+  } catch (error) {
+    console.error('Error al cargar producto:', error);
+    alert('Error al cargar el producto');
+  }
 }
 
 // Eliminar producto
-function deleteProduct(productId, productName) {
+async function deleteProduct(productId, productName) {
   if (!confirm(`¿Estás seguro de eliminar el producto "${productName}"?`)) {
     return;
   }
 
-  db.collection('articulos').doc(productId).delete()
-    .then(() => {
-      alert('Producto eliminado exitosamente');
-    })
-    .catch((error) => {
-      console.error('Error al eliminar producto:', error);
-      alert('Error al eliminar el producto');
+  try {
+    const response = await fetch('api/admin_productos.php', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: productId })
     });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert('Producto eliminado exitosamente');
+      loadProducts(); // Recargar lista
+    } else {
+      alert(data.error || 'Error al eliminar el producto');
+    }
+  } catch (error) {
+    console.error('Error al eliminar producto:', error);
+    alert('Error al eliminar el producto');
+  }
 }
 
 // Manejar envío del formulario de producto
@@ -198,26 +188,47 @@ document.getElementById('product-form')?.addEventListener('submit', async (e) =>
 
   const productData = {
     nombre: document.getElementById('product-nombre').value,
-    imagen: document.getElementById('product-imagen').value,
-    descripción: document.getElementById('product-descripcion').value,
+    imagen_url: document.getElementById('product-imagen').value,
+    descripcion: document.getElementById('product-descripcion').value,
     precio: parseFloat(document.getElementById('product-precio').value),
-    categoria: document.getElementById('product-categoria').value,
-    estatus: document.getElementById('product-estatus').value,
-    ultimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+    categoria_id: parseInt(document.getElementById('product-categoria').value) || null,
+    destacado: document.getElementById('product-estatus').value === 'destacado' ? 1 : 0,
+    stock: 0
   };
 
   try {
+    let response;
+    
     if (currentEditingProductId) {
       // Actualizar producto existente
-      await db.collection('articulos').doc(currentEditingProductId).update(productData);
-      alert('Producto actualizado exitosamente');
+      productData.id = currentEditingProductId;
+      response = await fetch('api/admin_productos.php', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData)
+      });
     } else {
       // Crear nuevo producto
-      await db.collection('articulos').add(productData);
-      alert('Producto agregado exitosamente');
+      response = await fetch('api/admin_productos.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData)
+      });
     }
     
-    closeProductModal();
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert(currentEditingProductId ? 'Producto actualizado exitosamente' : 'Producto agregado exitosamente');
+      closeProductModal();
+      loadProducts(); // Recargar lista
+    } else {
+      alert(data.error || 'Error al guardar el producto');
+    }
   } catch (error) {
     console.error('Error al guardar producto:', error);
     alert('Error al guardar el producto');
@@ -227,46 +238,15 @@ document.getElementById('product-form')?.addEventListener('submit', async (e) =>
   }
 });
 
-// Cambiar rol de usuario
+// Cambiar rol de usuario (deshabilitado)
 function changeUserRole(uid, newRole) {
-  const currentUser = firebase.auth().currentUser;
-  
-  if (currentUser.uid === uid && newRole !== 'administrador') {
-    alert('No puedes quitarte los permisos de administrador a ti mismo');
-    loadUsers(); // Recargar para restaurar el select
-    return;
-  }
-
-  if (!confirm(`¿Cambiar el rol de este usuario a "${newRole}"?`)) {
-    loadUsers(); // Recargar para restaurar el select
-    return;
-  }
-
-  db.collection('usuarios').doc(uid).update({ rol: newRole })
-    .then(() => {
-      alert('Rol actualizado exitosamente');
-    })
-    .catch((error) => {
-      console.error('Error al cambiar rol:', error);
-      alert('Error al cambiar el rol');
-      loadUsers();
-    });
+  alert('Función deshabilitada - requiere endpoint de usuarios');
+  loadUsers();
 }
 
-// Eliminar usuario
+// Eliminar usuario (deshabilitado)
 function deleteUser(uid, userName) {
-  if (!confirm(`¿Estás seguro de eliminar al usuario "${userName}"?\n\nNOTA: Esto solo eliminará los datos del usuario en la base de datos, no su cuenta de autenticación.`)) {
-    return;
-  }
-
-  db.collection('usuarios').doc(uid).delete()
-    .then(() => {
-      alert('Datos del usuario eliminados exitosamente');
-    })
-    .catch((error) => {
-      console.error('Error al eliminar usuario:', error);
-      alert('Error al eliminar el usuario');
-    });
+  alert('Función deshabilitada - requiere endpoint de usuarios');
 }
 
 // Funciones auxiliares
