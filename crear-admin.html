@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Usuario Admin - CarbassDeportes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Crear Usuario Administrador</h1>
+        
+        <div class="warning">
+            <strong>⚠️ IMPORTANTE:</strong> Este formulario crea un usuario con permisos de ADMINISTRADOR.
+            Solo debe usarse para crear el primer admin o usuarios de confianza.
+        </div>
+
+        <div class="info">
+            <strong>ℹ️ Información:</strong>
+            <p>El administrador podrá:</p>
+            <ul>
+                <li>Crear, editar y eliminar productos</li>
+                <li>Gestionar categorías</li>
+                <li>Ver todas las estadísticas</li>
+            </ul>
+            <p>Los usuarios regulares solo podrán ver y comprar productos.</p>
+        </div>
+
+        <form id="create-admin-form">
+            <div class="form-group">
+                <label for="nombre">Nombre Completo:</label>
+                <input type="text" id="nombre" name="nombre" required placeholder="Juan Pérez">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required placeholder="admin@carbassdeportes.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" required placeholder="Mínimo 6 caracteres">
+            </div>
+
+            <div class="form-group">
+                <label for="confirm-password">Confirmar Contraseña:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+
+            <button type="submit">✅ Crear Administrador</button>
+        </form>
+
+        <div id="resultado"></div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="login.html" style="color: #007bff; text-decoration: none;">← Volver al Login</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('create-admin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const resultDiv = document.getElementById('resultado');
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            // Validaciones
+            if (password !== confirmPassword) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Error:</strong> Las contraseñas no coinciden
+                    </div>
+                `;
+                return;
+            }
+
+            if (password.length < 6) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Error:</strong> La contraseña debe tener al menos 6 caracteres
+                    </div>
+                `;
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="info"><p>⏳ Creando administrador...</p></div>';
+
+            try {
+                const response = await fetch('api/create_admin.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Administrador creado exitosamente</h3>
+                            <p><strong>Nombre:</strong> ${data.user.nombre}</p>
+                            <p><strong>Email:</strong> ${data.user.email}</p>
+                            <p><strong>Rol:</strong> ${data.user.rol}</p>
+                            <p style="margin-top: 15px;">
+                                <a href="login.html" style="color: #007bff;">Ir a iniciar sesión →</a>
+                            </p>
+                        </div>
+                    `;
+                    document.getElementById('create-admin-form').reset();
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ Error:</strong> ${data.error || 'No se pudo crear el administrador'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Error de conexión:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

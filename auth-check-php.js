@@ -22,25 +22,22 @@ async function checkAuth() {
       // Mostrar nombre del usuario
       if (userNameElement) {
         userNameElement.textContent = userSession.nombre || userSession.email.split('@')[0];
-        userNameElement.style.display = 'inline';
       }
       
-      // Mostrar botón de cerrar sesión
+      // Mostrar botón de cerrar sesión, ocultar login
       if (logoutBtn) {
-        logoutBtn.style.display = 'inline-block';
+        logoutBtn.classList.remove('hidden');
       }
-      
-      // Ocultar botón de login
       if (loginBtn) {
-        loginBtn.style.display = 'none';
+        loginBtn.classList.add('hidden');
       }
       
       // Mostrar enlace de admin si es administrador
       if (adminLink) {
         if (userSession.rol === 'admin') {
-          adminLink.style.display = 'inline-block';
+          adminLink.classList.remove('hidden');
         } else {
-          adminLink.style.display = 'none';
+          adminLink.classList.add('hidden');
         }
       }
     } else {
@@ -50,22 +47,19 @@ async function checkAuth() {
       // Ocultar nombre de usuario
       if (userNameElement) {
         userNameElement.textContent = '';
-        userNameElement.style.display = 'none';
       }
       
-      // Ocultar botón de cerrar sesión
+      // Ocultar botón de cerrar sesión, mostrar login
       if (logoutBtn) {
-        logoutBtn.style.display = 'none';
+        logoutBtn.classList.add('hidden');
       }
-      
-      // Mostrar botón de login
       if (loginBtn) {
-        loginBtn.style.display = 'inline-block';
+        loginBtn.classList.remove('hidden');
       }
       
       // Ocultar enlace de admin
       if (adminLink) {
-        adminLink.style.display = 'none';
+        adminLink.classList.add('hidden');
       }
     }
   } catch (error) {
