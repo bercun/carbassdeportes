@@ -32,14 +32,26 @@ activityEvents.forEach(event => {
 });
 
 firebase.auth().onAuthStateChanged((user) => {
+  console.log('🔍 Estado de autenticación cambiado:', user ? 'Usuario logueado' : 'No hay usuario');
+  
   const userNameElement = document.getElementById('user-name');
   const logoutBtn = document.getElementById('logout-btn');
   const loginBtn = document.getElementById('login-btn');
   const adminLink = document.getElementById('admin-link');
   
+  console.log('🔍 Elementos DOM encontrados:', {
+    userNameElement: !!userNameElement,
+    logoutBtn: !!logoutBtn,
+    loginBtn: !!loginBtn,
+    adminLink: !!adminLink
+  });
+  
   if (user) {
+    console.log('✅ Usuario autenticado:', user.email);
+    
     // Verificar que firestore esté disponible
     if (typeof firestore === 'undefined') {
+      console.error('Firestore no está disponible');
       return;
     }
     
@@ -63,6 +75,7 @@ firebase.auth().onAuthStateChanged((user) => {
         }
         
         // Usuario autenticado: mostrar nombre y botón de logout
+        console.log('🔧 Configurando UI para usuario autenticado');
         if (userNameElement) {
           let displayName = user.displayName || user.email;
           
@@ -73,15 +86,18 @@ firebase.auth().onAuthStateChanged((user) => {
           
           userNameElement.innerHTML = displayName;
           userNameElement.style.display = 'inline';
+          console.log('✅ Nombre de usuario configurado:', displayName);
         }
         
         if (logoutBtn) {
           logoutBtn.classList.remove('hidden');
           logoutBtn.style.display = 'inline-block';
+          console.log('✅ Botón de logout mostrado');
         }
         if (loginBtn) {
           loginBtn.classList.add('hidden');
           loginBtn.style.display = 'none';
+          console.log('✅ Botón de login ocultado');
         }
         
         // Mostrar enlace al panel de admin solo para administradores
@@ -120,6 +136,8 @@ firebase.auth().onAuthStateChanged((user) => {
     // Iniciar el temporizador de sesión
     resetSessionTimer();
   } else {
+    console.log('❌ No hay usuario autenticado');
+    
     // Limpiar sessionStorage
     sessionStorage.removeItem('userRole');
     
@@ -127,14 +145,17 @@ firebase.auth().onAuthStateChanged((user) => {
     if (userNameElement) {
       userNameElement.style.display = 'none';
       userNameElement.textContent = '';
+      console.log('✅ Nombre de usuario ocultado');
     }
     if (logoutBtn) {
       logoutBtn.classList.add('hidden');
       logoutBtn.style.display = 'none';
+      console.log('✅ Botón de logout ocultado');
     }
     if (loginBtn) {
       loginBtn.classList.remove('hidden');
       loginBtn.style.display = 'inline-block';
+      console.log('✅ Botón de login mostrado');
     }
     if (adminLink) {
       adminLink.classList.add('hidden');
