@@ -1,7 +1,7 @@
 // admin.js - Lógica del panel de administración
 
 let currentEditingProductId = null;
-let userSession = null;
+// userSession es definida en auth-check-php.js
 
 // Verificar permisos de administrador al cargar la página
 async function checkAdminAccess() {
