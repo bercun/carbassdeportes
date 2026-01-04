@@ -11,6 +11,7 @@ async function checkAuth() {
     console.log('🔍 Estado de autenticación:', data.logged_in ? 'Usuario logueado' : 'No hay usuario');
     
     const userNameElement = document.getElementById('user-name');
+    const userInfoContainer = document.querySelector('.user-info');
     const logoutBtn = document.getElementById('logout-btn');
     const loginBtn = document.getElementById('login-btn');
     const adminLink = document.getElementById('admin-link');
@@ -19,7 +20,10 @@ async function checkAuth() {
       userSession = data.user;
       console.log('✅ Usuario autenticado:', userSession.email);
       
-      // Mostrar nombre del usuario
+      // Mostrar contenedor de usuario y nombre
+      if (userInfoContainer) {
+        userInfoContainer.classList.remove('hidden');
+      }
       if (userNameElement) {
         userNameElement.textContent = userSession.nombre || userSession.email.split('@')[0];
       }
@@ -44,7 +48,10 @@ async function checkAuth() {
       console.log('❌ No hay usuario autenticado');
       userSession = null;
       
-      // Ocultar nombre de usuario
+      // Ocultar contenedor de usuario y limpiar nombre
+      if (userInfoContainer) {
+        userInfoContainer.classList.add('hidden');
+      }
       if (userNameElement) {
         userNameElement.textContent = '';
       }
