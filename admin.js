@@ -1,7 +1,7 @@
 // admin.js - Lógica del panel de administración
+// userSession es definida en auth-check-php.js
 
 let currentEditingProductId = null;
-// userSession es definida en auth-check-php.js
 
 // Verificar permisos de administrador al cargar la página
 async function checkAdminAccess() {
@@ -89,11 +89,115 @@ async function loadProducts() {
   }
 }
 
-// Cargar usuarios (ahora deshabilitado - necesitarías crear api/usuarios.php)
-function loadUsers() {
-  const tbody = document.getElementById('users-table-body');
-  if (tbody) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Función deshabilitada - requiere endpoint de usuarios</td></tr>';
+// Cargar usuarios
+async function loadUsers() {
+  try {
+    const response = await fetch('api/usuarios.php');
+    const usuarios = await response.json();
+    
+    const tbody = document.getElementById('users-table-body');
+    
+    if (!tbody) return;
+    
+    if (usuarios.error) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">${usuarios.error}</td></tr>`;
+      return;
+    }
+    
+    if (usuarios.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay usuarios registrados</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = usuarios.map(user => `
+      <tr>
+        <td>${user.nombre || 'Sin nombre'}</td>
+        <td>${user.email}</td>
+        <td>
+          <select onchange="updateUserRole(${user.id}, this.value)" class="role-select">
+            <option value="user" ${user.rol === 'user' ? 'selected' : ''}>Usuario</option>
+            <option value="admin" ${user.rol === 'admin' ? 'selected' : ''}>Admin</option>
+          </select>
+        </td>
+        <td>${new Date(user.fecha_registro).toLocaleDateString('es-ES')}</td>
+        <td>
+          <button class="btn-delete" onclick="deleteUser(${user.id}, '${user.email.replace(/'/g, "\\'")}')">🗑️</button>
+        </td>
+      </tr>
+    `).join('');
+    
+    // Actualizar contador de usuarios
+    document.getElementById('total-usuarios').textContent = usuarios.length;
+  } catch (error) {
+    console.error("Error al cargar usuarios:", error);
+    const tbody = document.getElementById('users-table-body');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error al cargar usuarios</td></tr>';
+    }
+  }
+}
+
+// Actualizar rol de usuario
+async function updateUserRole(userId, newRole) {
+  if (!confirm(`¿Cambiar el rol de este usuario a ${newRole === 'admin' ? 'Administrador' : 'Usuario'}?`)) {
+    loadUsers(); // Recargar para revertir el select
+    return;
+  }
+  
+  try {
+    const response = await fetch('api/usuarios.php', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: userId,
+        rol: newRole
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('✅ Rol actualizado exitosamente');
+      loadUsers();
+    } else {
+      alert('❌ Error: ' + (data.error || 'No se pudo actualizar el rol'));
+      loadUsers();
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('❌ Error al actualizar el rol');
+    loadUsers();
+  }
+}
+
+// Eliminar usuario
+async function deleteUser(userId, userEmail) {
+  if (!confirm(`¿Estás seguro de eliminar al usuario ${userEmail}?`)) {
+    return;
+  }
+  
+  try {
+    const response = await fetch('api/usuarios.php', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `id=${userId}`
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('✅ Usuario eliminado exitosamente');
+      loadUsers();
+    } else {
+      alert('❌ Error: ' + (data.error || 'No se pudo eliminar el usuario'));
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('❌ Error al eliminar usuario');
   }
 }
 
@@ -106,6 +210,11 @@ function switchTab(tabName) {
   // Actualizar contenido
   document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
   document.getElementById('tab-' + tabName).classList.add('active');
+  
+  // Cargar datos según la pestaña
+  if (tabName === 'usuarios') {
+    loadUsers();
+  }
 }
 
 // Mostrar modal para agregar producto
@@ -178,6 +287,34 @@ async function deleteProduct(productId, productName) {
   }
 }
 
+// Función para subir imagen
+async function uploadImage(fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return null;
+
+  const formData = new FormData();
+  formData.append('imagen', file);
+
+  try {
+    const response = await fetch('api/upload_image.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      return data.url;
+    } else {
+      throw new Error(data.error || 'Error al subir imagen');
+    }
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    alert('Error al subir la imagen: ' + error.message);
+    return null;
+  }
+}
+
 // Manejar envío del formulario de producto
 document.getElementById('product-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -186,9 +323,30 @@ document.getElementById('product-form')?.addEventListener('submit', async (e) =>
   btnSave.disabled = true;
   btnSave.textContent = 'Guardando...';
 
+  // Verificar si hay una imagen para subir
+  const fileInput = document.getElementById('product-imagen-file');
+  const urlInput = document.getElementById('product-imagen');
+  
+  let imagen_url = urlInput.value.trim();
+
+  // Si hay un archivo seleccionado, subirlo primero
+  if (fileInput.files.length > 0) {
+    btnSave.textContent = 'Subiendo imagen...';
+    const uploadedUrl = await uploadImage(fileInput);
+    if (uploadedUrl) {
+      imagen_url = uploadedUrl;
+    } else {
+      btnSave.disabled = false;
+      btnSave.textContent = 'Guardar Producto';
+      return;
+    }
+  }
+
+  btnSave.textContent = 'Guardando...';
+
   const productData = {
     nombre: document.getElementById('product-nombre').value,
-    imagen_url: document.getElementById('product-imagen').value,
+    imagen_url: imagen_url,
     descripcion: document.getElementById('product-descripcion').value,
     precio: parseFloat(document.getElementById('product-precio').value),
     categoria_id: parseInt(document.getElementById('product-categoria').value) || null,
@@ -274,5 +432,35 @@ function formatDate(dateString) {
 document.getElementById('product-modal')?.addEventListener('click', (e) => {
   if (e.target.id === 'product-modal') {
     closeProductModal();
+  }
+});
+
+// Preview de imagen cuando se selecciona un archivo o se ingresa URL
+document.addEventListener('DOMContentLoaded', function() {
+  const fileInput = document.getElementById('product-imagen-file');
+  const urlInput = document.getElementById('product-imagen');
+  const preview = document.getElementById('imagen-preview');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px; margin-top: 5px;">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  if (urlInput) {
+    urlInput.addEventListener('input', function() {
+      if (this.value.trim()) {
+        preview.innerHTML = `<img src="${this.value}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px; margin-top: 5px;" onerror="this.style.display='none'">`;
+      } else {
+        preview.innerHTML = '';
+      }
+    });
   }
 });

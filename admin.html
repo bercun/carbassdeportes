@@ -146,8 +146,11 @@
         </div>
 
         <div class="form-group">
-          <label for="product-imagen">URL de Imagen *</label>
-          <input type="text" id="product-imagen" placeholder="https://placehold.co/600x400?text=Producto" required />
+          <label for="product-imagen-file">Imagen del Producto</label>
+          <input type="file" id="product-imagen-file" accept="image/*" class="form-control" />
+          <small style="color: #666; font-size: 0.85rem;">O ingresa una URL:</small>
+          <input type="text" id="product-imagen" placeholder="https://ejemplo.com/imagen.jpg" style="margin-top: 5px;" />
+          <div id="imagen-preview" style="margin-top: 10px;"></div>
         </div>
 
         <div class="form-group">
