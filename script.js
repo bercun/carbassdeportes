@@ -73,6 +73,11 @@ function setupAddButtons() {
     btn.dataset.listener = 'true';
 
     btn.addEventListener('click', async (e)=>{
+      // Si el botón está deshabilitado (sin stock), no hacer nada
+      if (e.target.disabled) {
+        return;
+      }
+
       // Verificar si el usuario está autenticado
       try {
         const response = await fetch('api/check_auth.php');
@@ -86,23 +91,126 @@ function setupAddButtons() {
           return;
         }
       } catch (error) {
+        alert('Error al verificar autenticación');
         return;
       }
       
-      // Usuario autenticado: agregar al carrito
+      // Obtener el ID del producto desde el card
       const card = e.target.closest('.card');
-      const title = card.querySelector('h4').innerText;
-      const originalText = e.target.innerText;
+      const productId = card.dataset.productId;
       
-      e.target.innerText = 'Añadido ✓';
+      if (!productId) {
+        alert('Error: No se pudo identificar el producto');
+        return;
+      }
+      
+      // Guardar texto original del botón
+      const originalText = e.target.innerText;
+      e.target.innerText = 'Agregando...';
       e.target.disabled = true;
       
-      setTimeout(()=>{ 
-        e.target.innerText = originalText; 
-        e.target.disabled = false; 
-      }, 1400);
+      // Agregar al carrito mediante API
+      try {
+        const response = await fetch('api/carrito.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            producto_id: productId,
+            cantidad: 1
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          // Éxito
+          e.target.innerText = 'Añadido ✓';
+          
+          // Actualizar contador del carrito
+          updateCartCount(result.cart_count);
+          
+          // Actualizar el stock visible en la tarjeta
+          if (result.nuevo_stock !== undefined) {
+            const stockElement = card.querySelector('.stock');
+            if (stockElement) {
+              const nuevoStock = result.nuevo_stock;
+              
+              if (nuevoStock > 0) {
+                stockElement.textContent = `📦 ${nuevoStock} disponibles`;
+                stockElement.className = 'stock in-stock';
+              } else {
+                // Sin stock - actualizar a agotado
+                stockElement.textContent = '📦 Agotado';
+                stockElement.className = 'stock out-of-stock';
+                
+                // Deshabilitar el botón permanentemente
+                e.target.innerText = 'Sin Stock';
+                e.target.disabled = true;
+                return; // No restablecer el botón
+              }
+            }
+          }
+          
+          setTimeout(()=>{ 
+            e.target.innerText = originalText; 
+            e.target.disabled = false; 
+          }, 1500);
+        } else {
+          // Error
+          alert(result.error || 'Error al agregar al carrito');
+          e.target.innerText = originalText;
+          e.target.disabled = false;
+        }
+      } catch (error) {
+        alert('Error de conexión al agregar al carrito');
+        e.target.innerText = originalText;
+        e.target.disabled = false;
+      }
     });
   });
+}
+
+// Función para actualizar el contador del carrito
+async function updateCartCount(count = null) {
+  try {
+    // Si se proporciona el count, usarlo directamente
+    let cartCount = count;
+    
+    // Si no se proporciona, hacer la petición al servidor
+    if (cartCount === null) {
+      const response = await fetch('api/carrito.php');
+      if (response.ok) {
+        const data = await response.json();
+        cartCount = data.count;
+      } else {
+        return; // Si falla la petición, salir
+      }
+    }
+    
+    // Actualizar el badge
+    const cartIcon = document.querySelector('.carrito');
+    if (!cartIcon) {
+      return;
+    }
+    
+    let badge = cartIcon.querySelector('.cart-badge');
+    if (cartCount > 0) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'cart-badge';
+        cartIcon.appendChild(badge);
+      }
+      badge.textContent = cartCount;
+      badge.style.display = 'flex'; // Asegurar que sea visible
+    } else if (badge) {
+      // Remover badge si count es 0
+      badge.remove();
+    }
+  } catch (error) {
+    // Error silencioso
+  }
 }
 
 // API PHP en lugar de Firebase
@@ -125,7 +233,7 @@ function createArticleCardHtml(article, isSmallGrid = false) {
   const stockText = stock > 0 ? `${stock} disponibles` : 'Agotado';
 
   return `
-    <article class="card">
+    <article class="card" data-product-id="${article.id}">
       <div class="thumb">
         <img src="${article.imagen || 'https://placehold.co/600x400?text=Sin+Imagen'}" alt="${article.nombre}"/>
         ${article.estatus ? `<span class="badge">${estatusDisplay}</span>` : ''}
@@ -372,6 +480,9 @@ function initializeApp() {
   
   // Cargar productos directamente
   loadProducts();
+  
+  // Actualizar contador del carrito
+  updateCartCount();
 }
 
 // Inicializar cuando el DOM esté listo

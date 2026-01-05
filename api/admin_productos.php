@@ -74,6 +74,19 @@ try {
             exit;
         }
         
+        // Si es solo para devolver stock
+        if (isset($data['devolver_stock'])) {
+            $cantidad = (int)$data['devolver_stock'];
+            $stmt = $pdo->prepare('UPDATE productos SET stock = stock + ? WHERE id = ?');
+            $stmt->execute([$cantidad, $id]);
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Stock actualizado'
+            ]);
+            exit;
+        }
+        
         $nombre = trim($data['nombre'] ?? '');
         $descripcion = trim($data['descripcion'] ?? '');
         $precio = $data['precio'] ?? 0;

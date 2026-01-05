@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carrito de Compras - CarbassDeportes</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Barra superior sticky para usuario -->
+  <div class="user-bar">
+    <div class="user-bar-content">
+      <div class="user-info hidden">
+        <span id="user-name" class="user-name"></span>
+      </div>
+      <div class="user-actions">
+        <a href="admin.html" id="admin-link" class="admin-btn hidden" title="Panel Admin">🛠️</a>
+        <a href="carrito.html" class="carrito" title="Carrito">🛒</a>
+        <button onclick="logout()" class="btn-logout hidden" id="logout-btn">Salir</button>
+        <a href="login.html" class="btn-login hidden" id="login-btn">Iniciar Sesión</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="site">
+    <header class="navbar">
+      <div class="brand">
+        <img class="logo-svg" src="sours/img/logos/logo_carbass.png" alt="CarbassDeportes Logo" />
+        <h1>CarbassDeportes</h1>
+      </div>
+
+      <nav>
+        <ul class="navlinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html#categorias">Categorías</a></li>
+          <li><a href="index.html#coleccionables">Coleccionables</a></li>
+          <li><a href="index.html#ofertas">Ofertas</a></li>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="index.html#sobre-nosotros">Nosotros</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="carrito-page">
+      <div class="carrito-container">
+        <h1>🛒 Mi Carrito de Compras</h1>
+        
+        <div id="carrito-vacio" class="carrito-vacio hidden">
+          <p>Tu carrito está vacío</p>
+          <a href="index.html" class="btn-continuar">Continuar Comprando</a>
+        </div>
+
+        <div id="carrito-contenido" class="carrito-contenido">
+          <!-- Productos del carrito -->
+          <div class="carrito-items">
+            <h2>Productos</h2>
+            <div id="items-lista"></div>
+          </div>
+
+          <!-- Resumen de compra -->
+          <div class="carrito-resumen">
+            <h2>Resumen del Pedido</h2>
+            
+            <div class="resumen-detalle">
+              <div class="resumen-linea">
+                <span>Subtotal:</span>
+                <span id="subtotal">$0.00</span>
+              </div>
+              <div class="resumen-linea">
+                <span>IVA (22%):</span>
+                <span id="iva">$0.00</span>
+              </div>
+              <div class="resumen-linea total">
+                <span><strong>Total:</strong></span>
+                <span id="total"><strong>$0.00</strong></span>
+              </div>
+            </div>
+
+            <div class="resumen-acciones">
+              <button id="btn-confirmar" class="btn-confirmar">
+                Confirmar Compra
+              </button>
+              <button id="btn-vaciar" class="btn-vaciar">
+                Vaciar Carrito
+              </button>
+              <a href="index.html" class="btn-continuar">
+                Seguir Comprando
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; 2026 CarbassDeportes. Todos los derechos reservados.</p>
+    </footer>
+  </div>
+
+  <script src="carrito.js"></script>
+</body>
+</html>
