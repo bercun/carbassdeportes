@@ -111,6 +111,7 @@ const API_BASE_URL = 'api/';
 // Función auxiliar para crear el HTML de una tarjeta de artículo
 function createArticleCardHtml(article, isSmallGrid = false) {
   const precio = typeof article.precio === 'number' ? article.precio : parseFloat(article.precio) || 0;
+  const stock = article.stock || 0;
   
   // Formatear el estatus para que se vea mejor
   let estatusDisplay = article.estatus || '';
@@ -118,6 +119,10 @@ function createArticleCardHtml(article, isSmallGrid = false) {
   else if (estatusDisplay.toLowerCase() === 'oferta') estatusDisplay = 'Oferta';
   else if (estatusDisplay.toLowerCase() === 'destacado') estatusDisplay = 'Destacado';
   else if (estatusDisplay) estatusDisplay = estatusDisplay.charAt(0).toUpperCase() + estatusDisplay.slice(1);
+
+  // Determinar si hay stock disponible
+  const stockClass = stock > 0 ? 'in-stock' : 'out-of-stock';
+  const stockText = stock > 0 ? `${stock} disponibles` : 'Agotado';
 
   return `
     <article class="card">
@@ -130,8 +135,11 @@ function createArticleCardHtml(article, isSmallGrid = false) {
         <p class="description">${article.descripción || ''}</p>
         <div class="meta">
           <span class="price">$${precio.toFixed(2)}</span>
+          <span class="stock ${stockClass}">📦 ${stockText}</span>
         </div>
-        <button class="add-btn">Agregar al Carrito</button>
+        <button class="add-btn" ${stock <= 0 ? 'disabled' : ''}>
+          ${stock > 0 ? 'Agregar al Carrito' : 'Sin Stock'}
+        </button>
       </div>
     </article>
   `;
@@ -184,8 +192,9 @@ async function loadProducts() {
       imagen: product.imagen_url || 'https://placehold.co/600x400?text=Sin+Imagen',
       categoria: product.categoria_nombre || 'general',
       categoria_id: product.categoria_id,
-      estatus: product.destacado == 1 ? 'destacado' : 'normal',
-      destacado: product.destacado
+      estatus: product.estado || (product.destacado == 1 ? 'destacado' : 'normal'),
+      destacado: product.destacado,
+      stock: product.stock || 0
     }));
     
     // Renderizar todas las secciones
