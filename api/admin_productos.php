@@ -27,8 +27,8 @@ try {
         $precio = $data['precio'] ?? 0;
         $imagen_url = trim($data['imagen_url'] ?? '');
         $categoria_id = $data['categoria_id'] ?? null;
-        $destacado = isset($data['destacado']) ? (int)$data['destacado'] : 0;
-        $stock = $data['stock'] ?? 0;
+        $estado = trim($data['estado'] ?? 'normal');
+        $stock = isset($data['stock']) ? (int)$data['stock'] : 1;
         
         // Validaciones
         if (empty($nombre) || $precio <= 0) {
@@ -39,7 +39,7 @@ try {
         
         $stmt = $pdo->prepare('
             INSERT INTO productos 
-            (nombre, descripcion, precio, imagen_url, categoria_id, destacado, stock) 
+            (nombre, descripcion, precio, imagen_url, categoria_id, estado, stock) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
         ');
         
@@ -49,7 +49,7 @@ try {
             $precio, 
             $imagen_url, 
             $categoria_id, 
-            $destacado, 
+            $estado, 
             $stock
         ]);
         
@@ -79,8 +79,8 @@ try {
         $precio = $data['precio'] ?? 0;
         $imagen_url = trim($data['imagen_url'] ?? '');
         $categoria_id = $data['categoria_id'] ?? null;
-        $destacado = isset($data['destacado']) ? (int)$data['destacado'] : 0;
-        $stock = $data['stock'] ?? 0;
+        $estado = trim($data['estado'] ?? 'normal');
+        $stock = isset($data['stock']) ? (int)$data['stock'] : 1;
         
         // Validaciones
         if (empty($nombre) || $precio <= 0) {
@@ -92,7 +92,7 @@ try {
         $stmt = $pdo->prepare('
             UPDATE productos 
             SET nombre = ?, descripcion = ?, precio = ?, imagen_url = ?, 
-                categoria_id = ?, destacado = ?, stock = ?
+                categoria_id = ?, estado = ?, stock = ?
             WHERE id = ?
         ');
         
@@ -102,7 +102,7 @@ try {
             $precio, 
             $imagen_url, 
             $categoria_id, 
-            $destacado, 
+            $estado, 
             $stock,
             $id
         ]);

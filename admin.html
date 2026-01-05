@@ -88,13 +88,14 @@
                   <th>Nombre</th>
                   <th>Categoría</th>
                   <th>Precio</th>
+                  <th>Stock</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="products-table-body">
                 <tr>
-                  <td colspan="6" style="text-align: center;">Cargando productos...</td>
+                  <td colspan="7" style="text-align: center;">Cargando productos...</td>
                 </tr>
               </tbody>
             </table>
@@ -165,13 +166,16 @@
           </div>
 
           <div class="form-group">
+            <label for="product-stock">Stock *</label>
+            <input type="number" id="product-stock" min="0" value="1" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
             <label for="product-categoria">Categoría *</label>
             <select id="product-categoria" required>
               <option value="">Seleccionar...</option>
-              <option value="futbol">Fútbol</option>
-              <option value="basket">Basket</option>
-              <option value="gym">Gym/Running</option>
-              <option value="coleccionables">Coleccionables</option>
             </select>
           </div>
 
@@ -181,7 +185,7 @@
               <option value="">Seleccionar...</option>
               <option value="destacado">Destacado</option>
               <option value="oferta">Oferta</option>
-              <option value="recien agregado">Recién Agregado</option>
+              <option value="recien_agregado">Recién Agregado</option>
               <option value="normal">Normal</option>
             </select>
           </div>

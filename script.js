@@ -86,7 +86,6 @@ function setupAddButtons() {
           return;
         }
       } catch (error) {
-        console.error('Error verificando autenticación:', error);
         return;
       }
       
@@ -102,8 +101,6 @@ function setupAddButtons() {
         e.target.innerText = originalText; 
         e.target.disabled = false; 
       }, 1400);
-      
-      console.info('Añadido al carrito:', title);
     });
   });
 }
@@ -143,11 +140,8 @@ function createArticleCardHtml(article, isSmallGrid = false) {
 // Función para renderizar artículos en un contenedor específico
 function renderArticlesToContainer(containerElement, articlesArray, isSmallGrid = false, limit = null) {
   if (!containerElement) {
-    console.warn('⚠️ Contenedor no encontrado');
     return;
   }
-
-  console.log(`🎨 Renderizando ${articlesArray.length} artículos en contenedor`, containerElement.id);
 
   containerElement.innerHTML = ''; // Limpiar el contenedor
   
@@ -156,22 +150,17 @@ function renderArticlesToContainer(containerElement, articlesArray, isSmallGrid 
   
   if (articlesToShow.length === 0) {
     containerElement.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">No hay artículos disponibles en esta sección.</p>';
-    console.log('📭 No hay artículos para mostrar en', containerElement.id);
     return;
   }
 
   articlesToShow.forEach((article, index) => {
-    console.log(`➕ Agregando artículo ${index + 1}: ${article.nombre}`);
     containerElement.innerHTML += createArticleCardHtml(article, isSmallGrid);
   });
   
-  console.log(`✅ ${articlesToShow.length} artículos renderizados en ${containerElement.id}`);
   setupAddButtons(); // Re-asociar eventos a los nuevos botones
 }
 // Función simplificada para cargar y renderizar productos
 async function loadProducts() {
-  console.log('🔄 Iniciando carga de productos...');
-  
   try {
     const response = await fetch(API_BASE_URL + 'productos.php');
     
@@ -181,11 +170,7 @@ async function loadProducts() {
     
     const allArticles = await response.json();
     
-    console.log('✅ Conexión exitosa con API');
-    console.log('📄 Productos encontrados:', allArticles.length);
-    
     if (allArticles.length === 0) {
-      console.warn('⚠️ No hay productos en la base de datos');
       showNoProductsMessage();
       return;
     }
@@ -203,14 +188,10 @@ async function loadProducts() {
       destacado: product.destacado
     }));
     
-    console.log('✅ Total productos cargados:', adaptedArticles.length);
-    console.log('📦 Muestra de productos:', adaptedArticles.slice(0, 3));
-    
     // Renderizar todas las secciones
     renderAllSections(adaptedArticles);
     
   } catch (error) {
-    console.error('❌ Error cargando productos:', error);
     showErrorMessage('Error cargando productos. Verifica tu conexión y recarga la página.');
   }
 }
@@ -229,8 +210,6 @@ function normalizarCategoria(categoria) {
 
 // Función para renderizar todas las secciones
 function renderAllSections(allArticles) {
-  console.log('🎨 Iniciando renderizado de todas las secciones...');
-  
   // Filtrar por categorías
   const destacados = allArticles.filter(p => 
     p.destacado == 1 || (p.estatus && p.estatus.toLowerCase() === 'destacado')
@@ -268,46 +247,29 @@ function renderAllSections(allArticles) {
     return cat === 'gym';
   });
   
-  console.log('🔍 Productos filtrados:');
-  console.log(`- Destacados: ${destacados.length}`);
-  console.log(`- Recientes: ${recientes.length}`);
-  console.log(`- Ofertas: ${ofertas.length}`);
-  console.log(`- Coleccionables: ${coleccionables.length}`);
-  console.log(`- Fútbol: ${futbol.length}`);
-  console.log(`- Basket: ${basket.length}`);
-  console.log(`- Gym: ${gym.length}`);
-  
   // RENDERIZADO SOLO SI EL CONTENEDOR EXISTE
   
   // DESTACADOS (index.html)
   const destacadosContainer = document.getElementById('destacados-container');
   if (destacadosContainer) {
-    console.log('🌟 Renderizando destacados...');
     renderArticlesToContainer(destacadosContainer, destacados, false, 3);
   }
 
   // RECIENTES (index.html)
   const recientesContainer = document.getElementById('recientes-container');
   if (recientesContainer) {
-    console.log('🆕 Renderizando recientes...');
     renderArticlesToContainer(recientesContainer, recientes, true, 3);
-  } else {
-    console.log('ℹ️ Contenedor recientes no encontrado (normal en catálogo)');
   }
 
   // OFERTAS (index.html)  
   const ofertasContainer = document.getElementById('ofertas-container');
   if (ofertasContainer) {
-    console.log('💰 Renderizando ofertas...');
     renderArticlesToContainer(ofertasContainer, ofertas, true, 3);
-  } else {
-    console.log('ℹ️ Contenedor ofertas no encontrado (normal en catálogo)');
   }
 
   // COLECCIONABLES (index.html y catalogo.html)
   const coleccionablesContainer = document.getElementById('coleccionables-container');
   if (coleccionablesContainer) {
-    console.log('🏆 Renderizando coleccionables...');
     // En index: límite 3, en catálogo: todos
     const isIndexPage = document.getElementById('destacados-container') !== null;
     const limit = isIndexPage ? 3 : null;
@@ -317,31 +279,20 @@ function renderAllSections(allArticles) {
   // FÚTBOL (catalogo.html)
   const futbolContainer = document.getElementById('futbol-container');
   if (futbolContainer) {
-    console.log('⚽ Renderizando fútbol...');
     renderArticlesToContainer(futbolContainer, futbol, false);
-  } else {
-    console.log('ℹ️ Contenedor fútbol no encontrado (normal en index)');
   }
 
   // BASKET (catalogo.html)
   const basketContainer = document.getElementById('basket-container');
   if (basketContainer) {
-    console.log('🏀 Renderizando basket...');
     renderArticlesToContainer(basketContainer, basket, false);
-  } else {
-    console.log('ℹ️ Contenedor basket no encontrado (normal en index)');
   }
 
   // GYM (catalogo.html)
   const gymContainer = document.getElementById('gym-container');
   if (gymContainer) {
-    console.log('💪 Renderizando gym...');
     renderArticlesToContainer(gymContainer, gym, false);
-  } else {
-    console.log('ℹ️ Contenedor gym no encontrado (normal en index)');
   }
-
-  console.log('✅ Renderizado de todas las secciones completado');
 }
 
 // Función genérica para renderizar cualquier sección
@@ -375,14 +326,10 @@ function showErrorMessage(message) {
 
 // Inicializar cuando el DOM esté listo
 function initializeApp() {
-  console.log('🚀 Iniciando aplicación...');
-  console.log('📄 URL actual:', window.location.pathname);
-  
   // Verificar que estamos en la página correcta
   if (window.location.pathname.includes('debug-firebase') || 
       window.location.pathname.includes('test') ||
       window.location.pathname.includes('login.html')) {
-    console.log('⏭️ Saltando carga en página de debug/test/login');
     return;
   }
   
@@ -407,23 +354,14 @@ function initializeApp() {
   [...indexContainers, ...catalogoContainers, ...sharedContainers].forEach(id => {
     if (document.getElementById(id)) {
       containersFound++;
-      console.log(`✅ Contenedor encontrado: ${id}`);
     }
   });
   
   if (containersFound === 0) {
-    console.warn('⚠️ No se encontraron contenedores - posible página incorrecta');
     return;
   }
   
-  // Determinar el tipo de página
-  const isIndex = indexContainers.some(id => document.getElementById(id));
-  const isCatalogo = catalogoContainers.some(id => document.getElementById(id));
-  
-  console.log(`📄 Página detectada: ${isIndex ? 'Index' : ''} ${isCatalogo ? 'Catálogo' : ''}`);
-  
   // Cargar productos directamente
-  console.log('⏰ Iniciando carga de productos...');
   loadProducts();
 }
 

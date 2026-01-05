@@ -29,6 +29,7 @@ async function checkAdminAccess() {
       // Cargar datos
       loadProducts();
       loadStats();
+      loadCategories();
     }
   } catch (error) {
     console.error("Error al verificar autenticación:", error);
@@ -49,9 +50,54 @@ async function loadStats() {
     console.error("Error al contar productos:", err);
     document.getElementById('total-productos').textContent = "Error";
   }
+}
+
+// Cargar categorías dinámicamente
+async function loadCategories() {
+  const select = document.getElementById('product-categoria');
+  if (!select) return;
   
-  // Total de usuarios (podrías crear un endpoint para esto)
-  document.getElementById('total-usuarios').textContent = "-";
+  select.innerHTML = '<option value="">Cargando...</option>';
+  select.disabled = true;
+  
+  try {
+    const response = await fetch('api/categorias.php');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const categorias = await response.json();
+    
+    if (!Array.isArray(categorias)) {
+      throw new Error('La respuesta no es un array de categorías');
+    }
+    
+    select.innerHTML = '<option value="">Seleccionar...</option>';
+    
+    categorias.forEach(categoria => {
+      const option = document.createElement('option');
+      option.value = categoria.id;
+      option.textContent = categoria.nombre;
+      select.appendChild(option);
+    });
+    
+    select.disabled = false;
+    
+    const totalCategorias = document.getElementById('total-categorias');
+    if (totalCategorias) {
+      totalCategorias.textContent = categorias.length;
+    }
+  } catch (error) {
+    select.innerHTML = `
+      <option value="">Seleccionar...</option>
+      <option value="1">Fútbol</option>
+      <option value="2">Basket</option>
+      <option value="3">Gym/Running</option>
+      <option value="4">Coleccionables</option>
+    `;
+    select.disabled = false;
+  }
 }
 
 // Cargar productos
@@ -63,7 +109,7 @@ async function loadProducts() {
     const tbody = document.getElementById('products-table-body');
     
     if (productos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay productos registrados</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay productos registrados</td></tr>';
       return;
     }
 
@@ -73,7 +119,8 @@ async function loadProducts() {
         <td>${product.nombre}</td>
         <td><span class="categoria-badge">${product.categoria_nombre || 'Sin categoría'}</span></td>
         <td>$${parseFloat(product.precio).toFixed(2)}</td>
-        <td><span class="estatus-badge ${product.destacado ? 'estatus-destacado' : ''}">${product.destacado ? 'Destacado' : 'Normal'}</span></td>
+        <td>${product.stock || 0}</td>
+        <td><span class="estatus-badge ${product.estado === 'destacado' ? 'estatus-destacado' : ''}">${product.estado || 'normal'}</span></td>
         <td>
           <button class="btn-edit" onclick="editProduct(${product.id})">✏️</button>
           <button class="btn-delete" onclick="deleteProduct(${product.id}, '${product.nombre.replace(/'/g, "\\'")}')">🗑️</button>
@@ -84,7 +131,7 @@ async function loadProducts() {
     console.error("Error al cargar productos:", error);
     const tbody = document.getElementById('products-table-body');
     if (tbody) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error al cargar productos</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Error al cargar productos</td></tr>';
     }
   }
 }
@@ -224,6 +271,8 @@ function showAddProductModal() {
   document.getElementById('product-form').reset();
   document.getElementById('product-id').value = '';
   document.getElementById('product-modal').classList.remove('hidden');
+  // Cargar categorías cuando se abre el modal
+  loadCategories();
 }
 
 // Cerrar modal
@@ -237,24 +286,38 @@ function closeProductModal() {
 async function editProduct(productId) {
   try {
     const response = await fetch(`api/productos.php?id=${productId}`);
+    
+    if (!response.ok) {
+      throw new Error('Error al obtener el producto del servidor');
+    }
+    
     const product = await response.json();
     
-    if (!product) return;
+    if (!product || !product.id) {
+      throw new Error('Producto no encontrado');
+    }
 
     currentEditingProductId = productId;
+    
+    // Primero mostrar el modal
     document.getElementById('modal-title').textContent = 'Editar Producto';
+    document.getElementById('product-modal').classList.remove('hidden');
+    
+    // Cargar las categorías
+    await loadCategories();
+    
+    // Establecer todos los valores
     document.getElementById('product-id').value = productId;
-    document.getElementById('product-nombre').value = product.nombre;
+    document.getElementById('product-nombre').value = product.nombre || '';
     document.getElementById('product-imagen').value = product.imagen_url || '';
     document.getElementById('product-descripcion').value = product.descripcion || '';
-    document.getElementById('product-precio').value = product.precio;
+    document.getElementById('product-precio').value = product.precio || 0;
+    document.getElementById('product-stock').value = product.stock || 1;
     document.getElementById('product-categoria').value = product.categoria_id || '';
-    document.getElementById('product-estatus').value = product.destacado ? 'destacado' : '';
+    document.getElementById('product-estatus').value = product.estado || 'normal';
     
-    document.getElementById('product-modal').classList.remove('hidden');
   } catch (error) {
-    console.error('Error al cargar producto:', error);
-    alert('Error al cargar el producto');
+    alert('Error al cargar el producto: ' + error.message);
   }
 }
 
@@ -350,8 +413,8 @@ document.getElementById('product-form')?.addEventListener('submit', async (e) =>
     descripcion: document.getElementById('product-descripcion').value,
     precio: parseFloat(document.getElementById('product-precio').value),
     categoria_id: parseInt(document.getElementById('product-categoria').value) || null,
-    destacado: document.getElementById('product-estatus').value === 'destacado' ? 1 : 0,
-    stock: 0
+    stock: parseInt(document.getElementById('product-stock').value) || 1,
+    estado: document.getElementById('product-estatus').value || 'normal'
   };
 
   try {
