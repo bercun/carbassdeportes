@@ -196,13 +196,18 @@ function renderizarItems() {
 
 // Calcular totales
 function calcularTotales() {
-  const subtotal = carritoItems.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
-  const iva = subtotal * IVA_RATE;
-  const total = subtotal + iva;
+  // El total es la suma de los subtotales (precios con IVA incluido)
+  const totalConIVA = carritoItems.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
   
-  document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+  // Calcular el subtotal sin IVA (precio base)
+  const subtotalSinIVA = totalConIVA / (1 + IVA_RATE);
+  
+  // El IVA es la diferencia
+  const iva = totalConIVA - subtotalSinIVA;
+  
+  document.getElementById('subtotal').textContent = `$${subtotalSinIVA.toFixed(2)}`;
   document.getElementById('iva').textContent = `$${iva.toFixed(2)}`;
-  document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+  document.getElementById('total').textContent = `$${totalConIVA.toFixed(2)}`;
 }
 
 // Cambiar cantidad de un item
@@ -305,15 +310,16 @@ async function confirmarCompra() {
     return;
   }
   
-  const subtotal = carritoItems.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
-  const iva = subtotal * IVA_RATE;
-  const total = subtotal + iva;
+  // El total con IVA incluido
+  const totalConIVA = carritoItems.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
+  const subtotalSinIVA = totalConIVA / (1 + IVA_RATE);
+  const iva = totalConIVA - subtotalSinIVA;
   
   const confirmacion = confirm(
     `¿Confirmar compra?\n\n` +
-    `Subtotal: $${subtotal.toFixed(2)}\n` +
+    `Subtotal: $${subtotalSinIVA.toFixed(2)}\n` +
     `IVA (22%): $${iva.toFixed(2)}\n` +
-    `Total: $${total.toFixed(2)}`
+    `Total: $${totalConIVA.toFixed(2)}`
   );
   
   if (!confirmacion) return;
