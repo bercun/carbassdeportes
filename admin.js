@@ -575,6 +575,13 @@ async function loadVentas() {
     const ventas = data.ventas || [];
     const estadisticas = data.estadisticas || {};
     
+    // Debug: Ver los datos de ventas
+    console.log('Ventas recibidas:', ventas);
+    if (ventas.length > 0) {
+      console.log('Primera venta:', ventas[0]);
+      console.log('Estado de primera venta:', ventas[0].estado);
+    }
+    
     // Actualizar estadísticas
     document.getElementById('total-ventas-count').textContent = estadisticas.total_ventas || 0;
     document.getElementById('total-ventas-monto').textContent = '$' + (estadisticas.total_monto || 0).toFixed(2);
@@ -600,7 +607,9 @@ async function loadVentas() {
         <td style="text-align: center;">${venta.cantidad_items}</td>
         <td><strong>$${parseFloat(venta.total).toFixed(2)}</strong></td>
         <td>
-          <span class="badge badge-${venta.estado}">${venta.estado}</span>
+          <span class="badge badge-${venta.estado || 'completada'}">
+            ${venta.estado ? venta.estado : 'completada'}
+          </span>
         </td>
         <td>
           <button class="btn-icon" onclick="verDetalleVenta(${venta.id})" title="Ver detalle">

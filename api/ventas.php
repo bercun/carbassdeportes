@@ -161,7 +161,22 @@ try {
         // Obtener ventas
         $sql = "
             SELECT 
-                v.*,
+                v.id,
+                v.numero_venta,
+                v.user_id,
+                v.fecha_venta,
+                v.subtotal,
+                v.iva,
+                v.total,
+                v.nombre_cliente,
+                v.apellido_cliente,
+                v.email_cliente,
+                v.telefono_cliente,
+                v.direccion_cliente,
+                v.observaciones,
+                v.estado,
+                v.created_at,
+                v.updated_at,
                 u.nombre as usuario_nombre,
                 u.email as usuario_email,
                 COUNT(dv.id) as cantidad_items
@@ -169,7 +184,10 @@ try {
             LEFT JOIN usuarios u ON v.user_id = u.id
             LEFT JOIN detalle_ventas dv ON v.id = dv.venta_id
             $whereClause
-            GROUP BY v.id
+            GROUP BY v.id, v.numero_venta, v.user_id, v.fecha_venta, v.subtotal, v.iva, v.total, 
+                     v.nombre_cliente, v.apellido_cliente, v.email_cliente, v.telefono_cliente, 
+                     v.direccion_cliente, v.observaciones, v.estado, v.created_at, v.updated_at,
+                     u.nombre, u.email
             ORDER BY v.fecha_venta DESC
             LIMIT ? OFFSET ?
         ";
