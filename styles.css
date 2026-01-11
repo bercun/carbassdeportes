@@ -1968,17 +1968,35 @@ body:has(.login-container) .navlinks a {
   position: static !important;
 }
 
-.admin-table .badge-completada {
+/* Badges en modales de venta */
+.venta-info .badge,
+.modal .badge {
+  display: inline-block !important;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  position: static !important;
+}
+
+.admin-table .badge-completada,
+.venta-info .badge-completada,
+.modal .badge-completada {
   background: #e8f5e9;
   color: #2e7d32;
 }
 
-.admin-table .badge-pendiente {
+.admin-table .badge-pendiente,
+.venta-info .badge-pendiente,
+.modal .badge-pendiente {
   background: #fff9c4;
   color: #f57f17;
 }
 
-.admin-table .badge-cancelada {
+.admin-table .badge-cancelada,
+.venta-info .badge-cancelada,
+.modal .badge-cancelada {
   background: #ffebee;
   color: #c62828;
 }
