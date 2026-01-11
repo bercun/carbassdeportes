@@ -97,6 +97,138 @@
     </footer>
   </div>
 
+  <!-- Modal de Datos de Facturación -->
+  <div id="modal-facturacion" class="modal hidden">
+    <div class="modal-content modal-facturacion">
+      <div class="modal-header">
+        <h3>Datos de Facturación</h3>
+        <button class="modal-close" id="close-modal-facturacion">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-facturacion" class="modal-form">
+          <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="apellido">Apellido</label>
+            <input type="text" id="apellido" name="apellido" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="direccion">Dirección</label>
+            <input type="text" id="direccion" name="direccion" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Método de Pago</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="metodo_pago" value="efectivo" checked>
+                Efectivo
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="metodo_pago" value="tarjeta">
+                Tarjeta
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="observaciones">Observaciones (opcional)</label>
+            <textarea id="observaciones" name="observaciones" rows="3" placeholder="Agrega cualquier comentario sobre tu pedido..."></textarea>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" class="btn-cancelar" id="btn-cancelar-facturacion">Cancelar</button>
+            <button type="submit" class="btn-confirmar">Procesar compra</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Factura -->
+  <div id="modal-factura" class="modal hidden">
+    <div class="modal-content modal-factura">
+      <div class="modal-header">
+        <h3>Ticket de Pedido</h3>
+        <button class="modal-close" id="close-modal-factura">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="factura-container">
+          <!-- Encabezado de la empresa -->
+          <div class="factura-empresa">
+            <img src="sours/img/logos/logo_carbass.png" alt="CarbassDeportes" class="factura-logo">
+            <h2>Carbass Deportes SL</h2>
+            <p>NIT: 100331819-1</p>
+            <p>CRA 80 N. 35-50, Montevideo, Uruguay</p>
+          </div>
+
+          <!-- Datos de facturación -->
+          <div class="factura-info">
+            <div class="factura-info-left">
+              <h4>Datos de Facturación:</h4>
+              <p><strong>Nombre:</strong> <span id="factura-nombre"></span></p>
+              <p><strong>Dirección:</strong> <span id="factura-direccion"></span></p>
+              <p><strong>Teléfono:</strong> <span id="factura-telefono"></span></p>
+              <p><strong>Email:</strong> <span id="factura-email"></span></p>
+              <p><strong>Fecha de Compra:</strong> <span id="factura-fecha"></span></p>
+            </div>
+            <div class="factura-info-right">
+              <h4>Número de Pedido</h4>
+              <p><strong>Pedido:</strong> <span id="factura-id"></span></p>
+              <p><strong>Fecha Emisión:</strong> <span id="factura-emision"></span></p>
+            </div>
+          </div>
+
+          <!-- Tabla de productos -->
+          <div class="factura-productos">
+            <table class="factura-tabla">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unitario</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="factura-items">
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="factura-observaciones">
+            <p><strong>Observaciones:</strong></p>
+            <p><span id="factura-observaciones">(Vacío)</span></p>
+          </div>
+
+          <!-- Total -->
+          <div class="factura-total">
+            <p><strong>Total:</strong> <span id="factura-total-final" class="total-final"></span></p>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-imprimir" id="btn-imprimir">Imprimir Ticket</button>
+          <button type="button" class="btn-confirmar" id="btn-finalizar">Finalizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="carrito.js"></script>
 </body>
 </html>
