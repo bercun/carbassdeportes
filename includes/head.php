@@ -8,5 +8,7 @@
   <?php if(isset($additionalCSS)): ?>
     <?php echo $additionalCSS; ?>
   <?php endif; ?>
+  <!-- Script para menú móvil -->
+  <script src="mobile-menu.js" defer></script>
 </head>
 <body>

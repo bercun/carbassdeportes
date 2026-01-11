@@ -5,7 +5,17 @@
       <h1>CarbassDeportes</h1>
     </div>
 
-    <nav>
+    <!-- Hamburger menu button (solo visible en móvil) -->
+    <button class="hamburger" id="hamburger-btn" aria-label="Abrir menú de navegación">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+
+    <nav class="nav-menu" id="nav-menu">
+      <!-- Botón cerrar (solo visible en móvil cuando el menú está abierto) -->
+      <button class="nav-close" id="nav-close-btn" aria-label="Cerrar menú">✕</button>
+      
       <ul class="navlinks">
         <?php
         // Navegación por defecto (puede ser sobrescrita por $customNav)
@@ -31,4 +41,7 @@
         ?>
       </ul>
     </nav>
+
+    <!-- Overlay para móvil -->
+    <div class="nav-overlay" id="nav-overlay"></div>
   </header>
