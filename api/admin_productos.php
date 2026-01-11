@@ -5,6 +5,7 @@ header('Access-Control-Allow-Methods: POST, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once 'db.php';
+require_once 'logger.php';
 
 session_start();
 
@@ -54,6 +55,21 @@ try {
         ]);
         
         $id = $pdo->lastInsertId();
+        
+        // Registrar log
+        registrar_log(
+            'PRODUCTO_CREADO',
+            'PRODUCTOS',
+            "Producto creado: $nombre",
+            $id,
+            null,
+            [
+                'nombre' => $nombre,
+                'precio' => $precio,
+                'stock' => $stock,
+                'categoria_id' => $categoria_id
+            ]
+        );
         
         echo json_encode([
             'success' => true,
@@ -120,6 +136,21 @@ try {
             $id
         ]);
         
+        // Registrar log
+        registrar_log(
+            'PRODUCTO_ACTUALIZADO',
+            'PRODUCTOS',
+            "Producto actualizado: $nombre (ID: $id)",
+            $id,
+            null,
+            [
+                'nombre' => $nombre,
+                'precio' => $precio,
+                'stock' => $stock,
+                'estado' => $estado
+            ]
+        );
+        
         echo json_encode([
             'success' => true,
             'message' => 'Producto actualizado exitosamente'
@@ -138,10 +169,25 @@ try {
             exit;
         }
         
+        // Obtener datos del producto antes de eliminar
+        $stmt = $pdo->prepare('SELECT nombre FROM productos WHERE id = ?');
+        $stmt->execute([$id]);
+        $producto = $stmt->fetch();
+        
         $stmt = $pdo->prepare('DELETE FROM productos WHERE id = ?');
         $stmt->execute([$id]);
         
         if ($stmt->rowCount() > 0) {
+            // Registrar log
+            registrar_log(
+                'PRODUCTO_ELIMINADO',
+                'PRODUCTOS',
+                "Producto eliminado: {$producto['nombre']} (ID: $id)",
+                $id,
+                ['nombre' => $producto['nombre']],
+                null
+            );
+            
             echo json_encode([
                 'success' => true,
                 'message' => 'Producto eliminado exitosamente'

@@ -281,6 +281,8 @@ function switchTab(tabName) {
     loadUsers();
   } else if (tabName === 'ventas') {
     loadVentas();
+  } else if (tabName === 'logs') {
+    loadLogs();
   }
 }
 
@@ -561,6 +563,20 @@ document.addEventListener('DOMContentLoaded', function() {
     hace30Dias.setDate(hoy.getDate() - 30);
     fechaInicio.valueAsDate = hace30Dias;
   }
+  
+  // Establecer fechas por defecto en filtros de logs
+  const logFechaFin = document.getElementById('log-fecha-fin');
+  const logFechaInicio = document.getElementById('log-fecha-inicio');
+  
+  if (logFechaFin) {
+    logFechaFin.valueAsDate = hoy;
+  }
+  
+  if (logFechaInicio) {
+    const hace7Dias = new Date();
+    hace7Dias.setDate(hoy.getDate() - 7);
+    logFechaInicio.valueAsDate = hace7Dias;
+  }
 });
 
 // ============================================
@@ -742,4 +758,87 @@ function formatearFecha(fechaStr) {
     minute: '2-digit'
   };
   return fecha.toLocaleDateString('es-UY', opciones);
+}
+
+// ============================================
+// GESTIÓN DE LOGS
+// ============================================
+
+// Cargar logs
+async function loadLogs() {
+  try {
+    const modulo = document.getElementById('log-modulo').value;
+    const fechaInicio = document.getElementById('log-fecha-inicio').value;
+    const fechaFin = document.getElementById('log-fecha-fin').value;
+    
+    let url = 'api/logs.php';
+    const params = new URLSearchParams();
+    
+    if (modulo) params.append('modulo', modulo);
+    if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+    if (fechaFin) params.append('fecha_fin', fechaFin);
+    
+    if (params.toString()) {
+      url += '?' + params.toString();
+    }
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Error al cargar logs');
+    }
+    
+    const logs = data.logs || [];
+    const estadisticas = data.estadisticas || {};
+    
+    // Actualizar estadísticas
+    document.getElementById('total-logs-count').textContent = estadisticas.total_logs || 0;
+    document.getElementById('usuarios-activos-logs').textContent = estadisticas.usuarios_activos || 0;
+    document.getElementById('dias-actividad').textContent = estadisticas.dias_con_actividad || 0;
+    
+    // Renderizar tabla
+    const tbody = document.getElementById('logs-table-body');
+    
+    if (logs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No se encontraron logs en el período seleccionado</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = logs.map(log => `
+      <tr>
+        <td style="white-space: nowrap;">${formatearFecha(log.fecha_hora)}</td>
+        <td>
+          <div>${log.usuario_email || 'Sistema'}</div>
+          ${log.ip_address ? `<small style="color: #666;">${log.ip_address}</small>` : ''}
+        </td>
+        <td><span class="badge badge-modulo-${log.modulo.toLowerCase()}">${log.modulo}</span></td>
+        <td><span class="badge badge-accion">${log.accion}</span></td>
+        <td>${log.descripcion || '-'}</td>
+        <td style="white-space: nowrap;">${log.ip_address || '-'}</td>
+      </tr>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Error al cargar logs:', error);
+    alert('Error al cargar logs: ' + error.message);
+  }
+}
+
+// Aplicar filtros de logs
+function aplicarFiltrosLogs() {
+  loadLogs();
+}
+
+// Limpiar filtros de logs
+function limpiarFiltrosLogs() {
+  const hoy = new Date();
+  const hace7Dias = new Date();
+  hace7Dias.setDate(hoy.getDate() - 7);
+  
+  document.getElementById('log-modulo').value = '';
+  document.getElementById('log-fecha-inicio').valueAsDate = hace7Dias;
+  document.getElementById('log-fecha-fin').valueAsDate = hoy;
+  
+  loadLogs();
 }

@@ -6,6 +6,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 header('Access-Control-Allow-Credentials: true');
 
 require_once 'db.php';
+require_once 'logger.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -33,6 +34,18 @@ try {
     $user = $stmt->fetch();
     
     if (!$user) {
+        // Registrar intento fallido
+        registrar_log(
+            'LOGIN_FAILED',
+            'AUTH',
+            "Intento de login fallido para el email: $email",
+            null,
+            null,
+            null,
+            null,
+            $email
+        );
+        
         http_response_code(401);
         echo json_encode(['error' => 'Credenciales inválidas']);
         exit;
@@ -40,6 +53,18 @@ try {
     
     // Verificar contraseña
     if (!password_verify($password, $user['password'])) {
+        // Registrar intento fallido
+        registrar_log(
+            'LOGIN_FAILED',
+            'AUTH',
+            "Contraseña incorrecta para el usuario: {$user['email']}",
+            $user['id'],
+            null,
+            null,
+            $user['id'],
+            $user['email']
+        );
+        
         http_response_code(401);
         echo json_encode(['error' => 'Credenciales inválidas']);
         exit;
@@ -51,6 +76,18 @@ try {
     $_SESSION['email'] = $user['email'];
     $_SESSION['nombre'] = $user['nombre'];
     $_SESSION['rol'] = $user['rol'];
+    
+    // Registrar login exitoso
+    registrar_log(
+        'LOGIN',
+        'AUTH',
+        "Inicio de sesión exitoso de {$user['nombre']} ({$user['email']})",
+        $user['id'],
+        null,
+        null,
+        $user['id'],
+        $user['email']
+    );
     
     // Devolver datos del usuario (sin password)
     echo json_encode([

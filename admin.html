@@ -73,6 +73,7 @@
           <button class="tab-btn active" onclick="switchTab('productos')">📦 Productos</button>
           <button class="tab-btn" onclick="switchTab('usuarios')">👥 Usuarios</button>
           <button class="tab-btn" onclick="switchTab('ventas')">💰 Ventas</button>
+          <button class="tab-btn" onclick="switchTab('logs')">📋 Logs</button>
         </div>
 
         <!-- Tab: Productos -->
@@ -180,6 +181,75 @@
               <tbody id="ventas-table-body">
                 <tr>
                   <td colspan="7" style="text-align: center;">Cargando ventas...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Logs -->
+        <div id="tab-logs" class="tab-content">
+          <!-- Filtros de logs -->
+          <div class="ventas-filters">
+            <div class="filter-group">
+              <label for="log-modulo">Módulo</label>
+              <select id="log-modulo">
+                <option value="">Todos</option>
+                <option value="AUTH">Autenticación</option>
+                <option value="PRODUCTOS">Productos</option>
+                <option value="USUARIOS">Usuarios</option>
+                <option value="VENTAS">Ventas</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="log-fecha-inicio">Desde</label>
+              <input type="date" id="log-fecha-inicio">
+            </div>
+            
+            <div class="filter-group">
+              <label for="log-fecha-fin">Hasta</label>
+              <input type="date" id="log-fecha-fin">
+            </div>
+            
+            <div class="filter-actions">
+              <button class="btn-filter" onclick="aplicarFiltrosLogs()">🔍 Filtrar</button>
+              <button class="btn-clear-filter" onclick="limpiarFiltrosLogs()">🔄 Limpiar</button>
+            </div>
+          </div>
+
+          <!-- Estadísticas de logs -->
+          <div class="ventas-stats">
+            <div class="stat-card">
+              <div class="stat-number" id="total-logs-count">0</div>
+              <div class="stat-label">Total Logs</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="usuarios-activos-logs">0</div>
+              <div class="stat-label">Usuarios Activos</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="dias-actividad">0</div>
+              <div class="stat-label">Días con Actividad</div>
+            </div>
+          </div>
+
+          <!-- Tabla de logs -->
+          <div class="ventas-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Fecha/Hora</th>
+                  <th>Usuario</th>
+                  <th>Módulo</th>
+                  <th>Acción</th>
+                  <th>Descripción</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody id="logs-table-body">
+                <tr>
+                  <td colspan="6" style="text-align: center;">Cargando logs...</td>
                 </tr>
               </tbody>
             </table>

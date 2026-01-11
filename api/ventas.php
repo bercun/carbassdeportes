@@ -5,6 +5,7 @@ header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once 'db.php';
+require_once 'logger.php';
 
 session_start();
 
@@ -109,6 +110,21 @@ try {
             
             // Confirmar transacción
             $pdo->commit();
+            
+            // Registrar log
+            registrar_log(
+                'VENTA_REGISTRADA',
+                'VENTAS',
+                "Venta registrada: $numero_venta - Total: $$total - Cliente: {$datosFacturacion['nombre']} {$datosFacturacion['apellido']}",
+                $venta_id,
+                null,
+                [
+                    'numero_venta' => $numero_venta,
+                    'total' => $total,
+                    'items' => count($items),
+                    'cliente' => $datosFacturacion['nombre'] . ' ' . $datosFacturacion['apellido']
+                ]
+            );
             
             echo json_encode([
                 'success' => true,
