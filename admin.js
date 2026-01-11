@@ -113,6 +113,17 @@ async function loadProducts() {
       return;
     }
 
+    // Calcular totales
+    let totalStock = 0;
+    let totalValor = 0;
+
+    productos.forEach(product => {
+      const stock = parseInt(product.stock) || 0;
+      const precio = parseFloat(product.precio) || 0;
+      totalStock += stock;
+      totalValor += (stock * precio);
+    });
+
     tbody.innerHTML = productos.map(product => `
       <tr>
         <td><img src="${product.imagen_url || 'https://placehold.co/50x50'}" alt="${product.nombre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>
@@ -126,7 +137,14 @@ async function loadProducts() {
           <button class="btn-delete" onclick="deleteProduct(${product.id}, '${product.nombre.replace(/'/g, "\\'")}')">🗑️</button>
         </td>
       </tr>
-    `).join('');
+    `).join('') + `
+      <tr class="totals-row">
+        <td colspan="3" style="text-align: right; font-weight: bold; padding-right: 20px;">TOTALES:</td>
+        <td style="font-weight: bold; color: #2e7d32;">$${totalValor.toFixed(2)}</td>
+        <td style="font-weight: bold; color: #1976d2;">${totalStock}</td>
+        <td colspan="2"></td>
+      </tr>
+    `;
   } catch (error) {
     console.error("Error al cargar productos:", error);
     const tbody = document.getElementById('products-table-body');
