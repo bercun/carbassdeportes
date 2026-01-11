@@ -527,6 +527,44 @@ function imprimirFactura() {
 // Finalizar compra
 async function finalizarCompra() {
   try {
+    // Obtener número de venta del DOM
+    const numeroVenta = document.getElementById('factura-id').textContent;
+    
+    // Obtener datos de facturación del DOM
+    const datosFacturacion = {
+      nombre: document.getElementById('factura-nombre').textContent.split(' ')[0],
+      apellido: document.getElementById('factura-nombre').textContent.split(' ').slice(1).join(' '),
+      direccion: document.getElementById('factura-direccion').textContent,
+      telefono: document.getElementById('factura-telefono').textContent,
+      email: document.getElementById('factura-email').textContent,
+      observaciones: document.getElementById('factura-observaciones').textContent !== '(Vacío)' 
+        ? document.getElementById('factura-observaciones').textContent 
+        : ''
+    };
+    
+    // Calcular total
+    const total = carritoItems.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
+    
+    // Registrar venta en la base de datos
+    const responseVenta = await fetch('api/ventas.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        numero_venta: numeroVenta,
+        items: carritoItems,
+        datosFacturacion: datosFacturacion,
+        total: total
+      })
+    });
+    
+    const resultVenta = await responseVenta.json();
+    
+    if (!resultVenta.success) {
+      throw new Error(resultVenta.error || 'Error al registrar la venta');
+    }
+    
     // Vaciar carrito sin devolver stock (compra confirmada)
     for (const item of carritoItems) {
       await fetch('api/carrito.php', {
@@ -542,11 +580,11 @@ async function finalizarCompra() {
     }
     
     cerrarModalFactura();
-    alert('¡Compra confirmada! Gracias por tu pedido.');
+    alert(`¡Compra confirmada! Número de venta: ${numeroVenta}\nGracias por tu pedido.`);
     window.location.href = 'index.html';
   } catch (error) {
     console.error('Error:', error);
-    alert('Error al procesar la compra');
+    alert('Error al procesar la compra: ' + error.message);
   }
 }
 

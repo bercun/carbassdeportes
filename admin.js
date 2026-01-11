@@ -261,6 +261,8 @@ function switchTab(tabName) {
   // Cargar datos según la pestaña
   if (tabName === 'usuarios') {
     loadUsers();
+  } else if (tabName === 'ventas') {
+    loadVentas();
   }
 }
 
@@ -526,4 +528,191 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+
+  // Establecer fechas por defecto en filtros de ventas
+  const hoy = new Date();
+  const fechaFin = document.getElementById('fecha-fin');
+  const fechaInicio = document.getElementById('fecha-inicio');
+  
+  if (fechaFin) {
+    fechaFin.valueAsDate = hoy;
+  }
+  
+  if (fechaInicio) {
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hoy.getDate() - 30);
+    fechaInicio.valueAsDate = hace30Dias;
+  }
 });
+
+// ============================================
+// GESTIÓN DE VENTAS
+// ============================================
+
+// Cargar ventas
+async function loadVentas() {
+  try {
+    const fechaInicio = document.getElementById('fecha-inicio').value;
+    const fechaFin = document.getElementById('fecha-fin').value;
+    
+    let url = 'api/ventas.php';
+    const params = new URLSearchParams();
+    
+    if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+    if (fechaFin) params.append('fecha_fin', fechaFin);
+    
+    if (params.toString()) {
+      url += '?' + params.toString();
+    }
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Error al cargar ventas');
+    }
+    
+    const ventas = data.ventas || [];
+    const estadisticas = data.estadisticas || {};
+    
+    // Actualizar estadísticas
+    document.getElementById('total-ventas-count').textContent = estadisticas.total_ventas || 0;
+    document.getElementById('total-ventas-monto').textContent = '$' + (estadisticas.total_monto || 0).toFixed(2);
+    document.getElementById('promedio-venta').textContent = '$' + (estadisticas.promedio_venta || 0).toFixed(2);
+    document.getElementById('productos-vendidos').textContent = estadisticas.total_productos_vendidos || 0;
+    
+    // Renderizar tabla
+    const tbody = document.getElementById('ventas-table-body');
+    
+    if (ventas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No se encontraron ventas en el período seleccionado</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = ventas.map(venta => `
+      <tr>
+        <td><strong>${venta.numero_venta}</strong></td>
+        <td>${formatearFecha(venta.fecha_venta)}</td>
+        <td>
+          <div>${venta.nombre_cliente} ${venta.apellido_cliente}</div>
+          <small style="color: #666;">${venta.email_cliente}</small>
+        </td>
+        <td style="text-align: center;">${venta.cantidad_items}</td>
+        <td><strong>$${parseFloat(venta.total).toFixed(2)}</strong></td>
+        <td>
+          <span class="badge badge-${venta.estado}">${venta.estado}</span>
+        </td>
+        <td>
+          <button class="btn-icon" onclick="verDetalleVenta(${venta.id})" title="Ver detalle">
+            👁️
+          </button>
+        </td>
+      </tr>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Error al cargar ventas:', error);
+    alert('Error al cargar ventas: ' + error.message);
+  }
+}
+
+// Ver detalle de venta
+async function verDetalleVenta(ventaId) {
+  try {
+    const response = await fetch(`api/detalle_venta.php?id=${ventaId}`);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Error al cargar detalle de venta');
+    }
+    
+    const venta = data.venta;
+    const detalles = data.detalles || [];
+    
+    // Llenar información de la venta
+    document.getElementById('venta-numero').textContent = venta.numero_venta;
+    document.getElementById('venta-fecha').textContent = formatearFecha(venta.fecha_venta);
+    document.getElementById('venta-estado').textContent = venta.estado;
+    document.getElementById('venta-estado').className = `badge badge-${venta.estado}`;
+    
+    // Datos del cliente
+    document.getElementById('venta-cliente-nombre').textContent = 
+      `${venta.nombre_cliente} ${venta.apellido_cliente}`;
+    document.getElementById('venta-cliente-email').textContent = venta.email_cliente;
+    document.getElementById('venta-cliente-telefono').textContent = venta.telefono_cliente;
+    document.getElementById('venta-cliente-direccion').textContent = venta.direccion_cliente;
+    
+    // Observaciones
+    const obsRow = document.getElementById('venta-observaciones-row');
+    if (venta.observaciones && venta.observaciones.trim()) {
+      document.getElementById('venta-observaciones').textContent = venta.observaciones;
+      obsRow.style.display = 'flex';
+    } else {
+      obsRow.style.display = 'none';
+    }
+    
+    // Productos
+    const itemsTbody = document.getElementById('venta-items');
+    itemsTbody.innerHTML = detalles.map(item => `
+      <tr>
+        <td>${item.nombre_producto}</td>
+        <td style="text-align: center;">${item.cantidad}</td>
+        <td>$${parseFloat(item.precio_unitario).toFixed(2)}</td>
+        <td><strong>$${parseFloat(item.subtotal).toFixed(2)}</strong></td>
+      </tr>
+    `).join('');
+    
+    // Totales
+    document.getElementById('venta-subtotal').textContent = '$' + parseFloat(venta.subtotal).toFixed(2);
+    document.getElementById('venta-iva').textContent = '$' + parseFloat(venta.iva).toFixed(2);
+    document.getElementById('venta-total').textContent = '$' + parseFloat(venta.total).toFixed(2);
+    
+    // Mostrar modal
+    document.getElementById('venta-modal').classList.remove('hidden');
+    
+  } catch (error) {
+    console.error('Error al cargar detalle:', error);
+    alert('Error al cargar detalle de venta: ' + error.message);
+  }
+}
+
+// Cerrar modal de venta
+function closeVentaModal() {
+  document.getElementById('venta-modal').classList.add('hidden');
+}
+
+// Imprimir venta
+function imprimirVenta() {
+  window.print();
+}
+
+// Aplicar filtros de ventas
+function aplicarFiltrosVentas() {
+  loadVentas();
+}
+
+// Limpiar filtros de ventas
+function limpiarFiltrosVentas() {
+  // Establecer fechas por defecto (últimos 30 días)
+  const hoy = new Date();
+  const hace30Dias = new Date();
+  hace30Dias.setDate(hoy.getDate() - 30);
+  
+  document.getElementById('fecha-inicio').valueAsDate = hace30Dias;
+  document.getElementById('fecha-fin').valueAsDate = hoy;
+  
+  loadVentas();
+}
+
+// Formatear fecha
+function formatearFecha(fechaStr) {
+  const fecha = new Date(fechaStr);
+  const opciones = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  return fecha.toLocaleDateString('es-UY', opciones);
+}

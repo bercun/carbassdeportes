@@ -72,6 +72,7 @@
         <div class="admin-tabs">
           <button class="tab-btn active" onclick="switchTab('productos')">📦 Productos</button>
           <button class="tab-btn" onclick="switchTab('usuarios')">👥 Usuarios</button>
+          <button class="tab-btn" onclick="switchTab('ventas')">💰 Ventas</button>
         </div>
 
         <!-- Tab: Productos -->
@@ -118,6 +119,67 @@
               <tbody id="users-table-body">
                 <tr>
                   <td colspan="5" style="text-align: center;">Cargando usuarios...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Ventas -->
+        <div id="tab-ventas" class="tab-content">
+          <!-- Filtros de ventas -->
+          <div class="ventas-filters">
+            <div class="filter-group">
+              <label for="fecha-inicio">Fecha Inicio:</label>
+              <input type="date" id="fecha-inicio" />
+            </div>
+            <div class="filter-group">
+              <label for="fecha-fin">Fecha Fin:</label>
+              <input type="date" id="fecha-fin" />
+            </div>
+            <div class="filter-actions">
+              <button class="btn-filter" onclick="aplicarFiltrosVentas()">🔍 Filtrar</button>
+              <button class="btn-clear-filter" onclick="limpiarFiltrosVentas()">🔄 Limpiar</button>
+            </div>
+          </div>
+
+          <!-- Estadísticas de ventas -->
+          <div class="ventas-stats">
+            <div class="stat-card">
+              <div class="stat-number" id="total-ventas-count">0</div>
+              <div class="stat-label">Total Ventas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="total-ventas-monto">$0.00</div>
+              <div class="stat-label">Monto Total</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="promedio-venta">$0.00</div>
+              <div class="stat-label">Promedio por Venta</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="productos-vendidos">0</div>
+              <div class="stat-label">Productos Vendidos</div>
+            </div>
+          </div>
+
+          <!-- Tabla de ventas -->
+          <div class="ventas-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Nº Venta</th>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="ventas-table-body">
+                <tr>
+                  <td colspan="7" style="text-align: center;">Cargando ventas...</td>
                 </tr>
               </tbody>
             </table>
@@ -196,6 +258,100 @@
           <button type="submit" class="btn-save" id="btn-save-product">Guardar Producto</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal: Detalle de Venta -->
+  <div id="venta-modal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3>📄 Detalle de Venta</h3>
+        <button class="modal-close" onclick="closeVentaModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="venta-info">
+          <div class="info-row">
+            <div class="info-col">
+              <strong>Número de Venta:</strong>
+              <span id="venta-numero"></span>
+            </div>
+            <div class="info-col">
+              <strong>Fecha:</strong>
+              <span id="venta-fecha"></span>
+            </div>
+            <div class="info-col">
+              <strong>Estado:</strong>
+              <span id="venta-estado" class="badge"></span>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <h4>Datos del Cliente</h4>
+            <div class="info-row">
+              <div class="info-col">
+                <strong>Nombre:</strong>
+                <span id="venta-cliente-nombre"></span>
+              </div>
+              <div class="info-col">
+                <strong>Email:</strong>
+                <span id="venta-cliente-email"></span>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-col">
+                <strong>Teléfono:</strong>
+                <span id="venta-cliente-telefono"></span>
+              </div>
+              <div class="info-col">
+                <strong>Dirección:</strong>
+                <span id="venta-cliente-direccion"></span>
+              </div>
+            </div>
+            <div class="info-row" id="venta-observaciones-row">
+              <div class="info-col full-width">
+                <strong>Observaciones:</strong>
+                <span id="venta-observaciones"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h4>Productos</h4>
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unit.</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="venta-items"></tbody>
+            </table>
+          </div>
+
+          <div class="info-section">
+            <div class="venta-totales">
+              <div class="total-row">
+                <span>Subtotal:</span>
+                <strong id="venta-subtotal">$0.00</strong>
+              </div>
+              <div class="total-row">
+                <span>IVA (22%):</span>
+                <strong id="venta-iva">$0.00</strong>
+              </div>
+              <div class="total-row total-final">
+                <span>TOTAL:</span>
+                <strong id="venta-total">$0.00</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeVentaModal()">Cerrar</button>
+        <button class="btn-save" onclick="imprimirVenta()">🖨️ Imprimir</button>
+      </div>
     </div>
   </div>
 

@@ -1864,3 +1864,257 @@ body:has(.login-container) .navlinks a {
     width: 100%;
   }
 }
+
+/* ============================================
+   ESTILOS PARA VENTAS EN ADMIN
+   ============================================ */
+
+.ventas-filters {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--negro);
+  font-size: 14px;
+}
+
+.filter-group input[type="date"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.filter-group input[type="date"]:focus {
+  outline: none;
+  border-color: var(--verde);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-filter,
+.btn-clear-filter {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.btn-filter {
+  background: var(--verde);
+  color: white;
+}
+
+.btn-filter:hover {
+  background: var(--verde-oscuro);
+  transform: scale(1.05);
+}
+
+.btn-clear-filter {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.btn-clear-filter:hover {
+  background: #e0e0e0;
+}
+
+.ventas-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.ventas-table-container {
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge-completada {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-pendiente {
+  background: #fff9c4;
+  color: #f57f17;
+}
+
+.badge-cancelada {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: #f5f5f5;
+  transform: scale(1.1);
+}
+
+/* Modal de detalle de venta */
+.modal-large {
+  max-width: 800px;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.venta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.info-col {
+  flex: 1;
+  min-width: 200px;
+}
+
+.info-col.full-width {
+  flex-basis: 100%;
+}
+
+.info-col strong {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-col span {
+  display: block;
+  font-size: 15px;
+  color: var(--negro);
+}
+
+.info-section {
+  padding: 20px 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+.info-section:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.info-section h4 {
+  margin: 0 0 16px 0;
+  color: var(--negro);
+  font-size: 18px;
+}
+
+.venta-totales {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 15px;
+}
+
+.total-row.total-final {
+  border-top: 2px solid #e0e0e0;
+  padding-top: 12px;
+  margin-top: 8px;
+  font-size: 18px;
+}
+
+.total-row strong {
+  color: var(--verde);
+}
+
+@media (max-width: 768px) {
+  .ventas-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  .filter-actions {
+    width: 100%;
+  }
+  
+  .filter-actions button {
+    flex: 1;
+  }
+  
+  .ventas-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .info-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .info-col {
+    min-width: 100%;
+  }
+  
+  .modal-large {
+    max-width: 95%;
+  }
+}
