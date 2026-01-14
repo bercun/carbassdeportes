@@ -1,6 +1,8 @@
 // mobile-menu.js - Control del menú hamburger para móviles
 
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Mobile menu script cargado');
+  
   const hamburgerBtn = document.getElementById('hamburger-btn');
   const navMenu = document.getElementById('nav-menu');
   const navCloseBtn = document.getElementById('nav-close-btn');
@@ -9,9 +11,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Verificar que los elementos existan
   if (!hamburgerBtn || !navMenu || !navCloseBtn || !navOverlay) {
-    console.warn('Elementos del menú móvil no encontrados');
+    console.error('Elementos del menú móvil no encontrados:', {
+      hamburgerBtn: !!hamburgerBtn,
+      navMenu: !!navMenu,
+      navCloseBtn: !!navCloseBtn,
+      navOverlay: !!navOverlay
+    });
     return;
   }
+  
+  console.log('Todos los elementos del menú encontrados correctamente');
 
   // Abrir menú
   function openMenu() {
