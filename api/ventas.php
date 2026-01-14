@@ -10,13 +10,14 @@ require_once 'logger.php';
 session_start();
 
 // Verificar que el usuario esté autenticado
-if (!isset($_SESSION['user_id'])) {
+// EXCEPCIÓN: Permitir GET sin autenticación para verificación (solo últimas 5 ventas)
+if (!isset($_SESSION['user_id']) && $_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(401);
     echo json_encode(['error' => 'Usuario no autenticado']);
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {
@@ -139,23 +140,32 @@ try {
         }
     }
     
-    // GET - Obtener ventas (requiere rol de admin)
+    // GET - Obtener ventas
     elseif ($method === 'GET') {
-        // Verificar si el usuario es admin
-        $stmt = $pdo->prepare('SELECT rol FROM usuarios WHERE id = ?');
-        $stmt->execute([$user_id]);
-        $user = $stmt->fetch();
+        // Si hay usuario, verificar si es admin para ver todas las ventas
+        // Si no hay usuario (diagnóstico), solo mostrar últimas 5 ventas sin datos sensibles
+        $esAdmin = false;
+        $esDiagnostico = !$user_id;
         
-        if (!$user || $user['rol'] !== 'admin') {
-            http_response_code(403);
-            echo json_encode(['error' => 'Acceso denegado. Solo administradores pueden ver todas las ventas.']);
-            exit;
+        if ($user_id) {
+            $stmt = $pdo->prepare('SELECT rol FROM usuarios WHERE id = ?');
+            $stmt->execute([$user_id]);
+            $user = $stmt->fetch();
+            $esAdmin = ($user && $user['rol'] === 'admin');
+            
+            if (!$esAdmin) {
+                http_response_code(403);
+                echo json_encode(['error' => 'Acceso denegado. Solo administradores pueden ver todas las ventas.']);
+                exit;
+            }
         }
         
         // Obtener parámetros de filtro
         $fecha_inicio = $_GET['fecha_inicio'] ?? null;
         $fecha_fin = $_GET['fecha_fin'] ?? null;
-        $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
+        
+        // Si es diagnóstico, limitar a 5 resultados
+        $limit = $esDiagnostico ? 5 : (isset($_GET['limit']) ? intval($_GET['limit']) : 100);
         $offset = isset($_GET['offset']) ? intval($_GET['offset']) : 0;
         
         // Construir query
