@@ -126,7 +126,7 @@ async function loadProducts() {
 
     tbody.innerHTML = productos.map(product => `
       <tr>
-        <td data-label="Imagen"><img src="${product.imagen_url || 'https://placehold.co/50x50'}" alt="${product.nombre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>
+        <td data-label="Imagen"><img src="${product.imagen_url || 'sours/img/articulos/default.jpg'}" alt="${product.nombre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>
         <td data-label="Nombre">${product.nombre}</td>
         <td data-label="Categoría"><span class="categoria-badge">${product.categoria_nombre || 'Sin categoría'}</span></td>
         <td data-label="Precio">$${parseFloat(product.precio).toFixed(2)}</td>

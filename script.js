@@ -235,7 +235,7 @@ function createArticleCardHtml(article, isSmallGrid = false) {
   return `
     <article class="card" data-product-id="${article.id}">
       <div class="thumb">
-        <img src="${article.imagen || 'https://placehold.co/600x400?text=Sin+Imagen'}" alt="${article.nombre}"/>
+        <img src="${article.imagen || 'sours/img/articulos/default.jpg'}" alt="${article.nombre}"/>
         ${article.estatus ? `<span class="badge">${estatusDisplay}</span>` : ''}
       </div>
       <div class="card-content">
@@ -297,7 +297,7 @@ async function loadProducts() {
       nombre: product.nombre,
       descripción: product.descripcion,
       precio: parseFloat(product.precio),
-      imagen: product.imagen_url || 'https://placehold.co/600x400?text=Sin+Imagen',
+      imagen: product.imagen_url || 'sours/img/articulos/default.jpg',
       categoria: product.categoria_nombre || 'general',
       categoria_id: product.categoria_id,
       estatus: product.estado || (product.destacado == 1 ? 'destacado' : 'normal'),
