@@ -126,13 +126,13 @@ async function loadProducts() {
 
     tbody.innerHTML = productos.map(product => `
       <tr>
-        <td><img src="${product.imagen_url || 'https://placehold.co/50x50'}" alt="${product.nombre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>
-        <td>${product.nombre}</td>
-        <td><span class="categoria-badge">${product.categoria_nombre || 'Sin categoría'}</span></td>
-        <td>$${parseFloat(product.precio).toFixed(2)}</td>
-        <td>${product.stock || 0}</td>
-        <td><span class="estatus-badge ${product.estado === 'destacado' ? 'estatus-destacado' : ''}">${product.estado || 'normal'}</span></td>
-        <td>
+        <td data-label="Imagen"><img src="${product.imagen_url || 'https://placehold.co/50x50'}" alt="${product.nombre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>
+        <td data-label="Nombre">${product.nombre}</td>
+        <td data-label="Categoría"><span class="categoria-badge">${product.categoria_nombre || 'Sin categoría'}</span></td>
+        <td data-label="Precio">$${parseFloat(product.precio).toFixed(2)}</td>
+        <td data-label="Stock">${product.stock || 0}</td>
+        <td data-label="Estado"><span class="estatus-badge ${product.estado === 'destacado' ? 'estatus-destacado' : ''}">${product.estado || 'normal'}</span></td>
+        <td data-label="Acciones">
           <button class="btn-edit" onclick="editProduct(${product.id})">✏️</button>
           <button class="btn-delete" onclick="deleteProduct(${product.id}, '${product.nombre.replace(/'/g, "\\'")}')">🗑️</button>
         </td>
@@ -176,16 +176,16 @@ async function loadUsers() {
 
     tbody.innerHTML = usuarios.map(user => `
       <tr>
-        <td>${user.nombre || 'Sin nombre'}</td>
-        <td>${user.email}</td>
-        <td>
+        <td data-label="Nombre">${user.nombre || 'Sin nombre'}</td>
+        <td data-label="Email">${user.email}</td>
+        <td data-label="Rol">
           <select onchange="updateUserRole(${user.id}, this.value)" class="role-select">
             <option value="user" ${user.rol === 'user' ? 'selected' : ''}>Usuario</option>
             <option value="admin" ${user.rol === 'admin' ? 'selected' : ''}>Admin</option>
           </select>
         </td>
-        <td>${new Date(user.fecha_registro).toLocaleDateString('es-ES')}</td>
-        <td>
+        <td data-label="Fecha Registro">${new Date(user.fecha_registro).toLocaleDateString('es-ES')}</td>
+        <td data-label="Acciones">
           <button class="btn-delete" onclick="deleteUser(${user.id}, '${user.email.replace(/'/g, "\\'")}')">🗑️</button>
         </td>
       </tr>
@@ -632,20 +632,20 @@ async function loadVentas() {
     
     tbody.innerHTML = ventas.map(venta => `
       <tr>
-        <td><strong>${venta.numero_venta}</strong></td>
-        <td>${formatearFecha(venta.fecha_venta)}</td>
-        <td>
+        <td data-label="Nº Venta"><strong>${venta.numero_venta}</strong></td>
+        <td data-label="Fecha">${formatearFecha(venta.fecha_venta)}</td>
+        <td data-label="Cliente">
           <div>${venta.nombre_cliente} ${venta.apellido_cliente}</div>
           <small style="color: #666;">${venta.email_cliente}</small>
         </td>
-        <td style="text-align: center;">${venta.cantidad_items}</td>
-        <td><strong>$${parseFloat(venta.total).toFixed(2)}</strong></td>
-        <td>
+        <td data-label="Items" style="text-align: center;">${venta.cantidad_items}</td>
+        <td data-label="Total"><strong>$${parseFloat(venta.total).toFixed(2)}</strong></td>
+        <td data-label="Estado">
           <span class="badge badge-${venta.estado || 'completada'}">
             ${venta.estado ? venta.estado : 'completada'}
           </span>
         </td>
-        <td>
+        <td data-label="Acciones">
           <button class="btn-icon" onclick="verDetalleVenta(${venta.id})" title="Ver detalle">
             👁️
           </button>
