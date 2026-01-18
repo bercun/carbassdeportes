@@ -23,13 +23,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
         
     } else {
-        // Obtener todos los productos
-        $sql = 'SELECT p.*, c.nombre as categoria_nombre 
-                FROM productos p 
-                LEFT JOIN categorias c ON p.categoria_id = c.id 
-                ORDER BY p.fecha_creacion DESC';
+        // Obtener todos los productos activos
+        // Verificar si existe la columna 'activo', si no, mostrar todos
+        try {
+            $sql = 'SELECT p.*, c.nombre as categoria_nombre 
+                    FROM productos p 
+                    LEFT JOIN categorias c ON p.categoria_id = c.id 
+                    WHERE p.activo = 1
+                    ORDER BY p.fecha_creacion DESC';
+            
+            $stmt = $pdo->query($sql);
+        } catch (PDOException $e) {
+            // Si la columna 'activo' no existe, mostrar todos los productos
+            $sql = 'SELECT p.*, c.nombre as categoria_nombre 
+                    FROM productos p 
+                    LEFT JOIN categorias c ON p.categoria_id = c.id 
+                    ORDER BY p.fecha_creacion DESC';
+            
+            $stmt = $pdo->query($sql);
+        }
         
-        $stmt = $pdo->query($sql);
         $productos = $stmt->fetchAll();
         
         echo json_encode($productos);

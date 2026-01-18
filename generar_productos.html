@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Productos Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1ecb63 0%, #17a352 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #1ecb63;
+            box-shadow: 0 0 0 3px rgba(30, 203, 99, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #1ecb63 0%, #17a352 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 203, 99, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+        }
+
+        .info-box li {
+            margin: 5px 0;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+
+        .result.error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1ecb63;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .productos-lista {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .producto-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 Generador de Productos Demo</h1>
+            <p>Crea productos de demostración automáticamente</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <h3>ℹ️ Información</h3>
+                <ul>
+                    <li>Los productos se generan con datos aleatorios realistas</li>
+                    <li>Se usan las imágenes disponibles en la carpeta articulos</li>
+                    <li>Categorías, precios y stocks son asignados aleatoriamente</li>
+                    <li>Máximo: 50 productos por generación</li>
+                </ul>
+            </div>
+
+            <form id="generador-form">
+                <div class="form-group">
+                    <label for="cantidad">Cantidad de Productos a Generar</label>
+                    <input 
+                        type="number" 
+                        id="cantidad" 
+                        name="cantidad" 
+                        min="1" 
+                        max="50" 
+                        value="10" 
+                        required
+                    />
+                </div>
+
+                <button type="submit" class="btn" id="btn-generar">
+                    🚀 Generar Productos
+                </button>
+            </form>
+
+            <div id="resultado" class="result"></div>
+
+            <a href="admin.html" class="back-link">← Volver al Panel Admin</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('generador-form');
+        const btnGenerar = document.getElementById('btn-generar');
+        const resultado = document.getElementById('resultado');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const cantidad = document.getElementById('cantidad').value;
+
+            // Deshabilitar botón
+            btnGenerar.disabled = true;
+            btnGenerar.innerHTML = '<span class="spinner"></span> Generando...';
+
+            // Limpiar resultado anterior
+            resultado.style.display = 'none';
+            resultado.className = 'result';
+            resultado.innerHTML = '';
+
+            try {
+                const response = await fetch(`api/generar_productos_demo.php?cantidad=${cantidad}`);
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    mostrarExito(data);
+                } else {
+                    mostrarError(data.error || 'Error desconocido');
+                }
+            } catch (error) {
+                mostrarError('Error de conexión: ' + error.message);
+            } finally {
+                btnGenerar.disabled = false;
+                btnGenerar.innerHTML = '🚀 Generar Productos';
+            }
+        });
+
+        function mostrarExito(data) {
+            resultado.className = 'result success';
+            resultado.style.display = 'block';
+
+            let html = `
+                <h3>✅ ${data.message}</h3>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${data.cantidad_creada}</div>
+                        <div class="stat-label">Productos Creados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${data.imagenes_utilizadas}</div>
+                        <div class="stat-label">Imágenes Usadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${data.resumen.categorias_usadas}</div>
+                        <div class="stat-label">Categorías</div>
+                    </div>
+                </div>
+
+                <h4>Estados generados:</h4>
+                <ul>
+            `;
+
+            for (let estado in data.resumen.estados) {
+                html += `<li><strong>${estado}:</strong> ${data.resumen.estados[estado]} productos</li>`;
+            }
+
+            html += `</ul>`;
+
+            if (data.productos && data.productos.length > 0) {
+                html += `
+                    <h4>Productos creados:</h4>
+                    <div class="productos-lista">
+                `;
+                
+                data.productos.forEach(prod => {
+                    html += `
+                        <div class="producto-item">
+                            <span><strong>${prod.nombre}</strong></span>
+                            <span>$${prod.precio} | Stock: ${prod.stock}</span>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            }
+
+            resultado.innerHTML = html;
+        }
+
+        function mostrarError(mensaje) {
+            resultado.className = 'result error';
+            resultado.style.display = 'block';
+            resultado.innerHTML = `
+                <h3>❌ Error</h3>
+                <p>${mensaje}</p>
+            `;
+        }
+    </script>
+</body>
+</html>

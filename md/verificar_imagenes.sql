@@ -43,6 +43,16 @@ ORDER BY id;
 -- SET imagen_url = NULL 
 -- WHERE imagen_url = '';
 
+-- 4b. Actualizar URLs no estándar con imagen por defecto
+-- DESCOMENTAR SOLO SI QUIERES EJECUTAR
+-- Este UPDATE cambiará todas las URLs externas y rutas no estándar
+UPDATE productos 
+SET imagen_url = 'sours/img/articulos/producto_695afd6b40ba23.40749591.jpg'
+WHERE (imagen_url IS NULL 
+   OR imagen_url = '' 
+   OR imagen_url LIKE 'http%'
+   OR (imagen_url NOT LIKE 'sours/img/articulos/%' AND imagen_url != ''));
+
 -- 5. Ver imágenes que apuntan a archivos que podrían no existir
 -- (Esto es solo informativo, necesitarías verificar manualmente los archivos)
 SELECT 

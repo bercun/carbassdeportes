@@ -157,7 +157,7 @@ try {
         ]);
     }
     
-    // DELETE - Eliminar producto
+    // DELETE - Soft Delete (marcar como inactivo)
     elseif ($method === 'DELETE') {
         $data = json_decode(file_get_contents('php://input'), true);
         
@@ -169,20 +169,34 @@ try {
             exit;
         }
         
-        // Obtener datos del producto antes de eliminar
+        // Obtener datos del producto antes de marcar como inactivo
         $stmt = $pdo->prepare('SELECT nombre FROM productos WHERE id = ?');
         $stmt->execute([$id]);
         $producto = $stmt->fetch();
         
-        $stmt = $pdo->prepare('DELETE FROM productos WHERE id = ?');
+        if (!$producto) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Producto no encontrado']);
+            exit;
+        }
+        
+        // Verificar si la columna 'activo' existe, si no, crearla
+        try {
+            $pdo->exec('ALTER TABLE productos ADD COLUMN IF NOT EXISTS activo TINYINT(1) DEFAULT 1');
+        } catch (PDOException $e) {
+            // La columna ya existe o hay otro error, continuar
+        }
+        
+        // Marcar como inactivo en lugar de eliminar
+        $stmt = $pdo->prepare('UPDATE productos SET activo = 0 WHERE id = ?');
         $stmt->execute([$id]);
         
         if ($stmt->rowCount() > 0) {
             // Registrar log
             registrar_log(
-                'PRODUCTO_ELIMINADO',
+                'PRODUCTO_DESACTIVADO',
                 'PRODUCTOS',
-                "Producto eliminado: {$producto['nombre']} (ID: $id)",
+                "Producto desactivado: {$producto['nombre']} (ID: $id)",
                 $id,
                 ['nombre' => $producto['nombre']],
                 null
@@ -193,8 +207,8 @@ try {
                 'message' => 'Producto eliminado exitosamente'
             ]);
         } else {
-            http_response_code(404);
-            echo json_encode(['error' => 'Producto no encontrado']);
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al eliminar el producto']);
         }
     }
     
