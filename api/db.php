@@ -1,11 +1,21 @@
 <?php
-// Configuración de la base de datos
-$host = 'localhost';  // En producción puede ser diferente
-$db   = 'brkoonuy_carbass_db';  // Nombre de tu base de datos
-$user = 'brkoonuy_brkncarbass'; // Usuario de la base de datos
-$pass = 'OIxJBi-anV+O5jp5';    // Contraseña del usuario
+/**
+ * Archivo de conexión a la base de datos
+ * Carga las credenciales desde db.config.php
+ */
 
-$charset = 'utf8mb4';
+// Cargar configuración de credenciales
+$configFile = __DIR__ . '/db.config.php';
+
+if (!file_exists($configFile)) {
+    http_response_code(500);
+    die(json_encode([
+        'error' => 'Archivo de configuración no encontrado',
+        'message' => 'Por favor, crea el archivo db.config.php basándote en db.config.example.php'
+    ]));
+}
+
+require_once $configFile;
 
 // DSN (Data Source Name)
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

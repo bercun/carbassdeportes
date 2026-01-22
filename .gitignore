@@ -16,6 +16,12 @@ Thumbs.db
 # Configuración local (si existe)
 firebase-config.local.js
 
+# Credenciales de base de datos
+api/db.config.php
+.env
+.env.local
+.env.production
+
 # Node modules (si usas npm)
 node_modules/
 
