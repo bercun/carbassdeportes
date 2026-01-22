@@ -21,7 +21,7 @@
 - ✅ Autenticación de usuarios (registro/login)
 - ✅ Panel de administración completo
 - ✅ Gestión de inventario y stock
-- ✅ Sistema de facturación automática
+- ✅ Sistema de facturación automática (gstion de pedidos no factura online)
 - ✅ Diseño responsive (adaptado a móviles y tablets)
 
 ---
@@ -139,11 +139,11 @@
 
 5. **Ofertas**
    - Productos con descuentos especiales
-   - Precio destacado en rojo
+   - Precio destacado en rojo (esto falta implementar)
 
 **Panel Lateral (Aside - Solo en Desktop)**:
 - **Promociones visuales**: Banners de ofertas especiales
-- **Video promocional**: Se reproduce al pasar el mouse
+- **Video promocional**: Se reproduce al pasar el mouse (Crónica de un "Pistolero")
 - **Coleccionable aleatorio**: Cambia en cada visita
 
 #### Catálogo Completo
@@ -326,6 +326,8 @@
 - **Acciones**: Editar y Eliminar
 
 **Indicadores visuales**:
+(estan por implentar es solo una idea)
+
 - 🌟 Destacado (fondo dorado)
 - 🔥 Oferta (fondo rojo)
 - ✨ Nuevo (fondo verde)
@@ -401,6 +403,7 @@
    - La acción **no se puede deshacer**
 
 **⚠️ Advertencia**: Al eliminar un producto:
+(nota mental cambiar el eliminar por dar de baja para que no se borre el historial de las ventas)
 - Se eliminará de todos los carritos
 - Se perderá el historial asociado
 - Las ventas previas mantendrán el registro
@@ -501,7 +504,7 @@
      - Estado actual
 
 3. **Acciones disponibles**:
-   - **Cambiar estado**: Marcar como Completada/Cancelada
+   - **Cambiar estado**: Marcar como Completada/Cancelada (falta implementar)
    - **Reimprimir factura**: Generar nueva impresión
    - **Enviar factura por email**: Reenviar al cliente
 
@@ -557,6 +560,7 @@
    - Selecciona el período o tipo de eventos
 
 2. **Exportar**
+(falta implementar)
    - Haz clic en **"📥 Exportar Logs"**
    - Se descargará un archivo CSV
    - Útil para análisis externo
@@ -702,6 +706,8 @@ Este manual corresponde a la versión actual del sistema. Las funcionalidades pu
 **Versión del Manual**: 1.0  
 **Fecha**: Enero 2026  
 **Sistema**: CarbassDeportes E-commerce Platform
+**Diseño**: brkoon
+
 
 ---
 
