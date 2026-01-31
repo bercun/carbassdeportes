@@ -1,12 +1,9 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Access-Control-Allow-Credentials: true');
-
+require_once 'security_middleware.php';
 require_once 'db.php';
 require_once 'logger.php';
+
+header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -14,9 +11,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+session_start();
+
 try {
     // Obtener datos del cuerpo de la solicitud
     $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Verificar token CSRF
+    verificar_csrf($data['csrf_token'] ?? '');
+    
+    // Rate limiting por IP
+    $ip = $_SERVER['REMOTE_ADDR'];
+    check_rate_limit("login_$ip", 5, 300); // 5 intentos en 5 minutos
     
     $email = trim($data['email'] ?? '');
     $password = $data['password'] ?? '';
@@ -71,11 +77,16 @@ try {
     }
     
     // Iniciar sesión
-    session_start();
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['email'] = $user['email'];
     $_SESSION['nombre'] = $user['nombre'];
     $_SESSION['rol'] = $user['rol'];
+    
+    // Regenerar token CSRF después de login exitoso
+    $new_csrf_token = regenerar_csrf_token();
+    
+    // Limpiar rate limiting para este IP
+    limpiar_rate_limit("login_$ip");
     
     // Registrar login exitoso
     registrar_log(
@@ -98,7 +109,8 @@ try {
             'email' => $user['email'],
             'nombre' => $user['nombre'],
             'rol' => $user['rol']
-        ]
+        ],
+        'csrf_token' => $new_csrf_token
     ]);
     
 } catch (PDOException $e) {

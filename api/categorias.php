@@ -1,8 +1,8 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-
+require_once 'security_middleware.php';
 require_once 'db.php';
+
+header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -38,6 +38,9 @@ try {
         }
         
         $data = json_decode(file_get_contents('php://input'), true);
+        
+        // Verificar token CSRF
+        verificar_csrf($data['csrf_token'] ?? '');
         $nombre = trim($data['nombre'] ?? '');
         $slug = trim($data['slug'] ?? '');
         

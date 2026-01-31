@@ -1,11 +1,11 @@
 <?php
+require_once 'security_middleware.php';
+require_once 'db.php';
+require_once 'logger.php';
+
 session_start();
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-
-require_once 'db.php';
-require_once 'logger.php';
 
 // Verificar que el usuario sea administrador
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
@@ -31,6 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 // PUT: Actualizar rol de usuario
 elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Verificar token CSRF
+    verificar_csrf($data['csrf_token'] ?? '');
     
     if (!isset($data['id']) || !isset($data['rol'])) {
         http_response_code(400);
@@ -75,7 +78,10 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
 
 // DELETE: Eliminar usuario
 elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-    parse_str(file_get_contents('php://input'), $data);
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Verificar token CSRF
+    verificar_csrf($data['csrf_token'] ?? '');
     
     if (!isset($data['id'])) {
         http_response_code(400);

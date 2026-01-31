@@ -210,15 +210,12 @@ async function updateUserRole(userId, newRole) {
   }
   
   try {
-    const response = await fetch('api/usuarios.php', {
+    const response = await fetchWithCsrf('api/usuarios.php', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
+      body: {
         id: userId,
         rol: newRole
-      })
+      }
     });
     
     const data = await response.json();
@@ -244,12 +241,11 @@ async function deleteUser(userId, userEmail) {
   }
   
   try {
-    const response = await fetch('api/usuarios.php', {
+    const response = await fetchWithCsrf('api/usuarios.php', {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `id=${userId}`
+      body: {
+        id: userId
+      }
     });
     
     const data = await response.json();
@@ -350,12 +346,9 @@ async function deleteProduct(productId, productName) {
   }
 
   try {
-    const response = await fetch('api/admin_productos.php', {
+    const response = await fetchWithCsrf('api/admin_productos.php', {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ id: productId })
+      body: { id: productId }
     });
     
     const data = await response.json();
@@ -445,21 +438,15 @@ document.getElementById('product-form')?.addEventListener('submit', async (e) =>
     if (currentEditingProductId) {
       // Actualizar producto existente
       productData.id = currentEditingProductId;
-      response = await fetch('api/admin_productos.php', {
+      response = await fetchWithCsrf('api/admin_productos.php', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(productData)
+        body: productData
       });
     } else {
       // Crear nuevo producto
-      response = await fetch('api/admin_productos.php', {
+      response = await fetchWithCsrf('api/admin_productos.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(productData)
+        body: productData
       });
     }
     
