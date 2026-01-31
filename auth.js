@@ -1,3 +1,4 @@
+
 // Variables del formulario
 const authForm = document.getElementById('auth-form');
 const emailInput = document.getElementById('email');
