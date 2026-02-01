@@ -376,7 +376,8 @@ async function uploadImage(fileInput) {
   try {
     const response = await fetch('api/upload_image.php', {
       method: 'POST',
-      body: formData
+      body: formData,
+      credentials: 'include' // Enviar cookies de sesión
     });
 
     const data = await response.json();
