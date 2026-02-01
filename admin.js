@@ -753,7 +753,12 @@ function formatearFecha(fechaStr) {
 
 // Cargar logs
 async function loadLogs() {
+  const tbody = document.getElementById('logs-table-body');
+  
   try {
+    // Mostrar mensaje de carga
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Cargando logs...</td></tr>';
+    
     const modulo = document.getElementById('log-modulo').value;
     const fechaInicio = document.getElementById('log-fecha-inicio').value;
     const fechaFin = document.getElementById('log-fecha-fin').value;
@@ -770,6 +775,14 @@ async function loadLogs() {
     }
     
     const response = await fetch(url);
+    
+    // Si no está autenticado, redirigir al login
+    if (response.status === 401) {
+      alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+      window.location.href = 'login.html';
+      return;
+    }
+    
     const data = await response.json();
     
     if (!data.success) {
@@ -785,8 +798,6 @@ async function loadLogs() {
     document.getElementById('dias-actividad').textContent = estadisticas.dias_con_actividad || 0;
     
     // Renderizar tabla
-    const tbody = document.getElementById('logs-table-body');
-    
     if (logs.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No se encontraron logs en el período seleccionado</td></tr>';
       return;
@@ -808,7 +819,7 @@ async function loadLogs() {
     
   } catch (error) {
     console.error('Error al cargar logs:', error);
-    alert('Error al cargar logs: ' + error.message);
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Error al cargar logs: ${error.message}</td></tr>`;
   }
 }
 
