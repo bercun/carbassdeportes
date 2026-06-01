@@ -1,17 +1,22 @@
 <?php
+require_once 'security_middleware.php';
+
+header('Content-Type: application/json');
+
 session_start();
 require_once 'csrf.php';
 
 // Validar CSRF
 require_csrf_token();
 
+// Regenerar sesión si es necesario
+regenerar_sesion_si_necesario();
+
 // Verificar que el usuario sea admin
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
     http_response_code(403);
     die(json_encode(['error' => 'Acceso denegado']));
 }
-
-header('Content-Type: application/json');
 
 // Verificar que se haya enviado un archivo
 if (!isset($_FILES['imagen']) || $_FILES['imagen']['error'] !== UPLOAD_ERR_OK) {

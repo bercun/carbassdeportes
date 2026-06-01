@@ -1,12 +1,9 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
-header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
-
+require_once 'security_middleware.php';
 require_once 'db.php';
 require_once 'logger.php';
-require_once 'csrf.php';
+
+header('Content-Type: application/json');
 
 session_start();
 
@@ -21,15 +18,13 @@ if (!isset($_SESSION['user_id']) && $_SERVER['REQUEST_METHOD'] !== 'GET') {
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Validar CSRF en mutaciones
-if ($method === 'POST') {
-    require_csrf_token();
-}
-
 try {
     // POST - Registrar una nueva venta
     if ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
+        
+        // Verificar token CSRF
+        verificar_csrf($input['csrf_token'] ?? '');
         
         if (!$input) {
             throw new Exception('Datos inválidos');

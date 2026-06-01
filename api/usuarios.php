@@ -1,13 +1,11 @@
 <?php
+require_once 'security_middleware.php';
+require_once 'db.php';
+require_once 'logger.php';
+
 session_start();
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
-
-require_once 'db.php';
-require_once 'logger.php';
-require_once 'csrf.php';
 
 // Verificar que el usuario sea administrador
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
@@ -16,15 +14,8 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
     exit;
 }
 
-$method = $_SERVER['REQUEST_METHOD'];
-
-// Validar CSRF en mutaciones
-if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
-    require_csrf_token();
-}
-
 // GET: Obtener todos los usuarios
-if ($method === 'GET') {
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
         $sql = 'SELECT id, email, nombre, rol, fecha_registro FROM usuarios ORDER BY fecha_registro DESC';
         $stmt = $pdo->query($sql);
@@ -38,8 +29,11 @@ if ($method === 'GET') {
 }
 
 // PUT: Actualizar rol de usuario
-elseif ($method === 'PUT') {
+elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Verificar token CSRF
+    verificar_csrf($data['csrf_token'] ?? '');
     
     if (!isset($data['id']) || !isset($data['rol'])) {
         http_response_code(400);
@@ -83,8 +77,11 @@ elseif ($method === 'PUT') {
 }
 
 // DELETE: Eliminar usuario
-elseif ($method === 'DELETE') {
-    parse_str(file_get_contents('php://input'), $data);
+elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Verificar token CSRF
+    verificar_csrf($data['csrf_token'] ?? '');
     
     if (!isset($data['id'])) {
         http_response_code(400);

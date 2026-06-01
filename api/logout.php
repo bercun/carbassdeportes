@@ -1,10 +1,8 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Credentials: true');
-
+require_once 'security_middleware.php';
 require_once 'logger.php';
+
+header('Content-Type: application/json');
 
 session_start();
 
@@ -28,6 +26,20 @@ if ($user_id) {
 
 // Destruir todas las variables de sesión
 $_SESSION = array();
+
+// Si se usa una cookie de sesión, eliminarla también
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(
+        session_name(),
+        '',
+        time() - 42000,
+        $params["path"],
+        $params["domain"],
+        $params["secure"],
+        $params["httponly"]
+    );
+}
 
 // Destruir la sesión
 session_destroy();

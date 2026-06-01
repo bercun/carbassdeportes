@@ -7,13 +7,20 @@ header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once 'db.php';
+require_once 'security_middleware.php';
 
 session_start();
+
+// Regenerar sesión si es necesario
+regenerar_sesion_si_necesario();
 
 // Verificar que el usuario esté autenticado y sea admin
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode(['error' => 'Usuario no autenticado']);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Usuario no autenticado'
+    ]);
     exit;
 }
 
@@ -27,7 +34,10 @@ try {
     
     if (!$user || $user['rol'] !== 'admin') {
         http_response_code(403);
-        echo json_encode(['error' => 'Acceso denegado. Solo administradores pueden ver los logs.']);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Acceso denegado. Solo administradores pueden ver los logs.'
+        ]);
         exit;
     }
     
@@ -68,8 +78,10 @@ try {
     // Obtener logs
     $sql = "
         SELECT 
-            l.*
+            l.*,
+            u.email as usuario_email
         FROM logs_auditoria l
+        LEFT JOIN usuarios u ON l.user_id = u.id
         $whereClause
         ORDER BY l.fecha_hora DESC
         LIMIT ? OFFSET ?

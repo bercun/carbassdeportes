@@ -1,8 +1,8 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *'); // Permitir CORS
-
+require_once 'security_middleware.php';
 require_once 'db.php';
+
+header('Content-Type: application/json');
 
 // GET: Obtener todos los productos o uno específico
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -63,6 +63,9 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Recibir datos JSON
     $data = json_decode(file_get_contents('php://input'), true);
     
+    // Verificar token CSRF
+    verificar_csrf($data['csrf_token'] ?? '');
+    
     $nombre = $data['nombre'] ?? '';
     $descripcion = $data['descripcion'] ?? '';
     $precio = $data['precio'] ?? 0;
@@ -103,6 +106,9 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     }
     
     $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Verificar token CSRF
+    verificar_csrf($data['csrf_token'] ?? '');
     $id = $data['id'] ?? 0;
     
     if (!$id) {
@@ -146,7 +152,10 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         exit;
     }
     
-    parse_str(file_get_contents('php://input'), $data);
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Verificar token CSRF
+    verificar_csrf($data['csrf_token'] ?? '');
     $id = $data['id'] ?? 0;
     
     if (!$id) {

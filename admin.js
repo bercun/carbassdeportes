@@ -2,7 +2,6 @@
 // userSession es definida en auth-check-php.js
 
 let currentEditingProductId = null;
-let csrfToken = '';
 
 // Verificar permisos de administrador al cargar la página
 async function checkAdminAccess() {
@@ -16,7 +15,6 @@ async function checkAdminAccess() {
       return;
     }
     
-    if (data.csrf_token) csrfToken = data.csrf_token;
     userSession = data.user;
     
     if (userSession.rol !== 'admin') {
@@ -212,16 +210,12 @@ async function updateUserRole(userId, newRole) {
   }
   
   try {
-    const response = await fetch('api/usuarios.php', {
+    const response = await fetchWithCsrf('api/usuarios.php', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken
-      },
-      body: JSON.stringify({
+      body: {
         id: userId,
         rol: newRole
-      })
+      }
     });
     
     const data = await response.json();
@@ -247,13 +241,11 @@ async function deleteUser(userId, userEmail) {
   }
   
   try {
-    const response = await fetch('api/usuarios.php', {
+    const response = await fetchWithCsrf('api/usuarios.php', {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-CSRF-Token': csrfToken
-      },
-      body: `id=${userId}`
+      body: {
+        id: userId
+      }
     });
     
     const data = await response.json();
@@ -354,13 +346,9 @@ async function deleteProduct(productId, productName) {
   }
 
   try {
-    const response = await fetch('api/admin_productos.php', {
+    const response = await fetchWithCsrf('api/admin_productos.php', {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken
-      },
-      body: JSON.stringify({ id: productId })
+      body: { id: productId }
     });
     
     const data = await response.json();
@@ -388,10 +376,8 @@ async function uploadImage(fileInput) {
   try {
     const response = await fetch('api/upload_image.php', {
       method: 'POST',
-      headers: {
-        'X-CSRF-Token': csrfToken
-      },
-      body: formData
+      body: formData,
+      credentials: 'include' // Enviar cookies de sesión
     });
 
     const data = await response.json();
@@ -453,23 +439,15 @@ document.getElementById('product-form')?.addEventListener('submit', async (e) =>
     if (currentEditingProductId) {
       // Actualizar producto existente
       productData.id = currentEditingProductId;
-      response = await fetch('api/admin_productos.php', {
+      response = await fetchWithCsrf('api/admin_productos.php', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
-        },
-        body: JSON.stringify(productData)
+        body: productData
       });
     } else {
       // Crear nuevo producto
-      response = await fetch('api/admin_productos.php', {
+      response = await fetchWithCsrf('api/admin_productos.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
-        },
-        body: JSON.stringify(productData)
+        body: productData
       });
     }
     
@@ -776,7 +754,12 @@ function formatearFecha(fechaStr) {
 
 // Cargar logs
 async function loadLogs() {
+  const tbody = document.getElementById('logs-table-body');
+  
   try {
+    // Mostrar mensaje de carga
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Cargando logs...</td></tr>';
+    
     const modulo = document.getElementById('log-modulo').value;
     const fechaInicio = document.getElementById('log-fecha-inicio').value;
     const fechaFin = document.getElementById('log-fecha-fin').value;
@@ -793,6 +776,14 @@ async function loadLogs() {
     }
     
     const response = await fetch(url);
+    
+    // Si no está autenticado, redirigir al login
+    if (response.status === 401) {
+      alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+      window.location.href = 'login.html';
+      return;
+    }
+    
     const data = await response.json();
     
     if (!data.success) {
@@ -808,8 +799,6 @@ async function loadLogs() {
     document.getElementById('dias-actividad').textContent = estadisticas.dias_con_actividad || 0;
     
     // Renderizar tabla
-    const tbody = document.getElementById('logs-table-body');
-    
     if (logs.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No se encontraron logs en el período seleccionado</td></tr>';
       return;
@@ -831,7 +820,7 @@ async function loadLogs() {
     
   } catch (error) {
     console.error('Error al cargar logs:', error);
-    alert('Error al cargar logs: ' + error.message);
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Error al cargar logs: ${error.message}</td></tr>`;
   }
 }
 

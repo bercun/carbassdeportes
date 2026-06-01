@@ -1,3 +1,4 @@
+
 // Variables del formulario
 const authForm = document.getElementById('auth-form');
 const emailInput = document.getElementById('email');
@@ -11,7 +12,26 @@ const toggleText = document.getElementById('toggle-text');
 const errorMessage = document.getElementById('error-message');
 
 let isLoginMode = true;
-let csrfToken = '';
+let csrfToken = null; // Token CSRF global
+
+// Obtener token CSRF al cargar la página
+async function obtenerCsrfToken() {
+  try {
+    const response = await fetch('api/check_auth.php');
+    const data = await response.json();
+    csrfToken = data.csrf_token;
+    
+    // Si ya está autenticado, redirigir
+    if (data.logged_in && window.location.pathname.includes('login.html')) {
+      window.location.href = 'index.html';
+    }
+  } catch (err) {
+    console.error('Error al obtener token CSRF:', err);
+  }
+}
+
+// Obtener token al cargar
+obtenerCsrfToken();
 
 // Función para alternar entre login y registro
 function toggleMode(e) {
@@ -70,16 +90,20 @@ if (authForm) {
     }
     
     try {
+      // Asegurarse de tener el token CSRF
+      if (!csrfToken) {
+        await obtenerCsrfToken();
+      }
+      
       const endpoint = isLoginMode ? 'api/login.php' : 'api/register.php';
       const body = isLoginMode 
-        ? { email, password }
-        : { email, password, nombre };
+        ? { email, password, csrf_token: csrfToken }
+        : { email, password, nombre, csrf_token: csrfToken };
       
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
       });
@@ -90,11 +114,13 @@ if (authForm) {
         throw new Error(data.error || 'Error en la autenticación');
       }
       
-      // Guardar nuevo CSRF token si viene en la respuesta
-      if (data.csrf_token) csrfToken = data.csrf_token;
-      
       // Login/registro exitoso
       console.log('Usuario autenticado:', data.user);
+      
+      // Actualizar token CSRF con el nuevo token recibido
+      if (data.csrf_token) {
+        csrfToken = data.csrf_token;
+      }
       
       // Redirigir a la página principal
       window.location.href = 'index.html';
@@ -113,15 +139,3 @@ if (authForm) {
     }
   });
 }
-
-// Verificar si el usuario ya está autenticado y obtener CSRF token
-fetch('api/check_auth.php')
-  .then(res => res.json())
-  .then(data => {
-    if (data.csrf_token) csrfToken = data.csrf_token;
-    if (data.logged_in && window.location.pathname.includes('login.html')) {
-      // Si ya está logueado y está en la página de login, redirigir
-      window.location.href = 'index.html';
-    }
-  })
-  .catch(err => console.log('No se pudo verificar autenticación'));

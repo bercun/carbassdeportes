@@ -1,12 +1,9 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
-
+require_once 'security_middleware.php';
 require_once 'db.php';
 require_once 'logger.php';
-require_once 'csrf.php';
+
+header('Content-Type: application/json');
 
 session_start();
 
@@ -19,13 +16,13 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Validar CSRF en todas las mutaciones
-require_csrf_token();
-
 try {
     // CREATE - Crear nuevo producto
     if ($method === 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
+        
+        // Verificar token CSRF
+        verificar_csrf($data['csrf_token'] ?? '');
         
         $nombre = trim($data['nombre'] ?? '');
         $descripcion = trim($data['descripcion'] ?? '');
@@ -85,6 +82,9 @@ try {
     // UPDATE - Actualizar producto existente
     elseif ($method === 'PUT') {
         $data = json_decode(file_get_contents('php://input'), true);
+        
+        // Verificar token CSRF
+        verificar_csrf($data['csrf_token'] ?? '');
         
         $id = $data['id'] ?? null;
         
