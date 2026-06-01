@@ -1,6 +1,7 @@
 // Carrito de compras - JavaScript
 
 let carritoItems = [];
+let csrfToken = '';
 const IVA_RATE = 0.22; // 22%
 
 // Inicializar
@@ -15,7 +16,9 @@ async function verificarAutenticacion() {
   try {
     const response = await fetch('api/check_auth.php');
     const data = await response.json();
-    
+
+    if (data.csrf_token) csrfToken = data.csrf_token;
+
     if (!data.logged_in) {
       window.location.href = 'login.html';
       return;
@@ -278,7 +281,8 @@ async function cambiarCantidad(carritoId, productoId, nuevaCantidad) {
     const response = await fetch('api/carrito.php', {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
       },
       body: JSON.stringify({
         id: carritoId,
@@ -309,7 +313,8 @@ async function eliminarItem(carritoId, productoId, cantidad) {
     const response = await fetch('api/carrito.php', {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
       },
       body: JSON.stringify({
         id: carritoId
@@ -342,7 +347,8 @@ async function vaciarCarrito() {
       await fetch('api/carrito.php', {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify({
           id: item.id
@@ -385,7 +391,8 @@ async function confirmarCompra() {
       await fetch('api/carrito.php', {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify({
           id: item.id,
@@ -557,7 +564,8 @@ async function finalizarCompra() {
     const responseVenta = await fetch('api/ventas.php', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
       },
       body: JSON.stringify({
         numero_venta: numeroVenta,
@@ -581,7 +589,8 @@ async function finalizarCompra() {
       const responseEmail = await fetch('api/enviar_factura.php', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify({
           numero_venta: numeroVenta
@@ -612,7 +621,8 @@ async function finalizarCompra() {
       await fetch('api/carrito.php', {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify({
           id: item.id,

@@ -1,5 +1,9 @@
 <?php
 session_start();
+require_once 'csrf.php';
+
+// Validar CSRF
+require_csrf_token();
 
 // Verificar que el usuario sea admin
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {

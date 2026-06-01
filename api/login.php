@@ -2,11 +2,12 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
 header('Access-Control-Allow-Credentials: true');
 
 require_once 'db.php';
 require_once 'logger.php';
+require_once 'csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -89,10 +90,11 @@ try {
         $user['email']
     );
     
-    // Devolver datos del usuario (sin password)
+    // Devolver datos del usuario (sin password) + CSRF token para peticiones posteriores
     echo json_encode([
         'success' => true,
         'message' => 'Login exitoso',
+        'csrf_token' => generate_csrf_token(),
         'user' => [
             'id' => $user['id'],
             'email' => $user['email'],

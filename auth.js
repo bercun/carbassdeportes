@@ -11,6 +11,7 @@ const toggleText = document.getElementById('toggle-text');
 const errorMessage = document.getElementById('error-message');
 
 let isLoginMode = true;
+let csrfToken = '';
 
 // Función para alternar entre login y registro
 function toggleMode(e) {
@@ -77,7 +78,8 @@ if (authForm) {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify(body)
       });
@@ -87,6 +89,9 @@ if (authForm) {
       if (!response.ok) {
         throw new Error(data.error || 'Error en la autenticación');
       }
+      
+      // Guardar nuevo CSRF token si viene en la respuesta
+      if (data.csrf_token) csrfToken = data.csrf_token;
       
       // Login/registro exitoso
       console.log('Usuario autenticado:', data.user);
@@ -109,10 +114,11 @@ if (authForm) {
   });
 }
 
-// Verificar si el usuario ya está autenticado
+// Verificar si el usuario ya está autenticado y obtener CSRF token
 fetch('api/check_auth.php')
   .then(res => res.json())
   .then(data => {
+    if (data.csrf_token) csrfToken = data.csrf_token;
     if (data.logged_in && window.location.pathname.includes('login.html')) {
       // Si ya está logueado y está en la página de login, redirigir
       window.location.href = 'index.html';

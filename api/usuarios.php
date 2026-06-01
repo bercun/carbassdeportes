@@ -3,9 +3,11 @@ session_start();
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
 
 require_once 'db.php';
 require_once 'logger.php';
+require_once 'csrf.php';
 
 // Verificar que el usuario sea administrador
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
@@ -14,8 +16,15 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
     exit;
 }
 
+$method = $_SERVER['REQUEST_METHOD'];
+
+// Validar CSRF en mutaciones
+if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
+    require_csrf_token();
+}
+
 // GET: Obtener todos los usuarios
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+if ($method === 'GET') {
     try {
         $sql = 'SELECT id, email, nombre, rol, fecha_registro FROM usuarios ORDER BY fecha_registro DESC';
         $stmt = $pdo->query($sql);
@@ -29,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 // PUT: Actualizar rol de usuario
-elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+elseif ($method === 'PUT') {
     $data = json_decode(file_get_contents('php://input'), true);
     
     if (!isset($data['id']) || !isset($data['rol'])) {
@@ -74,7 +83,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
 }
 
 // DELETE: Eliminar usuario
-elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+elseif ($method === 'DELETE') {
     parse_str(file_get_contents('php://input'), $data);
     
     if (!isset($data['id'])) {

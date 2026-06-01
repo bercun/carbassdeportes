@@ -4,11 +4,13 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Credentials: true');
 
 session_start();
+require_once 'csrf.php';
 
 if (isset($_SESSION['user_id'])) {
     // Usuario está autenticado
     echo json_encode([
         'logged_in' => true,
+        'csrf_token' => generate_csrf_token(),
         'user' => [
             'id' => $_SESSION['user_id'],
             'email' => $_SESSION['email'],
@@ -17,8 +19,9 @@ if (isset($_SESSION['user_id'])) {
         ]
     ]);
 } else {
-    // Usuario no está autenticado
+    // Usuario no está autenticado - devolver token igualmente para el flujo de login
     echo json_encode([
-        'logged_in' => false
+        'logged_in' => false,
+        'csrf_token' => generate_csrf_token()
     ]);
 }

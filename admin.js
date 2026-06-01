@@ -2,6 +2,7 @@
 // userSession es definida en auth-check-php.js
 
 let currentEditingProductId = null;
+let csrfToken = '';
 
 // Verificar permisos de administrador al cargar la página
 async function checkAdminAccess() {
@@ -15,6 +16,7 @@ async function checkAdminAccess() {
       return;
     }
     
+    if (data.csrf_token) csrfToken = data.csrf_token;
     userSession = data.user;
     
     if (userSession.rol !== 'admin') {
@@ -213,7 +215,8 @@ async function updateUserRole(userId, newRole) {
     const response = await fetch('api/usuarios.php', {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
       },
       body: JSON.stringify({
         id: userId,
@@ -247,7 +250,8 @@ async function deleteUser(userId, userEmail) {
     const response = await fetch('api/usuarios.php', {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRF-Token': csrfToken
       },
       body: `id=${userId}`
     });
@@ -353,7 +357,8 @@ async function deleteProduct(productId, productName) {
     const response = await fetch('api/admin_productos.php', {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
       },
       body: JSON.stringify({ id: productId })
     });
@@ -383,6 +388,9 @@ async function uploadImage(fileInput) {
   try {
     const response = await fetch('api/upload_image.php', {
       method: 'POST',
+      headers: {
+        'X-CSRF-Token': csrfToken
+      },
       body: formData
     });
 
@@ -448,7 +456,8 @@ document.getElementById('product-form')?.addEventListener('submit', async (e) =>
       response = await fetch('api/admin_productos.php', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify(productData)
       });
@@ -457,7 +466,8 @@ document.getElementById('product-form')?.addEventListener('submit', async (e) =>
       response = await fetch('api/admin_productos.php', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify(productData)
       });

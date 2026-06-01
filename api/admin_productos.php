@@ -2,10 +2,11 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
 
 require_once 'db.php';
 require_once 'logger.php';
+require_once 'csrf.php';
 
 session_start();
 
@@ -17,6 +18,9 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
+
+// Validar CSRF en todas las mutaciones
+require_csrf_token();
 
 try {
     // CREATE - Crear nuevo producto

@@ -66,6 +66,8 @@
 })();
 
 // Funcionalidad para botones "Agregar al carrito"
+let csrfToken = '';
+
 function setupAddButtons() {
   document.querySelectorAll('.add-btn').forEach(btn => {
     // Evita asociar el evento múltiples veces
@@ -78,10 +80,12 @@ function setupAddButtons() {
         return;
       }
 
-      // Verificar si el usuario está autenticado
+      // Verificar si el usuario está autenticado y obtener CSRF token
       try {
         const response = await fetch('api/check_auth.php');
         const data = await response.json();
+
+        if (data.csrf_token) csrfToken = data.csrf_token;
         
         if (!data.logged_in) {
           // Si no está logueado, redirigir al login
@@ -114,7 +118,8 @@ function setupAddButtons() {
         const response = await fetch('api/carrito.php', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
           },
           body: JSON.stringify({
             producto_id: productId,

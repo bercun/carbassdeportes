@@ -2,10 +2,11 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
 
 require_once 'db.php';
 require_once 'logger.php';
+require_once 'csrf.php';
 
 session_start();
 
@@ -19,6 +20,11 @@ if (!isset($_SESSION['user_id']) && $_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 $method = $_SERVER['REQUEST_METHOD'];
+
+// Validar CSRF en mutaciones
+if ($method === 'POST') {
+    require_csrf_token();
+}
 
 try {
     // POST - Registrar una nueva venta
