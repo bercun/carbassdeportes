@@ -66,8 +66,6 @@
 })();
 
 // Funcionalidad para botones "Agregar al carrito"
-let csrfToken = '';
-
 function setupAddButtons() {
   document.querySelectorAll('.add-btn').forEach(btn => {
     // Evita asociar el evento múltiples veces
@@ -82,10 +80,10 @@ function setupAddButtons() {
 
       // Verificar si el usuario está autenticado y obtener CSRF token
       try {
-        const response = await fetch('api/check_auth.php');
+        const response = await fetch('api/check_auth.php', { credentials: 'include' });
         const data = await response.json();
 
-        if (data.csrf_token) csrfToken = data.csrf_token;
+        if (data.csrf_token) window.csrfToken = data.csrf_token;
         
         if (!data.logged_in) {
           // Si no está logueado, redirigir al login
@@ -117,13 +115,14 @@ function setupAddButtons() {
       try {
         const response = await fetch('api/carrito.php', {
           method: 'POST',
+          credentials: 'include',
           headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': csrfToken
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             producto_id: productId,
-            cantidad: 1
+            cantidad: 1,
+            csrf_token: window.csrfToken
           })
         });
         

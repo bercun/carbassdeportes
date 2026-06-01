@@ -17,7 +17,7 @@ let csrfToken = null; // Token CSRF global
 // Obtener token CSRF al cargar la página
 async function obtenerCsrfToken() {
   try {
-    const response = await fetch('api/check_auth.php');
+    const response = await fetch('api/check_auth.php', { credentials: 'include' });
     const data = await response.json();
     csrfToken = data.csrf_token;
     
@@ -102,6 +102,7 @@ if (authForm) {
       
       const response = await fetch(endpoint, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         },
