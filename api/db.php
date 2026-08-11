@@ -25,4 +25,4 @@ try {
     http_response_code(500);
     die(json_encode(['error' => 'Error de conexión a la base de datos']));
 }
-?>
+

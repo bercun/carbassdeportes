@@ -57,11 +57,65 @@ function setupEventListeners() {
   const btnVaciar = document.getElementById('btn-vaciar');
   
   if (btnConfirmar) {
-    btnConfirmar.addEventListener('click', confirmarCompra);
+    btnConfirmar.addEventListener('click', abrirModalFacturacion);
   }
   
   if (btnVaciar) {
     btnVaciar.addEventListener('click', vaciarCarrito);
+  }
+
+  // Listeners del modal de facturación
+  const closeModalFacturacion = document.getElementById('close-modal-facturacion');
+  const btnCancelarFacturacion = document.getElementById('btn-cancelar-facturacion');
+  const formFacturacion = document.getElementById('form-facturacion');
+  
+  if (closeModalFacturacion) {
+    closeModalFacturacion.addEventListener('click', cerrarModalFacturacion);
+  }
+  
+  if (btnCancelarFacturacion) {
+    btnCancelarFacturacion.addEventListener('click', cerrarModalFacturacion);
+  }
+  
+  if (formFacturacion) {
+    formFacturacion.addEventListener('submit', procesarFacturacion);
+  }
+
+  // Listeners del modal de factura
+  const closeModalFactura = document.getElementById('close-modal-factura');
+  const btnImprimir = document.getElementById('btn-imprimir');
+  const btnFinalizar = document.getElementById('btn-finalizar');
+  
+  if (closeModalFactura) {
+    closeModalFactura.addEventListener('click', cerrarModalFactura);
+  }
+  
+  if (btnImprimir) {
+    btnImprimir.addEventListener('click', imprimirFactura);
+  }
+  
+  if (btnFinalizar) {
+    btnFinalizar.addEventListener('click', finalizarCompra);
+  }
+
+  // Cerrar modal al hacer clic fuera
+  const modalFacturacion = document.getElementById('modal-facturacion');
+  const modalFactura = document.getElementById('modal-factura');
+  
+  if (modalFacturacion) {
+    modalFacturacion.addEventListener('click', (e) => {
+      if (e.target === modalFacturacion) {
+        cerrarModalFacturacion();
+      }
+    });
+  }
+  
+  if (modalFactura) {
+    modalFactura.addEventListener('click', (e) => {
+      if (e.target === modalFactura) {
+        cerrarModalFactura();
+      }
+    });
   }
 }
 
@@ -340,6 +394,154 @@ async function confirmarCompra() {
       });
     }
     
+    alert('¡Compra confirmada! Gracias por tu pedido.');
+    window.location.href = 'index.html';
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Error al procesar la compra');
+  }
+}
+
+// Abrir modal de facturación
+function abrirModalFacturacion() {
+  if (carritoItems.length === 0) {
+    alert('El carrito está vacío');
+    return;
+  }
+  
+  const modal = document.getElementById('modal-facturacion');
+  if (modal) {
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevenir scroll
+  }
+}
+
+// Cerrar modal de facturación
+function cerrarModalFacturacion() {
+  const modal = document.getElementById('modal-facturacion');
+  if (modal) {
+    modal.classList.add('hidden');
+    document.body.style.overflow = ''; // Restaurar scroll
+  }
+}
+
+// Procesar formulario de facturación
+async function procesarFacturacion(e) {
+  e.preventDefault();
+  
+  const form = e.target;
+  const formData = new FormData(form);
+  
+  // Obtener datos del formulario
+  const datosFacturacion = {
+    nombre: formData.get('nombre'),
+    apellido: formData.get('apellido'),
+    email: formData.get('email'),
+    telefono: formData.get('telefono'),
+    direccion: formData.get('direccion'),
+    metodoPago: formData.get('metodo_pago'),
+    observaciones: formData.get('observaciones') || ''
+  };
+  
+  // Cerrar modal de facturación
+  cerrarModalFacturacion();
+  
+  // Generar y mostrar factura
+  mostrarFactura(datosFacturacion);
+}
+
+// Mostrar factura
+function mostrarFactura(datosFacturacion) {
+  // Calcular totales
+  const totalConIVA = carritoItems.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
+  
+  // Llenar datos de facturación
+  document.getElementById('factura-nombre').textContent = `${datosFacturacion.nombre} ${datosFacturacion.apellido}`;
+  document.getElementById('factura-direccion').textContent = datosFacturacion.direccion;
+  document.getElementById('factura-telefono').textContent = datosFacturacion.telefono;
+  document.getElementById('factura-email').textContent = datosFacturacion.email;
+  
+  // Fecha actual
+  const fecha = new Date();
+  const fechaFormateada = fecha.toLocaleDateString('es-UY', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+  document.getElementById('factura-fecha').textContent = fechaFormateada;
+  
+  // ID de factura (generado aleatoriamente)
+  const facturaId = generarIdFactura();
+  document.getElementById('factura-id').textContent = facturaId;
+  document.getElementById('factura-emision').textContent = fechaFormateada;
+  
+  // Llenar tabla de productos
+  const tbody = document.getElementById('factura-items');
+  tbody.innerHTML = carritoItems.map(item => `
+    <tr>
+      <td>${item.nombre}</td>
+      <td>${item.cantidad}</td>
+      <td>$${parseFloat(item.precio).toFixed(2)}</td>
+      <td>$${parseFloat(item.subtotal).toFixed(2)}</td>
+    </tr>
+  `).join('');
+  
+  // Observaciones
+  const observacionesTexto = datosFacturacion.observaciones.trim() || '(Vacío)';
+  document.getElementById('factura-observaciones').textContent = observacionesTexto;
+  
+  // Total
+  document.getElementById('factura-total-final').textContent = `$${totalConIVA.toFixed(2)}`;
+  
+  // Abrir modal de factura
+  const modal = document.getElementById('modal-factura');
+  if (modal) {
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// Generar número de pedido
+function generarIdFactura() {
+  // Generar un número de pedido secuencial basado en timestamp
+  const timestamp = Date.now();
+  // Tomar los últimos 8 dígitos y agregar un número aleatorio de 2 dígitos
+  const numeroPedido = timestamp.toString().slice(-8) + Math.floor(Math.random() * 100).toString().padStart(2, '0');
+  return numeroPedido;
+}
+
+// Cerrar modal de factura
+function cerrarModalFactura() {
+  const modal = document.getElementById('modal-factura');
+  if (modal) {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+}
+
+// Imprimir factura
+function imprimirFactura() {
+  window.print();
+}
+
+// Finalizar compra
+async function finalizarCompra() {
+  try {
+    // Vaciar carrito sin devolver stock (compra confirmada)
+    for (const item of carritoItems) {
+      await fetch('api/carrito.php', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: item.id,
+          confirmar_compra: true  // Flag para NO devolver stock
+        })
+      });
+    }
+    
+    cerrarModalFactura();
     alert('¡Compra confirmada! Gracias por tu pedido.');
     window.location.href = 'index.html';
   } catch (error) {
