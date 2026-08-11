@@ -5,6 +5,7 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
 require_once 'db.php';
+require_once 'logger.php';
 
 // Verificar que el usuario sea administrador
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
@@ -45,9 +46,25 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     }
     
     try {
+        // Obtener datos anteriores del usuario
+        $stmt = $pdo->prepare('SELECT email, nombre, rol FROM usuarios WHERE id = ?');
+        $stmt->execute([$data['id']]);
+        $usuario = $stmt->fetch();
+        $rol_anterior = $usuario['rol'];
+        
         $sql = 'UPDATE usuarios SET rol = ? WHERE id = ?';
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$data['rol'], $data['id']]);
+        
+        // Registrar log
+        registrar_log(
+            'ROL_CAMBIADO',
+            'USUARIOS',
+            "Rol de {$usuario['nombre']} ({$usuario['email']}) cambiado de {$rol_anterior} a {$data['rol']}",
+            $data['id'],
+            ['rol' => $rol_anterior],
+            ['rol' => $data['rol']]
+        );
         
         echo json_encode(['success' => true, 'mensaje' => 'Rol actualizado']);
     } catch (PDOException $e) {
@@ -74,8 +91,27 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     }
     
     try {
+        // Obtener datos del usuario antes de eliminar
+        $stmt = $pdo->prepare('SELECT email, nombre, rol FROM usuarios WHERE id = ?');
+        $stmt->execute([$data['id']]);
+        $usuario = $stmt->fetch();
+        
         $stmt = $pdo->prepare('DELETE FROM usuarios WHERE id = ?');
         $stmt->execute([$data['id']]);
+        
+        // Registrar log
+        registrar_log(
+            'USUARIO_ELIMINADO',
+            'USUARIOS',
+            "Usuario eliminado: {$usuario['nombre']} ({$usuario['email']}) - Rol: {$usuario['rol']}",
+            $data['id'],
+            [
+                'nombre' => $usuario['nombre'],
+                'email' => $usuario['email'],
+                'rol' => $usuario['rol']
+            ],
+            null
+        );
         
         echo json_encode(['success' => true, 'mensaje' => 'Usuario eliminado']);
     } catch (PDOException $e) {

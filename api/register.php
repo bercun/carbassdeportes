@@ -5,6 +5,7 @@ header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once 'db.php';
+require_once 'logger.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -68,6 +69,18 @@ try {
     $_SESSION['email'] = $email;
     $_SESSION['nombre'] = $nombre;
     $_SESSION['rol'] = 'user';
+    
+    // Registrar log
+    registrar_log(
+        'USUARIO_CREADO',
+        'USUARIOS',
+        "Nuevo usuario registrado: $nombre ($email)",
+        $userId,
+        null,
+        ['email' => $email, 'nombre' => $nombre, 'rol' => 'user'],
+        $userId,
+        $email
+    );
     
     echo json_encode([
         'success' => true,

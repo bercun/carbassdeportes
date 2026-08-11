@@ -526,8 +526,93 @@ function imprimirFactura() {
 
 // Finalizar compra
 async function finalizarCompra() {
+<<<<<<< HEAD
   try {
     // Vaciar carrito sin devolver stock (compra confirmada)
+=======
+  const btnFinalizar = document.getElementById('btn-finalizar');
+  const textoOriginal = btnFinalizar.textContent;
+  
+  try {
+    // Deshabilitar botón y mostrar indicador de carga
+    btnFinalizar.disabled = true;
+    btnFinalizar.textContent = '⏳ Procesando...';
+    
+    // Obtener número de venta del DOM
+    const numeroVenta = document.getElementById('factura-id').textContent;
+    
+    // Obtener datos de facturación del DOM
+    const datosFacturacion = {
+      nombre: document.getElementById('factura-nombre').textContent.split(' ')[0],
+      apellido: document.getElementById('factura-nombre').textContent.split(' ').slice(1).join(' '),
+      direccion: document.getElementById('factura-direccion').textContent,
+      telefono: document.getElementById('factura-telefono').textContent,
+      email: document.getElementById('factura-email').textContent,
+      observaciones: document.getElementById('factura-observaciones').textContent !== '(Vacío)' 
+        ? document.getElementById('factura-observaciones').textContent 
+        : ''
+    };
+    
+    // Calcular total
+    const total = carritoItems.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
+    
+    // Registrar venta en la base de datos
+    btnFinalizar.textContent = '💾 Registrando venta...';
+    const responseVenta = await fetch('api/ventas.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        numero_venta: numeroVenta,
+        items: carritoItems,
+        datosFacturacion: datosFacturacion,
+        total: total
+      })
+    });
+    
+    const resultVenta = await responseVenta.json();
+    
+    if (!resultVenta.success) {
+      throw new Error(resultVenta.error || 'Error al registrar la venta');
+    }
+    
+    // Enviar emails de confirmación
+    btnFinalizar.textContent = '📧 Enviando emails...';
+    console.log('🔄 Iniciando envío de emails para venta:', numeroVenta);
+    
+    try {
+      const responseEmail = await fetch('api/enviar_factura.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          numero_venta: numeroVenta
+        })
+      });
+      
+      console.log('📥 Respuesta HTTP recibida:', responseEmail.status);
+      
+      const resultEmail = await responseEmail.json();
+      console.log('📧 Resultado completo:', resultEmail);
+      
+      if (resultEmail.success) {
+        console.log('✅ Emails enviados correctamente:', resultEmail);
+        alert('✅ Pedido confirmado y emails enviados correctamente');
+      } else {
+        console.error('⚠️ Error al enviar emails:', resultEmail);
+        alert('⚠️ Pedido registrado pero hubo un problema al enviar los emails:\n' + resultEmail.message);
+      }
+    } catch (errorEmail) {
+      console.error('❌ Error al enviar emails:', errorEmail);
+      alert('⚠️ Pedido registrado pero no se pudieron enviar los emails de confirmación');
+      // Continuar aunque falle el envío de emails
+    }
+    
+    // Vaciar carrito sin devolver stock (compra confirmada)
+    btnFinalizar.textContent = '🧹 Limpiando carrito...';
+>>>>>>> aa5aa4865986980c349d86d8e9fa577da0eb20c5
     for (const item of carritoItems) {
       await fetch('api/carrito.php', {
         method: 'DELETE',
@@ -542,11 +627,21 @@ async function finalizarCompra() {
     }
     
     cerrarModalFactura();
+<<<<<<< HEAD
     alert('¡Compra confirmada! Gracias por tu pedido.');
     window.location.href = 'index.html';
   } catch (error) {
     console.error('Error:', error);
     alert('Error al procesar la compra');
+=======
+    alert(`✅ ¡Compra confirmada!\n\n📧 Se han enviado emails de confirmación a:\n• Tu correo electrónico\n• Administradores del sistema\n\nNúmero de venta: ${numeroVenta}\n\n¡Gracias por tu pedido!`);
+    window.location.href = 'index.html';
+  } catch (error) {
+    console.error('Error:', error);
+    btnFinalizar.disabled = false;
+    btnFinalizar.textContent = textoOriginal;
+    alert('❌ Error al procesar la compra: ' + error.message);
+>>>>>>> aa5aa4865986980c349d86d8e9fa577da0eb20c5
   }
 }
 

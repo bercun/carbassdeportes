@@ -113,20 +113,38 @@ async function loadProducts() {
       return;
     }
 
+    // Calcular totales
+    let totalStock = 0;
+    let totalValor = 0;
+
+    productos.forEach(product => {
+      const stock = parseInt(product.stock) || 0;
+      const precio = parseFloat(product.precio) || 0;
+      totalStock += stock;
+      totalValor += (stock * precio);
+    });
+
     tbody.innerHTML = productos.map(product => `
       <tr>
-        <td><img src="${product.imagen_url || 'https://placehold.co/50x50'}" alt="${product.nombre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>
-        <td>${product.nombre}</td>
-        <td><span class="categoria-badge">${product.categoria_nombre || 'Sin categoría'}</span></td>
-        <td>$${parseFloat(product.precio).toFixed(2)}</td>
-        <td>${product.stock || 0}</td>
-        <td><span class="estatus-badge ${product.estado === 'destacado' ? 'estatus-destacado' : ''}">${product.estado || 'normal'}</span></td>
-        <td>
+        <td data-label="Imagen"><img src="${product.imagen_url || 'https://placehold.co/50x50'}" alt="${product.nombre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>
+        <td data-label="Nombre">${product.nombre}</td>
+        <td data-label="Categoría"><span class="categoria-badge">${product.categoria_nombre || 'Sin categoría'}</span></td>
+        <td data-label="Precio">$${parseFloat(product.precio).toFixed(2)}</td>
+        <td data-label="Stock">${product.stock || 0}</td>
+        <td data-label="Estado"><span class="estatus-badge ${product.estado === 'destacado' ? 'estatus-destacado' : ''}">${product.estado || 'normal'}</span></td>
+        <td data-label="Acciones">
           <button class="btn-edit" onclick="editProduct(${product.id})">✏️</button>
           <button class="btn-delete" onclick="deleteProduct(${product.id}, '${product.nombre.replace(/'/g, "\\'")}')">🗑️</button>
         </td>
       </tr>
-    `).join('');
+    `).join('') + `
+      <tr class="totals-row">
+        <td colspan="3" style="text-align: right; font-weight: bold; padding-right: 20px;">TOTALES:</td>
+        <td style="font-weight: bold; color: #2e7d32;">$${totalValor.toFixed(2)}</td>
+        <td style="font-weight: bold; color: #1976d2;">${totalStock}</td>
+        <td colspan="2"></td>
+      </tr>
+    `;
   } catch (error) {
     console.error("Error al cargar productos:", error);
     const tbody = document.getElementById('products-table-body');
@@ -158,16 +176,16 @@ async function loadUsers() {
 
     tbody.innerHTML = usuarios.map(user => `
       <tr>
-        <td>${user.nombre || 'Sin nombre'}</td>
-        <td>${user.email}</td>
-        <td>
+        <td data-label="Nombre">${user.nombre || 'Sin nombre'}</td>
+        <td data-label="Email">${user.email}</td>
+        <td data-label="Rol">
           <select onchange="updateUserRole(${user.id}, this.value)" class="role-select">
             <option value="user" ${user.rol === 'user' ? 'selected' : ''}>Usuario</option>
             <option value="admin" ${user.rol === 'admin' ? 'selected' : ''}>Admin</option>
           </select>
         </td>
-        <td>${new Date(user.fecha_registro).toLocaleDateString('es-ES')}</td>
-        <td>
+        <td data-label="Fecha Registro">${new Date(user.fecha_registro).toLocaleDateString('es-ES')}</td>
+        <td data-label="Acciones">
           <button class="btn-delete" onclick="deleteUser(${user.id}, '${user.email.replace(/'/g, "\\'")}')">🗑️</button>
         </td>
       </tr>
@@ -261,6 +279,10 @@ function switchTab(tabName) {
   // Cargar datos según la pestaña
   if (tabName === 'usuarios') {
     loadUsers();
+  } else if (tabName === 'ventas') {
+    loadVentas();
+  } else if (tabName === 'logs') {
+    loadLogs();
   }
 }
 
@@ -526,4 +548,297 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+
+  // Establecer fechas por defecto en filtros de ventas
+  const hoy = new Date();
+  const fechaFin = document.getElementById('fecha-fin');
+  const fechaInicio = document.getElementById('fecha-inicio');
+  
+  if (fechaFin) {
+    fechaFin.valueAsDate = hoy;
+  }
+  
+  if (fechaInicio) {
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hoy.getDate() - 30);
+    fechaInicio.valueAsDate = hace30Dias;
+  }
+  
+  // Establecer fechas por defecto en filtros de logs
+  const logFechaFin = document.getElementById('log-fecha-fin');
+  const logFechaInicio = document.getElementById('log-fecha-inicio');
+  
+  if (logFechaFin) {
+    logFechaFin.valueAsDate = hoy;
+  }
+  
+  if (logFechaInicio) {
+    const hace7Dias = new Date();
+    hace7Dias.setDate(hoy.getDate() - 7);
+    logFechaInicio.valueAsDate = hace7Dias;
+  }
 });
+
+// ============================================
+// GESTIÓN DE VENTAS
+// ============================================
+
+// Cargar ventas
+async function loadVentas() {
+  try {
+    const fechaInicio = document.getElementById('fecha-inicio').value;
+    const fechaFin = document.getElementById('fecha-fin').value;
+    
+    let url = 'api/ventas.php';
+    const params = new URLSearchParams();
+    
+    if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+    if (fechaFin) params.append('fecha_fin', fechaFin);
+    
+    if (params.toString()) {
+      url += '?' + params.toString();
+    }
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Error al cargar ventas');
+    }
+    
+    const ventas = data.ventas || [];
+    const estadisticas = data.estadisticas || {};
+    
+    // Debug: Ver los datos de ventas
+    console.log('Ventas recibidas:', ventas);
+    if (ventas.length > 0) {
+      console.log('Primera venta:', ventas[0]);
+      console.log('Estado de primera venta:', ventas[0].estado);
+    }
+    
+    // Actualizar estadísticas
+    document.getElementById('total-ventas-count').textContent = estadisticas.total_ventas || 0;
+    document.getElementById('total-ventas-monto').textContent = '$' + (estadisticas.total_monto || 0).toFixed(2);
+    document.getElementById('promedio-venta').textContent = '$' + (estadisticas.promedio_venta || 0).toFixed(2);
+    document.getElementById('productos-vendidos').textContent = estadisticas.total_productos_vendidos || 0;
+    
+    // Renderizar tabla
+    const tbody = document.getElementById('ventas-table-body');
+    
+    if (ventas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No se encontraron ventas en el período seleccionado</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = ventas.map(venta => `
+      <tr>
+        <td data-label="Nº Venta"><strong>${venta.numero_venta}</strong></td>
+        <td data-label="Fecha">${formatearFecha(venta.fecha_venta)}</td>
+        <td data-label="Cliente">
+          <div>${venta.nombre_cliente} ${venta.apellido_cliente}</div>
+          <small style="color: #666;">${venta.email_cliente}</small>
+        </td>
+        <td data-label="Items" style="text-align: center;">${venta.cantidad_items}</td>
+        <td data-label="Total"><strong>$${parseFloat(venta.total).toFixed(2)}</strong></td>
+        <td data-label="Estado">
+          <span class="badge badge-${venta.estado || 'completada'}">
+            ${venta.estado ? venta.estado : 'completada'}
+          </span>
+        </td>
+        <td data-label="Acciones">
+          <button class="btn-icon" onclick="verDetalleVenta(${venta.id})" title="Ver detalle">
+            👁️
+          </button>
+        </td>
+      </tr>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Error al cargar ventas:', error);
+    alert('Error al cargar ventas: ' + error.message);
+  }
+}
+
+// Ver detalle de venta
+async function verDetalleVenta(ventaId) {
+  try {
+    const response = await fetch(`api/detalle_venta.php?id=${ventaId}`);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Error al cargar detalle de venta');
+    }
+    
+    const venta = data.venta;
+    const detalles = data.detalles || [];
+    
+    // Llenar información de la venta
+    document.getElementById('venta-numero').textContent = venta.numero_venta;
+    document.getElementById('venta-fecha').textContent = formatearFecha(venta.fecha_venta);
+    document.getElementById('venta-estado').textContent = venta.estado;
+    document.getElementById('venta-estado').className = `badge badge-${venta.estado}`;
+    
+    // Datos del cliente
+    document.getElementById('venta-cliente-nombre').textContent = 
+      `${venta.nombre_cliente} ${venta.apellido_cliente}`;
+    document.getElementById('venta-cliente-email').textContent = venta.email_cliente;
+    document.getElementById('venta-cliente-telefono').textContent = venta.telefono_cliente;
+    document.getElementById('venta-cliente-direccion').textContent = venta.direccion_cliente;
+    
+    // Observaciones
+    const obsRow = document.getElementById('venta-observaciones-row');
+    if (venta.observaciones && venta.observaciones.trim()) {
+      document.getElementById('venta-observaciones').textContent = venta.observaciones;
+      obsRow.style.display = 'flex';
+    } else {
+      obsRow.style.display = 'none';
+    }
+    
+    // Productos
+    const itemsTbody = document.getElementById('venta-items');
+    itemsTbody.innerHTML = detalles.map(item => `
+      <tr>
+        <td>${item.nombre_producto}</td>
+        <td style="text-align: center;">${item.cantidad}</td>
+        <td>$${parseFloat(item.precio_unitario).toFixed(2)}</td>
+        <td><strong>$${parseFloat(item.subtotal).toFixed(2)}</strong></td>
+      </tr>
+    `).join('');
+    
+    // Totales
+    document.getElementById('venta-subtotal').textContent = '$' + parseFloat(venta.subtotal).toFixed(2);
+    document.getElementById('venta-iva').textContent = '$' + parseFloat(venta.iva).toFixed(2);
+    document.getElementById('venta-total').textContent = '$' + parseFloat(venta.total).toFixed(2);
+    
+    // Mostrar modal
+    document.getElementById('venta-modal').classList.remove('hidden');
+    
+  } catch (error) {
+    console.error('Error al cargar detalle:', error);
+    alert('Error al cargar detalle de venta: ' + error.message);
+  }
+}
+
+// Cerrar modal de venta
+function closeVentaModal() {
+  document.getElementById('venta-modal').classList.add('hidden');
+}
+
+// Imprimir venta
+function imprimirVenta() {
+  window.print();
+}
+
+// Aplicar filtros de ventas
+function aplicarFiltrosVentas() {
+  loadVentas();
+}
+
+// Limpiar filtros de ventas
+function limpiarFiltrosVentas() {
+  // Establecer fechas por defecto (últimos 30 días)
+  const hoy = new Date();
+  const hace30Dias = new Date();
+  hace30Dias.setDate(hoy.getDate() - 30);
+  
+  document.getElementById('fecha-inicio').valueAsDate = hace30Dias;
+  document.getElementById('fecha-fin').valueAsDate = hoy;
+  
+  loadVentas();
+}
+
+// Formatear fecha
+function formatearFecha(fechaStr) {
+  const fecha = new Date(fechaStr);
+  const opciones = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  return fecha.toLocaleDateString('es-UY', opciones);
+}
+
+// ============================================
+// GESTIÓN DE LOGS
+// ============================================
+
+// Cargar logs
+async function loadLogs() {
+  try {
+    const modulo = document.getElementById('log-modulo').value;
+    const fechaInicio = document.getElementById('log-fecha-inicio').value;
+    const fechaFin = document.getElementById('log-fecha-fin').value;
+    
+    let url = 'api/logs.php';
+    const params = new URLSearchParams();
+    
+    if (modulo) params.append('modulo', modulo);
+    if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+    if (fechaFin) params.append('fecha_fin', fechaFin);
+    
+    if (params.toString()) {
+      url += '?' + params.toString();
+    }
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Error al cargar logs');
+    }
+    
+    const logs = data.logs || [];
+    const estadisticas = data.estadisticas || {};
+    
+    // Actualizar estadísticas
+    document.getElementById('total-logs-count').textContent = estadisticas.total_logs || 0;
+    document.getElementById('usuarios-activos-logs').textContent = estadisticas.usuarios_activos || 0;
+    document.getElementById('dias-actividad').textContent = estadisticas.dias_con_actividad || 0;
+    
+    // Renderizar tabla
+    const tbody = document.getElementById('logs-table-body');
+    
+    if (logs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No se encontraron logs en el período seleccionado</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = logs.map(log => `
+      <tr>
+        <td style="white-space: nowrap;">${formatearFecha(log.fecha_hora)}</td>
+        <td>
+          <div>${log.usuario_email || 'Sistema'}</div>
+          ${log.ip_address ? `<small style="color: #666;">${log.ip_address}</small>` : ''}
+        </td>
+        <td><span class="badge badge-modulo-${log.modulo.toLowerCase()}">${log.modulo}</span></td>
+        <td><span class="badge badge-accion">${log.accion}</span></td>
+        <td>${log.descripcion || '-'}</td>
+        <td style="white-space: nowrap;">${log.ip_address || '-'}</td>
+      </tr>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Error al cargar logs:', error);
+    alert('Error al cargar logs: ' + error.message);
+  }
+}
+
+// Aplicar filtros de logs
+function aplicarFiltrosLogs() {
+  loadLogs();
+}
+
+// Limpiar filtros de logs
+function limpiarFiltrosLogs() {
+  const hoy = new Date();
+  const hace7Dias = new Date();
+  hace7Dias.setDate(hoy.getDate() - 7);
+  
+  document.getElementById('log-modulo').value = '';
+  document.getElementById('log-fecha-inicio').valueAsDate = hace7Dias;
+  document.getElementById('log-fecha-fin').valueAsDate = hoy;
+  
+  loadLogs();
+}
