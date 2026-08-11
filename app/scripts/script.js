@@ -11,7 +11,7 @@
   const imgElement = document.getElementById('coleccionable-random');
   if(imgElement){
     const randomImg = coleccionables[Math.floor(Math.random() * coleccionables.length)];
-    imgElement.src = `sours/img/coleccionables/${randomImg}`;
+    imgElement.src = `../assets/sours/img/coleccionables/${randomImg}`;
   }
 })();
 

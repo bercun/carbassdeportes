@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CarbassDeportes — Tienda de Deportes & Coleccionables</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="../styles/styles.css" />
 </head>
 <body>
   <!-- Barra superior sticky para usuario -->
@@ -26,7 +26,7 @@
     <header class="navbar">
       <div class="brand">
         <!-- LOGO -->
-        <img class="logo-svg" src="sours/img/logos/logo_carbass.png" alt="CarbassDeportes Logo" />
+        <img class="logo-svg" src="../assets/sours/img/logos/logo_carbass.png" alt="CarbassDeportes Logo" />
         <h1>CarbassDeportes</h1>
       </div>
 
@@ -47,16 +47,16 @@
       <!-- ASIDE IZQUIERDO -->
       <aside class="left">
         <div class="promo">
-          <img src="sours/img/aside/soccer-755825_1920.jpg" alt="Promo entrenar" />
+          <img src="../assets/sours/img/aside/soccer-755825_1920.jpg" alt="Promo entrenar" />
           <div class="txt">20% OFF en equipamiento running</div>
         </div>
         <div class="promo">
-          <img id="coleccionable-random" src="sours/img/coleccionables/jersey-edicion-limitada.jpg" alt="Coleccionables" />
+          <img id="coleccionable-random" src="../assets/sours/img/coleccionables/jersey-edicion-limitada.jpg" alt="Coleccionables" />
           <div class="txt">Figuras limitadas: lanzamiento semanal</div>
         </div>
         <div class="promo video-promo">
           <video class="hover-video" muted loop playsinline>
-            <source src="sours/videos/libro pistolero.mp4" type="video/mp4">
+            <source src="../assets/sours/videos/libro pistolero.mp4" type="video/mp4">
             Tu navegador no soporta la reproducción de videos.
           </video>
         </div>
@@ -67,11 +67,11 @@
         <!-- CARRUSEL -->
         <div class="carousel" id="home">
           <div class="slides" id="slides">
-            <div class="slide"><img src="sours/img/carrousel/ball-488717_1280.jpg" alt="Deportes" /></div>
-            <div class="slide"><img src="sours/img/carrousel/sports-6480830_1280.jpg" alt="Equipamiento deportivo" /></div>
-            <div class="slide"><img src="sours/img/carrousel/runner-7876675_1280.jpg" alt="runner" /></div>
-            <div class="slide"><img src="sours/img/carrousel/tennis-1381230_1280.jpg" alt="tenis" /></div>
-            <div class="slide"><img src="sours/img/carrousel/woman-6143052_1280.jpg" alt="woman" /></div>
+            <div class="slide"><img src="../assets/sours/img/carrousel/ball-488717_1280.jpg" alt="Deportes" /></div>
+            <div class="slide"><img src="../assets/sours/img/carrousel/sports-6480830_1280.jpg" alt="Equipamiento deportivo" /></div>
+            <div class="slide"><img src="../assets/sours/img/carrousel/runner-7876675_1280.jpg" alt="runner" /></div>
+            <div class="slide"><img src="../assets/sours/img/carrousel/tennis-1381230_1280.jpg" alt="tenis" /></div>
+            <div class="slide"><img src="../assets/sours/img/carrousel/woman-6143052_1280.jpg" alt="woman" /></div>
           </div>
           <div class="carousel-controls">
             <button class="btn-ctrl" id="prev" aria-label="Anterior">◀</button>
@@ -194,9 +194,9 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="auth-check.js"></script>
-  <script src="script.js"></script>
-  <script src="check-resources.js"></script>
+  <script src="../../firebase-config.js"></script>
+  <script src="../scripts/auth-check.js"></script>
+  <script src="../scripts/script.js"></script>
+  <script src="../../tools/check-resources.js"></script>
 </body>
 </html>

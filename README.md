@@ -39,13 +39,13 @@
    ```
 
 2. **Abrir el proyecto**
-   - Opción 1: Abrir `index.html` directamente en el navegador
+  - Opción 1: Abrir `app/pages/index.html` directamente en el navegador
    - Opción 2: Usar Live Server en VS Code
    - Opción 3: Usar un servidor local simple:
      ```bash
      # Python 3
      python -m http.server 8000
-     # Luego visitar http://localhost:8000
+    # Luego visitar http://localhost:8000/app/pages/
      ```
 
 3. **Configurar Firebase**
