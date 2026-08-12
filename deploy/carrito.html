@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carrito de Compras - CarbassDeportes</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="mobile-menu.js" defer></script>
+</head>
+<body>
+  <!-- Barra superior sticky para usuario -->
+  <div class="user-bar">
+    <div class="user-bar-content">
+      <div class="user-info hidden">
+        <span id="user-name" class="user-name"></span>
+      </div>
+      <div class="user-actions">
+        <a href="admin.html" id="admin-link" class="admin-btn hidden" title="Panel Admin">🛠️</a>
+        <a href="carrito.html" class="carrito" title="Carrito">🛒</a>
+        <button onclick="logout()" class="btn-logout hidden" id="logout-btn">Salir</button>
+        <a href="login.html" class="btn-login hidden" id="login-btn">Iniciar Sesión</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="site">
+    <header class="navbar">
+      <div class="brand">
+        <img class="logo-svg" src="sours/img/logos/logo_carbass.png" alt="CarbassDeportes Logo" />
+        <h1>CarbassDeportes</h1>
+      </div>
+
+      <!-- Hamburger menu button (solo visible en móvil) -->
+      <button class="hamburger" id="hamburger-btn" aria-label="Abrir menú de navegación">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+      <nav class="nav-menu" id="nav-menu">
+        <!-- Botón cerrar (solo visible en móvil cuando el menú está abierto) -->
+        <button class="nav-close" id="nav-close-btn" aria-label="Cerrar menú">✕</button>
+        
+        <ul class="navlinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html#categorias">Categorías</a></li>
+          <li><a href="index.html#coleccionables">Coleccionables</a></li>
+          <li><a href="index.html#ofertas">Ofertas</a></li>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="index.html#sobre-nosotros">Nosotros</a></li>
+        </ul>
+      </nav>
+
+      <!-- Overlay para móvil -->
+      <div class="nav-overlay" id="nav-overlay"></div>
+    </header>
+
+    <main class="carrito-page">
+      <div class="carrito-container">
+        <h1>🛒 Mi Carrito de Compras</h1>
+        
+        <div id="carrito-vacio" class="carrito-vacio hidden">
+          <p>Tu carrito está vacío</p>
+          <a href="index.html" class="btn-continuar">Continuar Comprando</a>
+        </div>
+
+        <div id="carrito-contenido" class="carrito-contenido">
+          <!-- Productos del carrito -->
+          <div class="carrito-items">
+            <h2>Productos</h2>
+            <div id="items-lista"></div>
+          </div>
+
+          <!-- Resumen de compra -->
+          <div class="carrito-resumen">
+            <h2>Resumen del Pedido</h2>
+            
+            <div class="resumen-detalle">
+              <div class="resumen-linea">
+                <span>Subtotal:</span>
+                <span id="subtotal">$0.00</span>
+              </div>
+              <div class="resumen-linea">
+                <span>IVA (22%):</span>
+                <span id="iva">$0.00</span>
+              </div>
+              <div class="resumen-linea total">
+                <span><strong>Total:</strong></span>
+                <span id="total"><strong>$0.00</strong></span>
+              </div>
+            </div>
+
+            <div class="resumen-acciones">
+              <button id="btn-confirmar" class="btn-confirmar">
+                Confirmar Compra
+              </button>
+              <button id="btn-vaciar" class="btn-vaciar">
+                Vaciar Carrito
+              </button>
+              <a href="index.html" class="btn-continuar">
+                Seguir Comprando
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; 2026 CarbassDeportes. Todos los derechos reservados.</p>
+    </footer>
+  </div>
+
+  <!-- Modal de Datos de Facturación -->
+  <div id="modal-facturacion" class="modal hidden">
+    <div class="modal-content modal-facturacion">
+      <div class="modal-header">
+        <h3>Datos de Facturación</h3>
+        <button class="modal-close" id="close-modal-facturacion">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-facturacion" class="modal-form">
+          <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="apellido">Apellido</label>
+            <input type="text" id="apellido" name="apellido" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="direccion">Dirección</label>
+            <input type="text" id="direccion" name="direccion" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Método de Pago</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="metodo_pago" value="efectivo" checked>
+                Efectivo
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="metodo_pago" value="tarjeta">
+                Tarjeta
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="observaciones">Observaciones (opcional)</label>
+            <textarea id="observaciones" name="observaciones" rows="3" placeholder="Agrega cualquier comentario sobre tu pedido..."></textarea>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" class="btn-cancelar" id="btn-cancelar-facturacion">Cancelar</button>
+            <button type="submit" class="btn-confirmar">Procesar compra</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Factura -->
+  <div id="modal-factura" class="modal hidden">
+    <div class="modal-content modal-factura">
+      <div class="modal-header">
+        <h3>Ticket de Pedido</h3>
+        <button class="modal-close" id="close-modal-factura">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="factura-container">
+          <!-- Encabezado de la empresa -->
+          <div class="factura-empresa">
+            <img src="sours/img/logos/logo_carbass.png" alt="CarbassDeportes" class="factura-logo">
+            <h2>Carbass Deportes SL</h2>
+            <p>NIT: 100331819-1</p>
+            <p>CRA 80 N. 35-50, Montevideo, Uruguay</p>
+          </div>
+
+          <!-- Datos de facturación -->
+          <div class="factura-info">
+            <div class="factura-info-left">
+              <h4>Datos de Facturación:</h4>
+              <p><strong>Nombre:</strong> <span id="factura-nombre"></span></p>
+              <p><strong>Dirección:</strong> <span id="factura-direccion"></span></p>
+              <p><strong>Teléfono:</strong> <span id="factura-telefono"></span></p>
+              <p><strong>Email:</strong> <span id="factura-email"></span></p>
+              <p><strong>Fecha de Compra:</strong> <span id="factura-fecha"></span></p>
+            </div>
+            <div class="factura-info-right">
+              <h4>Número de Pedido</h4>
+              <p><strong>Pedido:</strong> <span id="factura-id"></span></p>
+              <p><strong>Fecha Emisión:</strong> <span id="factura-emision"></span></p>
+            </div>
+          </div>
+
+          <!-- Tabla de productos -->
+          <div class="factura-productos">
+            <table class="factura-tabla">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unitario</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="factura-items">
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="factura-observaciones">
+            <p><strong>Observaciones:</strong></p>
+            <p><span id="factura-observaciones">(Vacío)</span></p>
+          </div>
+
+          <!-- Total -->
+          <div class="factura-total">
+            <p><strong>Total:</strong> <span id="factura-total-final" class="total-final"></span></p>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-imprimir" id="btn-imprimir">Imprimir Ticket</button>
+          <button type="button" class="btn-confirmar" id="btn-finalizar">Finalizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="carrito.js"></script>
+</body>
+</html>
